@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmed - Brundavanam Goshala</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Cart count animation */
+        .cart-count-animate {
+            animation: pop 0.3s ease-in-out;
+        }
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4) rotate(10deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        /* Header shrink styles */
+        #header-inner {
+            transition: height 0.3s ease-in-out;
+        }
+        #logo-link {
+            transition: font-size 0.3s ease-in-out;
+        }
+        /* Spinner animation */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid currentColor;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            animation: spin 0.75s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        /* Custom Logo Loader */
+        .loader-logo {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+    </style>
+</head>
+<body class="bg-stone-50">
+
+    <!-- Page Loader -->
+    <div id="page-loader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-white transition-opacity duration-300 ease-in-out">
+        <!-- Replace with the direct URL to your logo image (e.g., assets/logo.png) -->
+        <img src="logo.png" alt="Brundavanam Goshala Logo" class="loader-logo w-24 h-24">
+    </div>
+
+    <!-- Header -->
+    <header class="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div id="header-inner" class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <a id="logo-link" href="index.html" class="text-xl sm:text-2xl font-bold text-green-800 hover:text-green-700">Brundavanam Goshala</a>
+                </div>
+                <nav class="hidden md:flex items-center space-x-8 text-sm font-medium">
+                    <a href="index.html" class="text-stone-600 hover:text-green-700">HOME</a>
+                    <a href="about.html" class="text-stone-600 hover:text-green-700">ABOUT US</a>
+                    <a href="contact.html" class="text-stone-600 hover:text-green-700">SUPPORT</a>
+                </nav>
+                <div class="flex items-center space-x-4">
+                    <a href="cart.html" class="relative text-stone-600 hover:text-green-700">
+                        <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+                        <span id="cart-count" class="absolute -top-2 -right-2 bg-amber-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                    </a>
+                    <button id="mobile-menu-button" class="md:hidden text-gray-700">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-white/80 backdrop-blur-sm border-t p-4 space-y-2">
+            <a href="index.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded">Home</a>
+            <a href="about.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded">About Us</a>
+            <a href="contact.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded">Support</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="bg-white p-8 md:p-12 rounded-lg shadow-lg text-center max-w-3xl mx-auto">
+            <div class="flex justify-center mb-6">
+                <div class="bg-green-100 p-4 rounded-full">
+                    <i data-lucide="check-circle-2" class="w-16 h-16 text-green-700"></i>
+                </div>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-bold text-stone-800 mb-3">Thank You For Your Order!</h1>
+            <p class="text-stone-600 text-lg mb-8">Your order has been placed successfully. We've sent a confirmation to your email address. Your support helps us care for our beloved Gaumata.</p>
+            <a href="index.html" class="inline-block bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-8 rounded-lg transition-colors">
+                Continue Shopping
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-stone-800 text-white mt-12">
+        <div class="container mx-auto px-8 py-12 text-center">
+             <p class="font-bold text-2xl mb-2">Brundavanam Goshala</p>
+             <p class="text-stone-400 max-w-xl mx-auto mb-6">Promoting wellness and sustainability through sacred cow products, while supporting the care and protection of our beloved Gomata.</p>
+             <div class="flex justify-center space-x-6">
+                 <a href="about.html" class="text-stone-300 hover:text-white">About Us</a>
+                 <a href="contact.html" class="text-stone-300 hover:text-white">Contact & Support</a>
+                 <a href="#" class="text-stone-300 hover:text-white">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- HEADER SHRINK LOGIC ---
+            const header = document.querySelector('header');
+            const headerInner = document.getElementById('header-inner');
+            const logoLink = document.getElementById('logo-link');
+
+            if (header && headerInner && logoLink) {
+                window.addEventListener('scroll', () => {
+                    const isShrunk = header.classList.contains('header-shrunk');
+                    if (window.scrollY > 50 && !isShrunk) {
+                        header.classList.add('header-shrunk');
+                        headerInner.classList.replace('h-16', 'h-14');
+                        logoLink.classList.replace('text-xl', 'text-lg');
+                        logoLink.classList.replace('sm:text-2xl', 'sm:text-xl');
+                    } else if (window.scrollY <= 50 && isShrunk) {
+                        header.classList.remove('header-shrunk');
+                        headerInner.classList.replace('h-14', 'h-16');
+                        logoLink.classList.replace('text-lg', 'text-xl');
+                        logoLink.classList.replace('sm:text-xl', 'sm:text-2xl');
+                    }
+                });
+            }
+        });
+
+        // --- Cart Count Logic ---
+        // The cart is cleared on checkout, so this will always show 0.
+        // This logic is kept for consistency and for the cross-tab update listener.
+        const cartCountElement = document.getElementById('cart-count');
+        function updateCartCount() {
+            const storedProducts = JSON.parse(localStorage.getItem('goshalaProducts')) || [];
+            const itemsInCart = storedProducts.filter(p => p.inCart).length;
+            if (cartCountElement) {
+                cartCountElement.textContent = itemsInCart;
+            }
+        }
+        updateCartCount();
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'goshalaProducts') {
+                updateCartCount();
+            }
+        });
+
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+        }
+
+        // --- PAGE LOADER LOGIC ---
+        const pageLoader = document.getElementById('page-loader');
+        // On page load, fade out the loader
+        document.addEventListener('DOMContentLoaded', () => {
+            if (pageLoader) {
+                pageLoader.classList.add('opacity-0');
+                // After the transition, hide it so it doesn't block interactions
+                setTimeout(() => {
+                    pageLoader.style.display = 'none';
+                }, 300); // Match duration-300
+            }
+        });
+        // Before leaving the page, show the loader
+        window.addEventListener('beforeunload', () => {
+            if (pageLoader) {
+                pageLoader.style.display = 'flex';
+            }
+        });
+    </script>
+</body>
+</html>
