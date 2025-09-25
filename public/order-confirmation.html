@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Confirmed - Brundavanam Goshala</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
+   <link rel="icon" type="image/png" href="/logo.png">
+   <style>
         body { font-family: 'Inter', sans-serif; }
         /* Cart count animation */
         .cart-count-animate {
@@ -56,31 +56,28 @@
 </head>
 <body class="bg-stone-50">
 
-    <!-- Page Loader -->
     <div id="page-loader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-white transition-opacity duration-300 ease-in-out">
-        <!-- Replace with the direct URL to your logo image (e.g., assets/logo.png) -->
-        <img src="logo.png" alt="Brundavanam Goshala Logo" class="loader-logo w-24 h-24">
+        <img src="/logo.png" alt="Brundavanam Goshala Logo" class="loader-logo w-24 h-24">
     </div>
 
-    <!-- Header -->
     <header class="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div id="header-inner" class="flex items-center justify-between h-16">
                 <div class="flex items-center">
                     <a id="logo-link" href="index.html" class="text-xl sm:text-2xl font-bold text-green-800 hover:text-green-700">Brundavanam Goshala</a>
                 </div>
-                <nav class="hidden md:flex items-center space-x-8 text-sm font-medium">
-                    <a href="index.html" class="text-stone-600 hover:text-green-700">HOME</a>
-                    <a href="about.html" class="text-stone-600 hover:text-green-700">ABOUT US</a>
-                    <a href="contact.html" class="text-stone-600 hover:text-green-700">SUPPORT</a>
+                <nav class="hidden md:flex items-center space-x-8 text-base">
+                    <a href="index.html" class="text-stone-600 hover:text-green-700 py-2 font-medium">HOME</a>
+                    <a href="about.html" class="text-stone-600 hover:text-green-700 py-2 font-medium">ABOUT US</a>
+                    <a href="contact.html" class="text-stone-600 hover:text-green-700 py-2 font-medium">SUPPORT</a>
                 </nav>
                 <div class="flex items-center space-x-4">
                     <a href="cart.html" class="relative text-stone-600 hover:text-green-700">
-                        <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.16"/></svg>
                         <span id="cart-count" class="absolute -top-2 -right-2 bg-amber-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
                     </a>
                     <button id="mobile-menu-button" class="md:hidden text-gray-700">
-                        <i data-lucide="menu" class="w-6 h-6"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
                     </button>
                 </div>
             </div>
@@ -92,23 +89,24 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="bg-white p-8 md:p-12 rounded-lg shadow-lg text-center max-w-3xl mx-auto">
             <div class="flex justify-center mb-6">
                 <div class="bg-green-100 p-4 rounded-full">
-                    <i data-lucide="check-circle-2" class="w-16 h-16 text-green-700"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-700"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>
                 </div>
             </div>
             <h1 class="text-3xl md:text-4xl font-bold text-stone-800 mb-3">Thank You For Your Order!</h1>
-            <p class="text-stone-600 text-lg mb-8">Your order has been placed successfully. We've sent a confirmation to your email address. Your support helps us care for our beloved Gaumata.</p>
+            <p class="text-stone-600 text-lg mb-6">Your order has been placed successfully. We've sent a confirmation to your email address. Your support helps us care for our beloved Gaumata.</p>
+            <div id="order-details" class="mb-8 text-stone-700 bg-stone-100 p-4 rounded-lg inline-block">
+                </div>
+            <br>
             <a href="index.html" class="inline-block bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-8 rounded-lg transition-colors">
                 Continue Shopping
             </a>
         </div>
     </main>
 
-    <!-- Footer -->
     <footer class="bg-stone-800 text-white mt-12">
         <div class="container mx-auto px-8 py-12 text-center">
              <p class="font-bold text-2xl mb-2">Brundavanam Goshala</p>
@@ -122,35 +120,8 @@
     </footer>
 
     <script>
-        lucide.createIcons();
-
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- HEADER SHRINK LOGIC ---
-            const header = document.querySelector('header');
-            const headerInner = document.getElementById('header-inner');
-            const logoLink = document.getElementById('logo-link');
-
-            if (header && headerInner && logoLink) {
-                window.addEventListener('scroll', () => {
-                    const isShrunk = header.classList.contains('header-shrunk');
-                    if (window.scrollY > 50 && !isShrunk) {
-                        header.classList.add('header-shrunk');
-                        headerInner.classList.replace('h-16', 'h-14');
-                        logoLink.classList.replace('text-xl', 'text-lg');
-                        logoLink.classList.replace('sm:text-2xl', 'sm:text-xl');
-                    } else if (window.scrollY <= 50 && isShrunk) {
-                        header.classList.remove('header-shrunk');
-                        headerInner.classList.replace('h-14', 'h-16');
-                        logoLink.classList.replace('text-lg', 'text-xl');
-                        logoLink.classList.replace('sm:text-xl', 'sm:text-2xl');
-                    }
-                });
-            }
-        });
-
+        // This script is now primarily for mobile menu and cart count, which don't need DOMContentLoaded
         // --- Cart Count Logic ---
-        // The cart is cleared on checkout, so this will always show 0.
-        // This logic is kept for consistency and for the cross-tab update listener.
         const cartCountElement = document.getElementById('cart-count');
         function updateCartCount() {
             const storedProducts = JSON.parse(localStorage.getItem('goshalaProducts')) || [];
@@ -166,27 +137,16 @@
             }
         });
 
-        // Mobile Menu Toggle
+        // --- Mobile Menu Toggle ---
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
         if (mobileMenuButton && mobileMenu) {
             mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
         }
 
-        // --- PAGE LOADER LOGIC ---
-        const pageLoader = document.getElementById('page-loader');
-        // On page load, fade out the loader
-        document.addEventListener('DOMContentLoaded', () => {
-            if (pageLoader) {
-                pageLoader.classList.add('opacity-0');
-                // After the transition, hide it so it doesn't block interactions
-                setTimeout(() => {
-                    pageLoader.style.display = 'none';
-                }, 300); // Match duration-300
-            }
-        });
-        // Before leaving the page, show the loader
+        // --- Before leaving the page, show the loader ---
         window.addEventListener('beforeunload', () => {
+            const pageLoader = document.getElementById('page-loader');
             if (pageLoader) {
                 pageLoader.style.display = 'flex';
             }

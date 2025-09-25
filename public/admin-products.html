@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Product Management - Brundavanam Goshala</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" type="image/png" href="/logo.png">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .modal { display: none; }
+        .modal.active { display: flex; }
+        .spinner {
+            width: 20px; height: 20px; border: 2px solid currentColor;
+            border-bottom-color: transparent; border-radius: 50%;
+            display: inline-block; animation: spin 0.75s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-stone-100">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="index.html" class="text-xl sm:text-2xl font-bold text-green-800">Brundavanam Goshala - Admin</a>
+                <nav class="flex items-center space-x-6">
+                    <a href="admin.html" class="text-sm font-medium text-stone-600 hover:text-green-700">View Orders</a>
+                    <a href="admin-products.html" class="text-sm font-bold text-green-700 border-b-2 border-green-700">Manage Products</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content" class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-stone-800">Product Management</h1>
+            <button id="create-product-btn" class="bg-green-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-800 transition-colors">
+                Create New Product
+            </button>
+        </div>
+        <div id="products-container" class="bg-white p-6 rounded-lg shadow-md min-h-[200px]">
+            <!-- Products will be loaded here -->
+            <div class="text-center py-8">
+                <p class="text-stone-500">Authenticating...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Product Form Modal -->
+    <div id="product-modal" class="modal fixed inset-0 bg-black/50 items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h2 id="modal-title" class="text-xl font-bold">Product Details</h2>
+                <button id="modal-close-btn" class="text-stone-500 hover:text-stone-800">&times;</button>
+            </div>
+            <form id="product-form" class="p-6 space-y-4 overflow-y-auto">
+                <input type="hidden" id="product-id">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-stone-700">Product Name</label>
+                    <input type="text" id="name" required class="mt-1 block w-full border-stone-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="price" class="block text-sm font-medium text-stone-700">Price (₹)</label>
+                        <input type="number" id="price" step="0.01" required class="mt-1 block w-full border-stone-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                    </div>
+                    <div>
+                        <label for="originalPrice" class="block text-sm font-medium text-stone-700">Original Price (Optional)</label>
+                        <input type="number" id="originalPrice" step="0.01" class="mt-1 block w-full border-stone-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                    </div>
+                </div>
+                <div>
+                    <label for="description" class="block text-sm font-medium text-stone-700">Description</label>
+                    <textarea id="description" rows="3" class="mt-1 block w-full border-stone-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500"></textarea>
+                </div>
+                <div>
+                    <label for="category" class="block text-sm font-medium text-stone-700">Categories (comma-separated)</label>
+                    <input type="text" id="category" class="mt-1 block w-full border-stone-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                </div>
+                <div>
+                    <label for="image-upload" class="block text-sm font-medium text-stone-700">Upload Images</label>
+                    <input type="file" id="image-upload" accept="image/*" class="mt-1 block w-full text-sm text-stone-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100">
+                    <div id="image-previews" class="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                        <!-- Image previews will be added here -->
+                    </div>
+                    <input type="hidden" id="images">
+                </div>
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="sellerTag" class="block text-sm font-medium text-stone-700">Seller Tag (e.g., Best Seller)</label>
+                        <input type="text" id="sellerTag" class="mt-1 block w-full border-stone-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                    </div>
+                    <div>
+                        <label for="deliveryDate" class="block text-sm font-medium text-stone-700">Delivery Info</label>
+                        <input type="text" id="deliveryDate" class="mt-1 block w-full border-stone-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                    </div>
+                </div>
+            </form>
+            <div class="p-4 border-t bg-stone-50 flex justify-end gap-4">
+                <button id="modal-cancel-btn" class="bg-stone-200 text-stone-800 font-bold py-2 px-4 rounded-lg hover:bg-stone-300">Cancel</button>
+                <button id="modal-save-btn" class="bg-green-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-800 flex items-center justify-center">Save Product</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const productsContainer = document.getElementById('products-container');
+            const modal = document.getElementById('product-modal');
+            const form = document.getElementById('product-form');
+            let uploadedImageUrls = [];
+            let adminSecret = localStorage.getItem('goshalaAdminSecret');
+
+            if (!adminSecret) {
+                adminSecret = prompt("Please enter the admin secret key:");
+                if (adminSecret) {
+                    localStorage.setItem('goshalaAdminSecret', adminSecret);
+                } else {
+                    productsContainer.innerHTML = `<div class="text-center py-8 text-red-600 font-semibold">Access denied. No secret key provided.</div>`;
+                    return;
+                }
+            }
+
+            const apiHeaders = {
+                'Content-Type': 'application/json',
+                'x-admin-secret': adminSecret
+            };
+
+            async function fetchProducts() {
+                try {
+                    const response = await fetch('/api/products');
+                    if (!response.ok) throw new Error('Failed to fetch products');
+                    const products = await response.json();
+                    renderProducts(products);
+                } catch (error) {
+                    console.error('Error fetching products:', error);
+                    productsContainer.innerHTML = `<div class="text-center py-8 text-red-600 font-semibold">Error loading products. Please check the console.</div>`;
+                }
+            }
+
+            function renderProducts(products) {
+                if (products.length === 0) {
+                    productsContainer.innerHTML = `<div class="text-center py-8 text-stone-500">No products found. Click 'Create New Product' to add one.</div>`;
+                    return;
+                }
+
+                const tableHTML = `
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-stone-200">
+                            <thead class="bg-stone-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Price</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Category</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-stone-500 uppercase">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-stone-200">
+                                ${products.map(p => `
+                                    <tr data-id="${p._id}">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">${p.name}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-600">₹${p.price}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-500">${(p.category || []).join(', ')}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                                            <button class="edit-btn text-blue-600 hover:text-blue-900">Edit</button>
+                                            <button class="delete-btn text-red-600 hover:text-red-900">Delete</button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                productsContainer.innerHTML = tableHTML;
+            }
+
+            function openModal(mode, product = null) {
+                form.reset();
+                document.getElementById('product-id').value = '';
+                const modalTitle = document.getElementById('modal-title');
+
+                uploadedImageUrls = []; // Reset images
+
+                if (mode === 'edit' && product) {
+                    modalTitle.textContent = 'Edit Product';
+                    document.getElementById('product-id').value = product._id;
+                    document.getElementById('name').value = product.name || '';
+                    document.getElementById('price').value = product.price || 0;
+                    document.getElementById('originalPrice').value = product.originalPrice || '';
+                    document.getElementById('description').value = product.description || '';
+                    document.getElementById('category').value = (product.category || []).join(', ');
+                    uploadedImageUrls = product.images || [];
+                    document.getElementById('sellerTag').value = product.sellerTag || '';
+                    document.getElementById('deliveryDate').value = product.deliveryDate || '';
+                } else {
+                    modalTitle.textContent = 'Create New Product';
+                }
+                renderImagePreviews();
+                modal.classList.add('active');
+            }
+
+            function closeModal() {
+                modal.classList.remove('active');
+            }
+
+            document.getElementById('create-product-btn').addEventListener('click', () => openModal('create'));
+            document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+            document.getElementById('modal-cancel-btn').addEventListener('click', closeModal);
+
+            // Image Upload Logic
+            const imageUploadInput = document.getElementById('image-upload');
+            const imagePreviewsContainer = document.getElementById('image-previews');
+
+            imageUploadInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const formData = new FormData();
+                formData.append('image', file);
+
+                try {
+                    const res = await fetch('/api/upload', {
+                        method: 'POST',
+                        headers: { 'x-admin-secret': adminSecret },
+                        body: formData
+                    });
+                    if (!res.ok) throw new Error('Upload failed');
+                    const data = await res.json();
+                    uploadedImageUrls.push(data.url);
+                    renderImagePreviews();
+                } catch (error) {
+                    alert('Error uploading image: ' + error.message);
+                }
+                imageUploadInput.value = ''; // Reset input
+            });
+
+            function renderImagePreviews() {
+                imagePreviewsContainer.innerHTML = uploadedImageUrls.map((url, index) => `
+                    <div class="relative group">
+                        <img src="${url}" class="w-full h-24 object-cover rounded-md">
+                        <button data-index="${index}" class="remove-image-btn absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100">&times;</button>
+                    </div>
+                `).join('');
+            }
+
+            imagePreviewsContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('remove-image-btn')) {
+                    const index = parseInt(e.target.dataset.index);
+                    uploadedImageUrls.splice(index, 1);
+                    renderImagePreviews();
+                }
+            });
+
+            productsContainer.addEventListener('click', async (e) => {
+                const editBtn = e.target.closest('.edit-btn');
+                const deleteBtn = e.target.closest('.delete-btn');
+                const row = e.target.closest('tr');
+                if (!row) return;
+                const productId = row.dataset.id;
+
+                if (editBtn) {
+                    try {
+                        const res = await fetch(`/api/products/${productId}`);
+                        if (!res.ok) throw new Error('Could not fetch product details.');
+                        const product = await res.json();
+                        openModal('edit', product);
+                    } catch (error) {
+                        alert('Error: ' + error.message);
+                    }
+                }
+
+                if (deleteBtn) {
+                    if (confirm('Are you sure you want to delete this product? This cannot be undone.')) {
+                        try {
+                            const res = await fetch(`/api/products/${productId}`, { method: 'DELETE', headers: apiHeaders });
+                            if (!res.ok) throw new Error('Failed to delete product.');
+                            await fetchProducts(); // Refresh list
+                        } catch (error) {
+                            alert('Error: ' + error.message);
+                        }
+                    }
+                }
+            });
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const saveBtn = document.getElementById('modal-save-btn');
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<span class="spinner mr-2"></span> Saving...';
+
+                const productId = document.getElementById('product-id').value;
+                const isEditing = !!productId;
+
+                const productData = {
+                    name: document.getElementById('name').value,
+                    price: parseFloat(document.getElementById('price').value),
+                    originalPrice: document.getElementById('originalPrice').value ? parseFloat(document.getElementById('originalPrice').value) : null,
+                    description: document.getElementById('description').value,
+                    category: document.getElementById('category').value.split(',').map(s => s.trim()).filter(Boolean),
+                    images: uploadedImageUrls,
+                    sellerTag: document.getElementById('sellerTag').value || null,
+                    deliveryDate: document.getElementById('deliveryDate').value || null,
+                };
+
+                const url = isEditing ? `/api/products/${productId}` : '/api/products';
+                const method = isEditing ? 'PUT' : 'POST';
+
+                try {
+                    const res = await fetch(url, {
+                        method: method,
+                        headers: apiHeaders,
+                        body: JSON.stringify(productData)
+                    });
+
+                    if (!res.ok) {
+                        const errorData = await res.json();
+                        throw new Error(errorData.error || 'Failed to save product.');
+                    }
+
+                    closeModal();
+                    await fetchProducts(); // Refresh list
+
+                } catch (error) {
+                    alert('Error: ' + error.message);
+                } finally {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = 'Save Product';
+                }
+            });
+
+            fetchProducts();
+        });
+    </script>
+
+</body>
+</html>

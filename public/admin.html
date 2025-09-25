@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Order Dashboard - Brundavanam Goshala</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/logo.png">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-stone-100">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="index.html" class="text-xl sm:text-2xl font-bold text-green-800">Brundavanam Goshala - Admin</a>
+                <nav class="flex items-center space-x-6">
+                    <a href="admin.html" class="text-sm font-bold text-green-700 border-b-2 border-green-700">View Orders</a>
+                    <a href="admin-products.html" class="text-sm font-medium text-stone-600 hover:text-green-700">Manage Products</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content" class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-stone-800">Order Dashboard</h1>
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <input type="text" id="search-orders-input" placeholder="Search by Order ID, Name, Email..." class="w-64 p-2 pl-10 border border-stone-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:outline-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                </div>
+                <button id="export-csv-btn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 invisible">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                    Export to CSV
+                </button>
+            </div>
+        </div>
+        <div id="orders-container" class="bg-white p-6 rounded-lg shadow-md min-h-[200px]">
+            <!-- Orders will be loaded here -->
+            <div class="text-center py-8">
+                <p class="text-stone-500">Authenticating...</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const ordersContainer = document.getElementById('orders-container');
+            const searchInput = document.getElementById('search-orders-input');
+            
+            let adminSecret = localStorage.getItem('goshalaAdminSecret');
+
+            if (!adminSecret) {
+                adminSecret = prompt("Please enter the admin secret key:");
+                if (adminSecret) {
+                    localStorage.setItem('goshalaAdminSecret', adminSecret);
+                } else {
+                    ordersContainer.innerHTML = `<div class="text-center py-8 text-red-600 font-semibold">Access denied. No secret key provided.</div>`;
+                    return;
+                }
+            }
+
+            function debounce(func, delay) {
+                let timeout;
+                return function(...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), delay);
+                };
+            }
+
+            async function fetchAndRenderOrders(searchTerm = '') {
+                try {
+                    const url = new URL('/api/admin/orders', window.location.origin);
+                    url.searchParams.set('secret', adminSecret);
+                    if (searchTerm) {
+                        url.searchParams.set('search', searchTerm);
+                    }
+
+                    const response = await fetch(url);
+                    
+                    if (response.status === 401) {
+                        ordersContainer.innerHTML = `<div class="text-center py-8 text-red-600 font-semibold">Access Denied. Incorrect secret key.</div>`;
+                        localStorage.removeItem('goshalaAdminSecret');
+                        return;
+                    }
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch orders. Status: ${response.status}`);
+                    }
+
+                    const orders = await response.json();
+                    renderOrders(orders);
+                    document.getElementById('export-csv-btn').classList.remove('invisible');
+
+                } catch (error) {
+                    console.error('Error fetching orders:', error);
+                    ordersContainer.innerHTML = `<div class="text-center py-8 text-red-600 font-semibold">Error loading orders. Please check the console.</div>`;
+                }
+            }
+
+            function renderOrders(orders) {
+                if (orders.length === 0) {
+                    ordersContainer.innerHTML = `<div class="text-center py-8 text-stone-500">No orders have been placed yet.</div>`;
+                    return;
+                }
+
+                // Calculate total revenue and other stats
+                const totalRevenue = orders.reduce((sum, order) => sum + parseFloat(order.total), 0);
+                const totalOrders = orders.length;
+
+                let tableHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-blue-100 p-6 rounded-lg">
+                            <h3 class="text-sm font-medium text-blue-800 uppercase">Total Orders</h3>
+                            <p class="text-3xl font-bold text-blue-900 mt-1">${totalOrders}</p>
+                        </div>
+                        <div class="bg-green-100 p-6 rounded-lg">
+                            <h3 class="text-sm font-medium text-green-800 uppercase">Total Revenue</h3>
+                            <p class="text-3xl font-bold text-green-900 mt-1">₹${totalRevenue.toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-stone-200">
+                            <thead class="bg-stone-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Order ID</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Date</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Customer</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Address</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Total</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Items</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-stone-200">
+                `;
+
+                orders.forEach(order => {
+                    const orderDate = new Date(order.date).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    const itemsSummary = order.items.map(item => `<div class="truncate" title="${item.name}">${item.quantity} &times; ${item.name}</div>`).join('') || 'No items';
+                    const customerInfo = order.user
+                        ? `<div class="font-medium text-stone-900">${order.user.firstname} ${order.user.lastname}</div>
+                           <div class="text-stone-500">${order.user.email}</div>
+                           <div class="text-stone-500">${order.user.phone || ''}</div>`
+                        : `<div class="text-stone-500">N/A</div>`;
+                    
+                    const addressInfo = order.user
+                        ? `<div class="text-sm text-stone-600 whitespace-pre-wrap">${order.user.address1}${order.user.address2 ? `<br>${order.user.address2}` : ''}<br>${order.user.city}, ${order.user.state} ${order.user.zip}</div>`
+                        : `<div class="text-stone-500">N/A</div>`;
+                    
+                    tableHTML += `
+                        <tr class="hover:bg-stone-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-900">${order.orderId}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-500">${orderDate}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">${customerInfo}</td>
+                            <td class="px-6 py-4 text-sm">${addressInfo}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-stone-800">₹${order.total}</td>
+                            <td class="px-6 py-4 text-sm text-stone-500 space-y-1">${itemsSummary}</td>
+                        </tr>
+                    `;
+                });
+
+                tableHTML += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                ordersContainer.innerHTML = tableHTML;
+            }
+
+            searchInput.addEventListener('input', debounce(() => {
+                fetchAndRenderOrders(searchInput.value.trim());
+            }, 300));
+
+            const exportBtn = document.getElementById('export-csv-btn');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', () => {
+                    const secret = localStorage.getItem('goshalaAdminSecret');
+                    const searchTerm = searchInput.value.trim();
+                    if (!secret) {
+                        alert('Authentication error. Please refresh and enter the secret key.');
+                        return;
+                    }
+                    const url = new URL('/api/admin/orders/export', window.location.origin);
+                    url.searchParams.set('secret', secret);
+                    if (searchTerm) {
+                        url.searchParams.set('search', searchTerm);
+                    }
+                    window.location.href = url.toString();
+                });
+            }
+
+            // Initial load
+            fetchAndRenderOrders();
+        });
+    </script>
+
+</body>
+</html>
