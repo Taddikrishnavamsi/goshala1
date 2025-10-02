@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders - Brundavanam Goshala</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="icon" type="image/png" href="/logo.png">
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        .spinner { width: 24px; height: 24px; border: 3px solid currentColor; border-bottom-color: transparent; border-radius: 50%; display: inline-block; animation: spin 0.75s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .cart-count-animate { animation: jiggle 0.4s ease-in-out; }
+        @keyframes jiggle {
+            0%, 100% { transform: rotate(0); }
+            25% { transform: rotate(-15deg); }
+            75% { transform: rotate(15deg); }
+        }
+        .nav-link-glow:hover { text-shadow: 0 0 8px rgba(22, 101, 52, 0.7); }
+    </style>
+</head>
+<body class="bg-stone-100">
+    
+    <!-- Header -->
+    <header id="main-header" class="app-bar sticky top-0 left-0 w-full transition-all duration-300 z-[100]" style="background: rgba(200, 200, 200, 0.25); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 16px; border: 1px solid rgba(200, 200, 200, 0.3); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);">
+        <div class="container mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+            <a href="index.html" class="text-xl font-bold text-green-900">Brundavanam Goshala</a>
+            <nav class="hidden md:flex items-center gap-6 text-stone-800 font-medium">
+                <a href="index.html" class="nav-link-glow">Home</a>
+                <a href="about.html" class="nav-link-glow">About Us</a>
+                <a href="index.html#shop-search-section" class="nav-link-glow">Shop</a>
+                <a href="contact.html" class="nav-link-glow">Contact</a>
+            </nav>
+            <div class="flex items-center gap-4">
+                <a href="my-orders.html" class="p-2 rounded-full bg-white/20 text-green-800 hover:bg-white/40">
+                    <i data-lucide="user" class="w-5 h-5"></i>
+                </a>
+                <a href="cart.html" class="relative p-2 rounded-full bg-white/20 text-stone-700 hover:bg-white/40">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 class="text-3xl font-bold text-stone-800 mb-8">My Order History</h1>
+
+        <div id="orders-container" class="space-y-6">
+            <!-- Orders will be loaded here -->
+        </div>
+    </main>
+
+    <script type="module">
+        import { updateCartCount } from '/js/app.js';
+
+        const ordersContainer = document.getElementById('orders-container');
+
+        async function fetchOrders() {
+            const orderIds = JSON.parse(localStorage.getItem('goshalaMyOrders')) || [];
+
+            if (orderIds.length === 0) {
+                renderOrders([]); // Show empty state
+                return;
+            }
+
+            ordersContainer.innerHTML = `<div class="flex justify-center p-8"><div class="spinner"></div></div>`;
+
+            try {
+                const response = await fetch('/api/orders-by-ids', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderIds })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to fetch orders.');
+                }
+
+                const orders = await response.json();
+                renderOrders(orders);
+
+            } catch (error) {
+                console.error("Error fetching orders:", error);
+                ordersContainer.innerHTML = `<div class="text-center p-8 bg-red-50 text-red-700 rounded-lg">${error.message}</div>`;
+            }
+        }
+
+        function renderOrders(orders) {
+            if (orders.length === 0) {
+                ordersContainer.innerHTML = `
+                    <div class="text-center p-8 bg-white rounded-lg shadow-md">
+                        <i data-lucide="shopping-bag" class="w-16 h-16 mx-auto text-stone-400 mb-4"></i>
+                        <h2 class="text-xl font-semibold text-stone-700">No Orders Found</h2>
+                        <p class="text-stone-500 mt-2">You haven't placed any orders with us yet from this device.</p>
+                        <a href="index.html" class="mt-6 inline-block bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700">Start Shopping</a>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            ordersContainer.innerHTML = orders.sort((a, b) => new Date(b.date) - new Date(a.date)).map(order => `
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="p-4 bg-stone-50 border-b flex flex-wrap justify-between items-center gap-4 text-sm">
+                        <div>
+                            <span class="font-semibold text-stone-700">Order ID:</span>
+                            <span class="font-mono text-stone-600 ml-2">${order.orderId}</span>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-stone-700">Date:</span>
+                            <span class="text-stone-600 ml-2">${new Date(order.date).toLocaleDateString()}</span>
+                        </div>
+                        <div>
+                            <span class="font-semibold text-stone-700">Total:</span>
+                            <span class="font-bold text-green-800 ml-2">₹${order.total.toFixed(2)}</span>
+                        </div>
+                    </div>
+                    <div class="p-4 space-y-3">
+                        ${order.items.map(item => `
+                            <div class="flex items-start gap-4">
+                                <img src="${item.image || 'https://placehold.co/64x64'}" alt="${item.name}" class="w-16 h-16 object-cover rounded-md border">
+                                <div>
+                                    <p class="font-semibold text-stone-800">${item.name}</p>
+                                    <p class="text-xs text-stone-500">Qty: ${item.quantity} | Price: ₹${item.price.toFixed(2)}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join(''); // No need to call lucide.createIcons() here as there are none
+        }
+
+        async function initializePage() {
+            lucide.createIcons();
+            updateCartCount();
+            window.addEventListener('storage', () => updateCartCount());
+            fetchOrders();
+        }
+
+        initializePage();
+
+    </script>
+</body>
+</html>

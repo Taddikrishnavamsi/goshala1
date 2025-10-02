@@ -5,13 +5,15 @@ const multer = require('multer');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const Razorpay = require('razorpay');
+const crypto = require('crypto');
+const { put } = require('@vercel/blob');
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const productsFilePath = path.join(__dirname, 'products.json');
-let productsFromJson = []; // Used only for the initial migration
-const ADMIN_SECRET = 'goshala_admin_123'; // For admin dashboard
+const ADMIN_SECRET = process.env.ADMIN_SECRET || 'goshala_admin_123';
 
 // Middleware for admin authentication
 const adminAuth = (req, res, next) => {
@@ -22,23 +24,25 @@ const adminAuth = (req, res, next) => {
     next();
 };
 
-// --- Multer Configuration for Image Uploads ---
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadPath = path.join(__dirname, 'public/uploads');
-        // Ensure the directory exists
-        fs.mkdir(uploadPath, { recursive: true }).then(() => {
-            cb(null, uploadPath);
-        }).catch(err => cb(err));
-    },
-    filename: function (req, file, cb) {
-        // Create a unique filename
-        cb(null, Date.now() + path.extname(file.originalname));
-    }
+// Middleware for user authentication (simple email-based)
+const userAuth = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer <token>
+    if (token == null) return res.sendStatus(401);
+
+    // In this simple setup, the token is the user's email.
+    req.userEmail = token;
+    next();
+};
+
+const razorpay = new Razorpay({
+    key_id: process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
+// --- Multer Configuration for Image Uploads (in-memory) ---
 const upload = multer({ 
-    storage: storage,
+    storage: multer.memoryStorage(), // Use memory storage to handle the file as a buffer
     fileFilter: (req, file, cb) => {
         if (!file.mimetype.startsWith('image/')) return cb(new Error('Only image files are allowed!'), false);
         cb(null, true);
@@ -48,7 +52,8 @@ const upload = multer({
 // --- Middleware ---
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve all static files (HTML, CSS, client-side JS, images) from the 'public' directory.
+app.use(express.static('public'));
 
 // --- MongoDB Connection ---
 // Connection string is now loaded from the .env file
@@ -69,7 +74,7 @@ const ProductSchema = new mongoose.Schema({
     minlength: 3,
     maxlength: 150
   },
-  dateAdded: { type: Date },
+  dateAdded: { type: Date, default: Date.now },
   category: [String],
   images: [String],
   description: { type: String, trim: true, maxlength: 2000 },
@@ -87,7 +92,7 @@ const ProductSchema = new mongoose.Schema({
 const Product = mongoose.model('Product', ProductSchema);
 
 const CommentSchema = new mongoose.Schema({
-  productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+  productId: { type: Number, required: true, index: true },
   username: { type: String, required: true, trim: true },
   comment: { type: String, required: true, trim: true },
   rating: { type: Number, min: 1, max: 5 },
@@ -100,6 +105,7 @@ const OrderSchema = new mongoose.Schema({
   orderId: { type: String, required: true, unique: true },
   date: { type: Date, default: Date.now },
   user: {
+    // userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Future enhancement
     firstname: { type: String, required: true, trim: true },
     lastname: { type: String, required: true, trim: true },
     email: { type: String, required: true, trim: true, match: [/.+@.+\..+/, 'Please enter a valid email address'] },
@@ -122,24 +128,83 @@ const OrderSchema = new mongoose.Schema({
     validate: [
         { validator: (val) => val.length > 0, msg: 'Order must have at least one item.' }
     ]
+  },
+  paymentStatus: { type: String, default: 'pending' },
+  razorpay: {
+    orderId: String,
+    paymentId: String,
+    signature: String
+  },
+  shippingStatus: {
+    type: String,
+    enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled'],
+    default: 'Pending',
+    required: true
   }
 });
 const Order = mongoose.model('Order', OrderSchema);
+
+const ConfigSchema = new mongoose.Schema({
+  key: { type: String, required: true, unique: true, index: true },
+  value: mongoose.Schema.Types.Mixed
+});
+const Config = mongoose.model('Config', ConfigSchema);
 
 // --- Main API Endpoints ---
 
 app.get('/api/products', async (req, res) => {
     try {
-        // .lean() returns plain JavaScript objects, not Mongoose documents, which is faster.
-        const allProducts = await Product.find({}).lean();
-        // The frontend expects the old format with 'id', so we map it.
-        const formattedProducts = allProducts.map(p => {
-            p.id = p.legacyId; // Add the numeric id for frontend compatibility
-            delete p.legacyId;
-            delete p.__v;
-            return p;
+        const { sort = 'relevance', category: categoryQuery, page = 1, limit = 10, search } = req.query;
+
+        let query = {};
+
+        if (categoryQuery && categoryQuery !== 'All') {
+            query.category = categoryQuery;
+        }
+
+        if (search) {
+            const searchRegex = { $regex: search, $options: 'i' };
+            const searchNumber = parseInt(search);
+            query.$or = [
+                { name: searchRegex },
+                ...(isNaN(searchNumber) ? [] : [{ legacyId: searchNumber }])
+            ];
+        }
+
+        let sortOptions = {};
+        if (sort === 'newest') { sortOptions = { dateAdded: -1 }; }
+        else if (sort === 'price-asc') { sortOptions = { price: 1 }; }
+        else if (sort === 'price-desc') { sortOptions = { price: -1 }; }
+        else { sortOptions = { legacyId: 1 }; } // Default sort for admin
+
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
+        const skip = (pageNum - 1) * limitNum;
+
+        const totalProducts = await Product.countDocuments(query);
+        const totalPages = Math.ceil(totalProducts / limitNum);
+
+        const productsFromDB = await Product.find(query)
+            .sort(sortOptions)
+            .skip(skip)
+            .limit(limitNum)
+            .lean();
+
+        const formattedProducts = (productsFromDB || []).map(product => {
+            const productObj = { ...product };
+            productObj.id = productObj.legacyId; // Add the numeric id for frontend compatibility
+            delete productObj.legacyId;
+            delete productObj.__v;
+            delete productObj._id;
+            return productObj;
         });
-        res.json(formattedProducts);
+
+        res.json({
+            products: formattedProducts,
+            totalPages: totalPages,
+            currentPage: pageNum,
+            totalProducts: totalProducts
+        });
     } catch (error) {
         console.error('Error fetching products from DB:', error);
         res.status(500).json({ error: 'Failed to fetch products' });
@@ -148,26 +213,39 @@ app.get('/api/products', async (req, res) => {
 
 app.get('/api/products/:id', async (req, res) => {
     try {
-        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            return res.status(400).json({ error: 'Invalid product ID format.' });
-        }
-        const product = await Product.findById(req.params.id);
+        const product = await Product.findOne({ legacyId: parseInt(req.params.id) });
         if (!product) {
             return res.status(404).json({ error: 'Product not found.' });
         }
-        res.json(product);
+
+        const productObj = product.toObject();
+        productObj.id = productObj.legacyId;
+        delete productObj.legacyId;
+        delete productObj.__v;
+        
+        res.json(productObj);
     } catch (error) {
         console.error('Error fetching single product:', error);
         res.status(500).json({ error: 'Failed to fetch product.' });
     }
 });
 
-app.post('/api/upload', adminAuth, upload.single('image'), (req, res) => {
+app.post('/api/upload', adminAuth, upload.single('image'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded.' });
     }
-    // Return the public URL of the uploaded file
-    res.status(201).json({ url: `/uploads/${req.file.filename}` });
+
+    try {
+        const filename = `${Date.now()}-${req.file.originalname}`;
+        // Upload the file buffer to Vercel Blob
+        const blob = await put(filename, req.file.buffer, {
+          access: 'public', // Make the file publicly accessible
+        });
+        res.status(201).json({ url: blob.url }); // Return the permanent URL
+    } catch (error) {
+        console.error('Error uploading to Vercel Blob:', error);
+        res.status(500).json({ error: 'Failed to upload image.' });
+    }
 }, (error, req, res, next) => {
     // Multer error handler
     res.status(400).json({ error: error.message });
@@ -175,17 +253,23 @@ app.post('/api/upload', adminAuth, upload.single('image'), (req, res) => {
 
 app.post('/api/products', adminAuth, async (req, res) => {
     try {
-        // Auto-increment legacyId
-        const lastProduct = await Product.findOne().sort({ legacyId: -1 });
-        const newLegacyId = lastProduct ? lastProduct.legacyId + 1 : 1;
+        const productData = { ...req.body };
+        delete productData._id; // Ensure we don't pass an invalid _id
+        delete productData.id;
 
         const newProduct = new Product({
-            ...req.body,
-            legacyId: newLegacyId,
+            ...productData,
+            legacyId: productData.legacyId, // Use the provided legacyId
             dateAdded: new Date()
         });
         await newProduct.save();
-        res.status(201).json(newProduct);
+        
+        const productObj = newProduct.toObject();
+        productObj.id = productObj.legacyId;
+        delete productObj.legacyId;
+        delete productObj.__v;
+        
+        res.status(201).json(productObj);
     } catch (error) {
         console.error('Error creating product:', error);
         res.status(400).json({ error: 'Failed to create product.', details: error.message });
@@ -194,18 +278,21 @@ app.post('/api/products', adminAuth, async (req, res) => {
 
 app.put('/api/products/:id', adminAuth, async (req, res) => {
     try {
-        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            return res.status(400).json({ error: 'Invalid product ID format.' });
-        }
-        const updatedProduct = await Product.findByIdAndUpdate(
-            req.params.id, 
+        const updatedProduct = await Product.findOneAndUpdate(
+            { legacyId: parseInt(req.params.id) }, 
             req.body, 
             { new: true, runValidators: true }
         );
         if (!updatedProduct) {
             return res.status(404).json({ error: 'Product not found.' });
         }
-        res.json(updatedProduct);
+        
+        const productObj = updatedProduct.toObject();
+        productObj.id = productObj.legacyId;
+        delete productObj.legacyId;
+        delete productObj.__v;
+        
+        res.json(productObj);
     } catch (error) {
         console.error('Error updating product:', error);
         res.status(400).json({ error: 'Failed to update product.', details: error.message });
@@ -214,7 +301,7 @@ app.put('/api/products/:id', adminAuth, async (req, res) => {
 
 app.delete('/api/products/:id', adminAuth, async (req, res) => {
     try {
-        const deletedProduct = await Product.findByIdAndDelete(req.params.id);
+        const deletedProduct = await Product.findOneAndDelete({ legacyId: parseInt(req.params.id) });
         if (!deletedProduct) return res.status(404).json({ error: 'Product not found.' });
         res.status(200).json({ message: 'Product deleted successfully.' });
     } catch (error) {
@@ -224,16 +311,11 @@ app.delete('/api/products/:id', adminAuth, async (req, res) => {
 
 app.get('/api/comments/:productId', async (req, res) => {
     try {
-        const { productId } = req.params;
+        const { productId: legacyId } = req.params;
         const sort = req.query.sort || 'newest';
         const stars = req.query.stars; // e.g., "5,4"
-
-        if (!mongoose.Types.ObjectId.isValid(productId)) {
-            return res.status(400).json({ message: 'Invalid Product ID format' });
-        }
-
-        // Build the query object
-        const query = { productId };
+        
+        const query = { productId: parseInt(legacyId) };
         if (stars) {
             const starFilters = stars.split(',').map(Number).filter(n => n >= 1 && n <= 5);
             if (starFilters.length > 0) {
@@ -259,24 +341,22 @@ app.get('/api/comments/:productId', async (req, res) => {
 });
 
 app.post('/api/products/:id/reviews', async (req, res) => {
-    const legacyId = parseInt(req.params.id);
-    const { user, rating, comment } = req.body;
-
-    if (!user || !rating || !comment || rating < 1 || rating > 5) {
-        return res.status(400).json({ error: 'Missing required review fields: user, rating, comment' });
-    }
-
+    const productId = req.params.id;
     try {
-        const product = await Product.findOne({ legacyId: legacyId });
+        const product = await Product.findOne({ legacyId: parseInt(productId) });
         if (!product) {
-            return res.status(404).json({ error: `Product with ID ${legacyId} not found.` });
+            return res.status(404).json({ error: `Product with ID ${productId} not found.` });
         }
 
         // --- Verification Logic ---
+        const { user, rating, comment } = req.body;
+        if (!user || !rating || !comment || rating < 1 || rating > 5) {
+            return res.status(400).json({ error: 'Missing required review fields: user, rating, comment' });
+        }
+
         let isVerified = false;
         // Find orders that contain this product's legacyId
-        const ordersWithProduct = await Order.find({ 'items.id': legacyId });
-        
+        const ordersWithProduct = await Order.find({ 'items.id': product.legacyId, });
         // Check if any of those orders were placed by a user with a matching name
         if (ordersWithProduct.length > 0) {
             const reviewerName = user.toLowerCase().trim();
@@ -289,7 +369,7 @@ app.post('/api/products/:id/reviews', async (req, res) => {
         // --- End Verification Logic ---
 
         const newComment = new Comment({
-            productId: product._id,
+            productId: product.legacyId, // Use the numeric legacyId
             username: user,
             rating: parseInt(rating),
             comment: comment,
@@ -298,17 +378,16 @@ app.post('/api/products/:id/reviews', async (req, res) => {
         await newComment.save();
 
         const stats = await Comment.aggregate([
-            { $match: { productId: product._id } },
+            { $match: { productId: product.legacyId } },
             { $group: { _id: '$productId', avgRating: { $avg: '$rating' }, count: { $sum: 1 } } }
         ]);
 
         if (stats.length > 0) {
-            product.rating = Math.round(stats[0].avgRating);
+            product.rating = Math.round(stats[0].avgRating * 10) / 10; // Keep decimal for accuracy
             product.reviewsCount = stats[0].count;
             await product.save();
         }
 
-        console.log(`Review for ${product.name} (ID: ${legacyId}) saved. Verified: ${isVerified}`);
         res.status(201).json({
             newComment,
             newRating: product.rating,
@@ -320,33 +399,70 @@ app.post('/api/products/:id/reviews', async (req, res) => {
     }
 });
 
-// --- Order and Admin Endpoints ---
-app.post('/api/orders', async (req, res) => {
-    const { items, total, user } = req.body;
-    if (!items || !Array.isArray(items) || items.length === 0 || !total || !user) {
-        return res.status(400).json({ error: 'Invalid order data.' });
-    }
+// --- Config Endpoints (for homepage carousel and top picks) ---
 
-    try {
-        const newOrder = new Order({
-            orderId: `ORD-${Date.now()}`,
-            user: user,
-            total: parseFloat(total),
-            items: items
-        });
-        await newOrder.save();
-        console.log(`New order ${newOrder.orderId} saved to MongoDB.`);
-        res.status(201).json({ message: 'Order placed successfully!', orderId: newOrder.orderId });
-    } catch (err) {
-        console.error('Error processing order:', err);
-        res.status(500).json({ error: 'Failed to process the order.' });
-    }
+// GET the list of product IDs for the carousel
+app.get('/api/admin/config/carousel', adminAuth, async (req, res) => {
+    const config = await Config.findOne({ key: 'carouselProductIds' });
+    res.json(config ? config.value : []);
 });
 
+// SET the list of product IDs for the carousel
+app.put('/api/admin/config/carousel', adminAuth, async (req, res) => {
+    const { productIds } = req.body;
+    await Config.findOneAndUpdate(
+        { key: 'carouselProductIds' },
+        { value: productIds },
+        { upsert: true, new: true }
+    );
+    res.status(200).json({ success: true });
+});
+
+// GET the list of product IDs for top picks
+app.get('/api/admin/config/top-picks', adminAuth, async (req, res) => {
+    const config = await Config.findOne({ key: 'topPicksProductIds' });
+    res.json(config ? config.value : []);
+});
+
+// SET the list of product IDs for top picks
+app.put('/api/admin/config/top-picks', adminAuth, async (req, res) => {
+    const { productIds } = req.body;
+    await Config.findOneAndUpdate(
+        { key: 'topPicksProductIds' },
+        { value: productIds },
+        { upsert: true, new: true }
+    );
+    res.status(200).json({ success: true });
+});
+
+// PUBLIC: Get the full product data for the carousel slides
+app.get('/api/config/carousel-slides', async (req, res) => {
+    const config = await Config.findOne({ key: 'carouselProductIds' });
+    if (!config || !config.value || config.value.length === 0) {
+        return res.json([]);
+    }
+    const products = await Product.find({ legacyId: { $in: config.value } }).lean();
+    // Sort products to match the order in the config
+    const sortedProducts = config.value.map(id => products.find(p => p.legacyId === id)).filter(Boolean);
+    res.json(sortedProducts);
+});
+
+// PUBLIC: Get the full product data for top picks
+app.get('/api/config/top-picks-products', async (req, res) => {
+    const config = await Config.findOne({ key: 'topPicksProductIds' });
+    if (!config || !config.value || config.value.length === 0) {
+        return res.json([]);
+    }
+    const products = await Product.find({ legacyId: { $in: config.value } }).lean();
+    const sortedProducts = config.value.map(id => products.find(p => p.legacyId === id)).filter(Boolean);
+    res.json(sortedProducts);
+});
+
+// --- Order and Admin Endpoints ---
 app.get('/api/admin/orders', adminAuth, async (req, res) => {
     try {
-        const { search } = req.query;
-        const query = {};
+        const { search, page = 1, limit = 10 } = req.query;
+        let query = {};
 
         if (search) {
             const searchRegex = { $regex: search, $options: 'i' }; // i for case-insensitive
@@ -358,8 +474,19 @@ app.get('/api/admin/orders', adminAuth, async (req, res) => {
             ];
         }
 
-        const orders = await Order.find(query).sort({ date: -1 });
-        res.json(orders);
+        const pageNum = parseInt(page);
+        const limitNum = parseInt(limit);
+        const skip = (pageNum - 1) * limitNum;
+
+        const totalOrders = await Order.countDocuments(query);
+        const totalPages = Math.ceil(totalOrders / limitNum);
+
+        const orders = await Order.find(query).sort({ date: -1 }).skip(skip).limit(limitNum).lean();
+        res.json({
+            orders,
+            totalPages,
+            currentPage: pageNum
+        });
     } catch (error) {
         console.error('Error fetching orders from DB:', error);
         res.status(500).json({ error: 'Failed to read orders data.' });
@@ -420,174 +547,274 @@ app.get('/api/admin/orders/export', adminAuth, async (req, res) => {
     }
 });
 
-// --- Endpoints for secondary product page (product.html) ---
-
-// GET /product/:id: Fetch product details and its comments
-app.get('/product/:id', async (req, res) => {
-  try {
-    const productId = req.params.id;
-
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
-        return res.status(400).json({ message: 'Invalid Product ID format' });
-    }
-
-    const product = await Product.findById(productId);
-    if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
-    }
-
-    const comments = await Comment.find({ productId: productId }).sort({ createdAt: -1 });
-
-    res.json({
-      product,
-      comments,
-    });
-  } catch (error) {
-    console.error('Error fetching product:', error);
-    res.status(500).json({ message: 'Server error while fetching product details.' });
-  }
-});
-
-// POST /product/:id/comment: Save a new comment
-app.post('/product/:id/comment', async (req, res) => {
-  try {
-    const { id: productId } = req.params;
-    const { username, comment } = req.body;
-
-    if (!username || !comment) {
-      return res.status(400).json({ message: 'Username and comment are required.' });
-    }
-    
-    if (!mongoose.Types.ObjectId.isValid(productId)) {
-        return res.status(400).json({ message: 'Invalid Product ID format' });
-    }
-
-    const productExists = await Product.findById(productId);
-    if (!productExists) {
-        return res.status(404).json({ message: 'Cannot comment on a non-existent product.' });
-    }
-
-    const newComment = new Comment({
-      productId,
-      username,
-      comment,
-    });
-
-    await newComment.save();
-
-    res.status(201).json(newComment);
-  } catch (error) {
-    console.error('Error posting comment:', error);
-    res.status(500).json({ message: 'Server error while posting comment.' });
-  }
-});
-
-// --- Data Migration and Seeding on Startup ---
-async function migrateAndSeed() {
-  try {
-    // 1. Migrate products from JSON file if they don't exist in DB
-    const productCountInDB = await Product.countDocuments();
-    if (productCountInDB < productsFromJson.length) {
-      console.log('Starting product migration from products.json to MongoDB...');
-      let migratedCount = 0;
-      for (const p of productsFromJson) {
-        const existingProduct = await Product.findOne({ legacyId: p.id });
-        if (existingProduct) continue;
-
-        const newProduct = new Product({
-          legacyId: p.id,
-          name: p.name,
-          dateAdded: p.dateAdded ? new Date(p.dateAdded) : new Date(),
-          category: p.category,
-          images: p.images,
-          description: p.description,
-          rating: p.rating,
-          reviewsCount: p.reviewsCount,
-          sellerTag: p.sellerTag,
-          price: p.price,
-          originalPrice: p.originalPrice,
-          deliveryDate: p.deliveryDate
-        });
-        await newProduct.save();
-        migratedCount++;
-
-        // Migrate embedded reviews to the Comment collection
-        if (p.reviews && p.reviews.length > 0) {
-          // Find orders that contain this product's legacyId to check for verification
-          const ordersWithProduct = await Order.find({ 'items.id': p.id });
-
-          const commentsToCreate = p.reviews.map(review => {
-            let isVerified = false;
-            if (ordersWithProduct.length > 0) {
-                const reviewerName = review.user.toLowerCase().trim();
-                isVerified = ordersWithProduct.some(order => {
-                    const customerName = `${order.user.firstname || ''} ${order.user.lastname || ''}`.toLowerCase().trim();
-                    return customerName.includes(reviewerName);
-                });
+app.get('/api/admin/dashboard-stats', adminAuth, async (req, res) => {
+    try {
+        // 1. Get total revenue and total orders
+        const orderStats = await Order.aggregate([
+            {
+                $group: {
+                    _id: null,
+                    totalRevenue: { $sum: '$total' },
+                    totalOrders: { $sum: 1 }
+                }
             }
-            return {
-              productId: newProduct._id,
-              username: review.user,
-              rating: review.rating,
-              comment: review.comment,
-              createdAt: review.createdAt || new Date(),
-              verifiedPurchase: isVerified
-            };
-          });
-          await Comment.insertMany(commentsToCreate);
-        }
-      }
-      if (migratedCount > 0) {
-        console.log(`Successfully migrated ${migratedCount} new products to MongoDB.`);
-      } else {
-        console.log('All products from JSON file are already in the database.');
-      }
-    }
-
-    // 2. Seed comments for the new product page if none exist
-    const commentCount = await Comment.countDocuments();
-    if (commentCount === 0) {
-      const productToCommentOn = await Product.findOne().sort({ legacyId: 1 });
-      if (productToCommentOn) {
-        console.log(`Seeding comments for product: ${productToCommentOn.name}`);
-        await Comment.create([
-          { productId: productToCommentOn._id, username: 'Radha', rating: 5, comment: 'This is the best ghee I have ever tasted! So pure and aromatic.' },
-          { productId: productToCommentOn._id, username: 'Krishna', rating: 4, comment: 'Excellent quality and fast delivery. Highly recommended.' }
         ]);
-        console.log('Sample comments created for the new product page.');
-      }
+
+        // 2. Get 5 most recent orders
+        const recentOrders = await Order.find().sort({ date: -1 }).limit(5).lean();
+
+        // 3. Get top 5 selling products
+        const topSellingProducts = await Order.aggregate([
+            { $unwind: '$items' },
+            {
+                $group: {
+                    _id: { id: '$items.id', name: '$items.name' },
+                    totalQuantity: { $sum: '$items.quantity' }
+                }
+            },
+            { $sort: { totalQuantity: -1 } },
+            { $limit: 5 },
+            { 
+                $project: {
+                    _id: 0,
+                    id: '$_id.id',
+                    name: '$_id.name',
+                    totalQuantity: 1
+                }
+            }
+        ]);
+
+        res.json({
+            ...orderStats[0],
+            recentOrders,
+            topSellingProducts
+        });
+    } catch (error) {
+        console.error('Error fetching dashboard stats:', error);
+        res.status(500).json({ error: 'Failed to fetch dashboard statistics.' });
     }
-  } catch (error) {
-    console.error('Error during data migration and seeding:', error);
-  }
-}
+});
+
+// --- Config Endpoints ---
+app.get('/api/config/maps-key', (req, res) => {
+    // Send the Google Maps API key from environment variables to the client
+    res.json({ apiKey: process.env.GOOGLE_MAPS_API_KEY });
+});
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+    res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
+app.post('/api/razorpay/create-order', async (req, res) => {
+    try {
+        const { total } = req.body;
+        if (!total) {
+            return res.status(400).json({ success: false, error: "Total amount is required."});
+        }
+
+        const options = {
+            amount: Math.round(total * 100), // amount in the smallest currency unit (paise)
+            currency: "INR",
+            receipt: `receipt_order_${new Date().getTime()}`,
+        };
+
+        const razorpayOrder = await razorpay.orders.create(options);
+        if (!razorpayOrder) {
+            return res.status(500).send('Error creating Razorpay order');
+        }
+        
+        res.status(200).json({
+            success: true,
+            order: razorpayOrder,
+            key_id: process.env.RAZORPAY_KEY_ID
+        });
+    } catch (error) {
+        console.error('Error in /api/razorpay/create-order:', error);
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+});
+
+// Endpoint 2: Verify Payment & Create Order in DB
+app.post('/api/razorpay/capture', async (req, res) => {
+    try {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderDetails } = req.body;
+        
+        if(!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !orderDetails) {
+             return res.status(400).json({ success: false, error: 'Missing required data.' });
+        }
+
+        // Step 1: Verify the signature
+        const shasum = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
+        shasum.update(`${razorpay_order_id}|${razorpay_payment_id}`);
+        const digest = shasum.digest('hex');
+
+        if (digest === razorpay_signature) {
+            // Step 2: Signature is valid. Create the order in your database.
+            const { user, items, total } = orderDetails;
+            const newOrder = new Order({
+                orderId: razorpay_order_id,
+                user,
+                items,
+                total,
+                paymentStatus: 'confirmed',
+                razorpay: {
+                    orderId: razorpay_order_id,
+                    paymentId: razorpay_payment_id,
+                    signature: razorpay_signature
+                }
+            });
+            await newOrder.save();
+            
+            res.json({
+                success: true,
+                message: 'Payment successful and order created',
+                orderId: newOrder.orderId
+            });
+        } else {
+            res.status(400).json({ success: false, error: 'Invalid signature' });
+        }
+    } catch (error) {
+        console.error('Error in /api/razorpay/capture:', error);
+        res.status(500).json({ success: false, error: 'Internal Server Error' });
+    }
+});
+
+app.get('/api/my-orders', userAuth, async (req, res) => {
+    try {
+        const orders = await Order.find({ 'user.email': req.userEmail })
+            .sort({ date: -1 })
+            .lean();
+
+        // To enrich items with their current image
+        const productIds = [...new Set(orders.flatMap(o => o.items.map(i => i.id)))];
+        const products = await Product.find({ legacyId: { $in: productIds } }).lean();
+        const productImages = products.reduce((acc, p) => {
+            acc[p.legacyId] = (p.images && p.images.length > 0) ? p.images[0] : 'https://placehold.co/64x64';
+            return acc;
+        }, {});
+
+        const enrichedOrders = orders.map(order => ({
+            ...order,
+            items: order.items.map(item => ({
+                ...item,
+                image: productImages[item.id] || 'https://placehold.co/64x64'
+            }))
+        }));
+
+        res.json(enrichedOrders);
+    } catch (error) {
+        console.error('Error fetching user orders:', error);
+        res.status(500).json({ error: 'Failed to fetch your orders.' });
+    }
+});
+
+app.put('/api/admin/orders/:orderId/status', adminAuth, async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const { status } = req.body;
+
+        // Validate the status against the schema enum
+        if (!Order.schema.path('shippingStatus').enumValues.includes(status)) {
+            return res.status(400).json({ error: 'Invalid status value.' });
+        }
+
+        const updatedOrder = await Order.findOneAndUpdate(
+            { orderId: orderId },
+            { $set: { shippingStatus: status } },
+            { new: true }
+        );
+
+        if (!updatedOrder) return res.status(404).json({ error: 'Order not found.' });
+        res.json(updatedOrder);
+    } catch (error) {
+        console.error('Error updating order status:', error);
+        res.status(500).json({ error: 'Failed to update order status.' });
+    }
+});
 
 // --- Server Startup ---
 async function startServer() {
-    // 1. Load products from JSON file for one-time migration check
-    try {
-        const data = await fs.readFile(productsFilePath, 'utf8');
-        productsFromJson = JSON.parse(data);
-        console.log(`Loaded ${productsFromJson.length} products from products.json for migration check.`);
-    } catch (error) {
-        console.error('Could not read products.json. Cannot perform migration.', error);
-    }
+    const connectWithRetry = async () => {
+        try {
+            console.log('Attempting to connect to MongoDB...');
+            await mongoose.connect(MONGO_URI);
+            console.log('Successfully connected to MongoDB.');
+        } catch (err) {
+            console.error('MongoDB connection error:', err.message);
+            console.log('Retrying connection in 5 seconds...');
+            setTimeout(connectWithRetry, 5000); // Retry after 5 seconds
+        }
+    };
 
-    // 2. Connect to MongoDB for the new features
+    await connectWithRetry();
+
+    mongoose.connection.on('disconnected', () => {
+        console.error('MongoDB disconnected! Attempting to reconnect...');
+        connectWithRetry();
+    });
+
+    // This part of the code will only run after a successful initial connection.
     try {
-        await mongoose.connect(MONGO_URI);
-        console.log('Successfully connected to MongoDB.');
-        await migrateAndSeed();
+        // The server logic that depends on the DB connection
+        // can now be placed here, confident that the connection is established.
+        
+        // Check if the database is empty. If so, seed it from products.json.
+        const productCount = await Product.countDocuments();
+        if (productCount === 0) {
+            console.log('Database is empty. Seeding from products.json...');
+            try {
+                const productsJsonPath = path.resolve(process.cwd(), 'products.json');
+                const productsData = await fs.readFile(productsJsonPath, 'utf-8');
+                const productsFromFile = JSON.parse(productsData);
+
+                const productsToSeed = [];
+                const commentsToSeed = [];
+
+                for (const product of productsFromFile) {
+                    const { reviews, id, ...productDetails } = product;
+                    
+                    // Prepare product for DB
+                    productsToSeed.push({
+                        ...productDetails,
+                        legacyId: id, // Map 'id' from JSON to 'legacyId' in schema
+                        rating: product.rating || 0,
+                        reviewsCount: reviews ? reviews.length : 0
+                    });
+
+                    // Prepare comments for DB
+                    if (reviews && Array.isArray(reviews)) {
+                        reviews.forEach(review => {
+                            commentsToSeed.push({
+                                productId: id,
+                                username: review.user,
+                                comment: review.comment,
+                                rating: review.rating
+                            });
+                        });
+                    }
+                }
+
+                await Product.insertMany(productsToSeed);
+                await Comment.insertMany(commentsToSeed);
+                console.log('Database seeded successfully with products and comments.');
+
+            } catch (seedError) {
+                console.error('Error seeding database:', seedError);
+            }
+        } else {
+            console.log('Database already contains products. Skipping seeding.');
+        }
+
+        app.listen(PORT, () => {
+            console.log(`\n🚀 Server running at http://localhost:${PORT}`);
+            console.log(`Access your main site at: http://localhost:${PORT}/index.html`);
+            console.log(`Admin dashboard at: http://localhost:${PORT}/admin.html`);
+        });
     } catch (err) {
-        console.error('FATAL: MongoDB connection error. The new product page will not work.', err);
+        console.error('FATAL: Server startup error:', err);
         process.exit(1);
     }
-
-    // 3. Start the Express server
-    app.listen(PORT, () => {
-        console.log(`\n🚀 Server running at http://localhost:${PORT}`);
-        console.log(`Access your main site at: http://localhost:${PORT}/index.html`);
-    });
 }
 
 startServer();

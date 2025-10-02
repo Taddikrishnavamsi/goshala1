@@ -3,62 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkout - Brundavanam Goshala</title>
+    <title>Secure Checkout - Brundavanam Goshala</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="/logo.png">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; /* slate-100 */ }
+        body { font-family: 'Poppins', sans-serif; }
         .spinner {
             width: 20px; height: 20px; border: 2px solid currentColor;
             border-bottom-color: transparent; border-radius: 50%;
             display: inline-block; animation: spin 0.75s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .form-invalid {
-            border-color: #DC2626; /* red-600 */
-            --tw-ring-color: #DC2626;
-        }
-        #map {
-            height: 200px; width: 100%; border-radius: 0.375rem; /* rounded-md */
-            margin-top: 1rem; background-color: #e2e8f0; /* slate-200 */
-        }
-        .progress-step {
-            display: flex;
-            align-items: center;
-            flex-grow: 1;
-            color: #64748b; /* slate-500 */
-        }
-        .progress-step.active {
-            color: #166534; /* green-800 */
-            font-weight: 600;
-        }
-        .progress-step .circle {
-            width: 2rem; height: 2rem;
-            border-radius: 9999px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            border: 2px solid #cbd5e1; /* slate-300 */
-            background-color: white;
-        }
-        .progress-step.active .circle {
-            border-color: #166534;
-            background-color: #166534;
-            color: white;
-        }
-        .progress-line {
-            height: 2px;
-            background-color: #cbd5e1; /* slate-300 */
-            flex-grow: 1;
-            margin: 0 1rem;
-        }
+        .form-invalid { border-color: #DC2626; }
+        .form-invalid:focus { --tw-ring-color: #DC2626; }
     </style>
 </head>
-<body class="bg-slate-100">
-
-    <header class="bg-white border-b border-slate-200">
+<body class="bg-stone-100">
+    <header class="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-40">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-20">
                 <a href="index.html" class="text-2xl font-bold text-green-800">Brundavanam Goshala</a>
@@ -70,90 +33,58 @@
         </div>
     </header>
 
-    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="max-w-2xl mx-auto mb-8">
-            <div class="flex items-center">
-                <div class="progress-step active">
-                    <div class="circle">1</div>
-                    <span class="ml-2 hidden sm:inline">SHIPPING</span>
-                </div>
-                <div class="progress-line"></div>
-                <div class="progress-step">
-                    <div class="circle">2</div>
-                    <span class="ml-2 hidden sm:inline">PAYMENT</span>
-                </div>
-                <div class="progress-line"></div>
-                <div class="progress-step">
-                    <div class="circle">3</div>
-                    <span class="ml-2 hidden sm:inline">REVIEW & SUBMIT</span>
-                </div>
-            </div>
-        </div>
-
-        <div id="checkout-container" class="grid grid-cols-1 lg:grid-cols-5 gap-8">
-            
-            <div class="lg:col-span-3">
-                <form id="checkout-form" novalidate class="bg-white p-6 sm:p-8 rounded-lg shadow-md">
-                    <h1 class="text-2xl font-semibold text-slate-800 mb-6 border-b pb-4">Shipping Address</h1>
-                    <div class="space-y-4">
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        <div id="checkout-container" class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+            <div class="lg:col-span-1">
+                 <form id="checkout-form" novalidate class="space-y-4">
+                    <div id="shipping-section" class="bg-white rounded-lg shadow-md p-6">
+                        <h2 class="text-xl font-semibold text-slate-800 mb-4">Shipping Information</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label for="firstname" class="block text-sm font-medium text-slate-700">First Name</label>
-                                <input type="text" id="firstname" name="firstname" required class="mt-1 block w-full border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                                <input type="text" id="firstname" name="firstname" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
                             </div>
                             <div>
                                 <label for="lastname" class="block text-sm font-medium text-slate-700">Last Name</label>
-                                <input type="text" id="lastname" name="lastname" required class="mt-1 block w-full border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                                <input type="text" id="lastname" name="lastname" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
                             </div>
                         </div>
                         <div>
-                            <label for="address-search" class="block text-sm font-medium text-slate-700">Find Address</label>
-                            <div class="relative">
-                                <input type="text" id="address-search" placeholder="Search with Google Maps..." class="mt-1 block w-full border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500 pr-10">
-                                <button type="button" id="get-location-btn" title="Use my current location" class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-500 hover:text-green-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-                                </button>
-                            </div>
-                        </div>
-                         <div id="map"></div>
-                        <div>
-                            <label for="address1" class="block text-sm font-medium text-slate-700">Address 1</label>
-                            <input type="text" id="address1" name="address1" required placeholder="Street Address, P.O. Box" class="mt-1 block w-full border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                            <label for="email" class="block text-sm font-medium text-slate-700">Email Address</label>
+                            <input type="email" id="email" name="email" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
                         </div>
                         <div>
-                            <label for="address2" class="block text-sm font-medium text-slate-700">Address 2 (Optional)</label>
-                            <input type="text" id="address2" name="address2" placeholder="Apartment, Suite, Unit, etc." class="mt-1 block w-full border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                            <label for="phone" class="block text-sm font-medium text-slate-700">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                        </div>
+                        <div class="pt-4 border-t mt-4">
+                            <label for="address1" class="block text-sm font-medium text-slate-700">Street Address</label>
+                            <input type="text" id="address1" name="address1" required placeholder="House No. & Street Name" class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                        </div>
+                         <div>
+                            <label for="address2" class="block text-sm font-medium text-slate-700">Apartment, suite, etc. (Optional)</label>
+                            <input type="text" id="address2" name="address2" class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label for="city" class="block text-sm font-medium text-slate-700">City</label>
-                                <input type="text" id="city" name="city" required class="mt-1 block w-full border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                                <input type="text" id="city" name="city" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
                             </div>
                             <div>
                                 <label for="zip" class="block text-sm font-medium text-slate-700">Zip / Postal Code</label>
-                                <input type="text" id="zip" name="zip" required class="mt-1 block w-full border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                                <input type="text" id="zip" name="zip" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
                             </div>
                         </div>
-                         <div>
+                        <div>
                             <label for="state" class="block text-sm font-medium text-slate-700">State / Province</label>
-                            <input type="text" id="state" name="state" required class="mt-1 block w-full border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
-                        </div>
-                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                             <div>
-                                <label for="phone" class="block text-sm font-medium text-slate-700">Phone</label>
-                                <input type="tel" id="phone" name="phone" required class="mt-1 block w-full border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
-                            </div>
-                            <div>
-                                <label for="email" class="block text-sm font-medium text-slate-700">Email</label>
-                                <input type="email" id="email" name="email" required class="mt-1 block w-full border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
-                            </div>
+                            <input type="text" id="state" name="state" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
                         </div>
                     </div>
-                </form>
+                 </form>
             </div>
 
-            <div class="lg:col-span-2">
-                <div class="bg-white p-6 rounded-lg shadow-md sticky top-6">
+            <div class="lg:col-span-1">
+                <div id="order-summary-desktop" class="bg-white p-6 rounded-lg shadow-md sticky top-24">
                     <h2 class="text-lg font-semibold text-slate-800 mb-4 border-b pb-4">Order Summary</h2>
                     <div id="order-items-summary" class="space-y-4 max-h-80 overflow-y-auto pr-2 mb-4"></div>
                     <div class="space-y-2 mb-4 border-t pt-4">
@@ -172,86 +103,35 @@
                             <span id="total">₹0.00</span>
                         </div>
                     </div>
-                    <button id="place-order-btn" type="submit" form="checkout-form" class="w-full mt-6 bg-green-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-800 transition-colors shadow-lg disabled:bg-slate-400 flex items-center justify-center">
-                        Place Order
-                    </button>
-                    <div id="form-status" class="mt-4 text-center font-medium"></div>
-                    <div class="text-center mt-6 text-xs text-slate-500 space-x-4">
-                        <a href="#" class="hover:underline">Return Policy</a>
-                        <a href="#" class="hover:underline">Shipping Information</a>
+                    <div class="pt-6">
+                        <button id="place-order-btn" type="button" class="w-full bg-amber-600 text-stone-900 font-bold py-3 px-6 rounded-lg hover:bg-amber-700 transition-colors shadow-lg flex items-center justify-center">
+                            Pay with Razorpay
+                        </button>
+                        <div id="form-status" class="mt-4 text-center font-medium"></div>
+                    </div>
+                    <div class="mt-6 border-t pt-4">
+                        <div class="flex items-center justify-center text-sm text-slate-500">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <span>Secure SSL Encrypted Payment</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places&callback=initMap" async defer></script>
-
     <script type="module">
-        import { loadProducts } from '/data.js';
+        import { loadProducts } from '/js/data.js';
 
-        let map, marker, geocoder;
-
-        // --- GOOGLE MAPS FUNCTIONS ---
-        window.initMap = function() {
-            const defaultLocation = { lat: 17.3850, lng: 78.4867 }; // Default to Hyderabad
-            geocoder = new google.maps.Geocoder();
-            map = new google.maps.Map(document.getElementById('map'), {
-                zoom: 12, center: defaultLocation, mapTypeControl: false, streetViewControl: false,
-            });
-            marker = new google.maps.Marker({ map, position: defaultLocation, draggable: true, title: "Drag to your location" });
-
-            google.maps.event.addListener(marker, 'dragend', () => geocodeAndFillAddress(marker.getPosition()));
-            
-            const searchInput = document.getElementById('address-search');
-            const autocomplete = new google.maps.places.Autocomplete(searchInput, { types: ['address'], componentRestrictions: { country: 'in' } });
-            autocomplete.addListener('place_changed', () => {
-                const place = autocomplete.getPlace();
-                if (place.geometry) {
-                    map.panTo(place.geometry.location);
-                    map.setZoom(17);
-                    marker.setPosition(place.geometry.location);
-                    parseAndFillAddress(place.address_components);
-                }
-            });
-        }
-        window.initMap = initMap;
-
-        function geocodeAndFillAddress(latlng) {
-            geocoder.geocode({ 'location': latlng }, (results, status) => {
-                if (status === 'OK' && results[0]) {
-                    parseAndFillAddress(results[0].address_components);
-                } else console.error('Geocoder failed due to: ' + status);
-            });
-        }
-        
-        function parseAndFillAddress(components) {
-            const address = { street_number: '', route: '', locality: '', administrative_area_level_1: '', postal_code: '' };
-            components.forEach(component => {
-                const type = component.types[0];
-                if (address.hasOwnProperty(type)) {
-                    address[type] = component.long_name;
-                }
-            });
-            document.getElementById('address1').value = `${address.street_number} ${address.route}`.trim();
-            document.getElementById('city').value = address.locality;
-            document.getElementById('state').value = address.administrative_area_level_1;
-            document.getElementById('zip').value = address.postal_code;
-        }
-
-        // --- MAIN SCRIPT ---
         document.addEventListener('DOMContentLoaded', async () => {
-            lucide.createIcons();
             const checkoutContainer = document.getElementById('checkout-container');
             const orderItemsContainer = document.getElementById('order-items-summary');
             const subtotalEl = document.getElementById('subtotal');
             const totalEl = document.getElementById('total');
-            const placeOrderBtn = document.getElementById('place-order-btn');
             const formStatus = document.getElementById('form-status');
             const checkoutForm = document.getElementById('checkout-form');
-            const getLocationBtn = document.getElementById('get-location-btn');
+            const placeOrderBtn = document.getElementById('place-order-btn');
 
-            // Pre-fill form from localStorage
             const savedUser = JSON.parse(localStorage.getItem('goshalaUser')) || {};
             Object.keys(savedUser).forEach(key => {
                 const el = document.getElementById(key);
@@ -259,6 +139,7 @@
             });
 
             let cartItems = [];
+            
             try {
                 const products = await loadProducts();
                 cartItems = products.filter(p => p.inCart);
@@ -286,22 +167,8 @@
                 totalEl.textContent = `₹${subtotal.toFixed(2)}`;
             }
             
-            getLocationBtn.addEventListener('click', () => {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(position => {
-                        const pos = { lat: position.coords.latitude, lng: position.coords.longitude };
-                        map.setCenter(pos);
-                        map.setZoom(17);
-                        marker.setPosition(pos);
-                        geocodeAndFillAddress(pos);
-                    }, () => alert("Error: Geolocation failed or was denied."));
-                } else {
-                    alert("Error: Your browser doesn't support geolocation.");
-                }
-            });
-
-            checkoutForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
+            placeOrderBtn.addEventListener('click', () => {
+                // Validate form before initiating payment
                 let isFormValid = true;
                 const requiredFields = checkoutForm.querySelectorAll('[required]');
                 requiredFields.forEach(field => {
@@ -316,11 +183,16 @@
                     formStatus.className = 'mt-4 text-center font-medium text-red-600';
                     return;
                 }
-                const originalButtonText = "Place Order";
-                placeOrderBtn.disabled = true;
-                placeOrderBtn.innerHTML = `<span class="spinner mr-2"></span> Placing Order...`;
                 formStatus.textContent = '';
-                
+                initiatePayment();
+            });
+
+            async function initiatePayment() {
+                const originalButtonText = "Pay with Razorpay";
+                placeOrderBtn.disabled = true;
+                placeOrderBtn.innerHTML = `<span class="spinner mr-2"></span> Processing...`;
+                formStatus.textContent = '';
+
                 const userDetails = {
                     firstname: document.getElementById('firstname').value,
                     lastname: document.getElementById('lastname').value,
@@ -333,24 +205,90 @@
                     zip: document.getElementById('zip').value,
                 };
                 localStorage.setItem('goshalaUser', JSON.stringify(userDetails));
-                
+
                 const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                const orderData = { user: userDetails, items: cartItems.map(item => ({ id: item.id, name: item.name, quantity: item.quantity, price: item.price })), total: total.toFixed(2) };
                 
+                // This object now holds all data needed to create the order AFTER payment
+                const finalOrderDetails = { 
+                    user: userDetails, 
+                    items: cartItems.map(item => ({ id: item.id, name: item.name, quantity: item.quantity, price: item.price })), 
+                    total: total.toFixed(2) 
+                };
+
                 try {
-                    const response = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(orderData) });
-                    if (!response.ok) { throw new Error((await response.json()).error || 'Failed to place order.'); }
-                    const result = await response.json();
-                    localStorage.removeItem('goshalaProducts');
-                    window.location.href = `order-confirmation.html?orderId=${result.orderId}`;
+                    // Step 1: Create a Razorpay order ID on your server
+                    const response = await fetch('/api/razorpay/create-order', { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify({ total: total.toFixed(2) }) 
+                    });
+
+                    if (!response.ok) throw new Error('Failed to create Razorpay order.');
+                    
+                    const { order, key_id } = await response.json();
+
+                    // Step 2: Open Razorpay Checkout
+                    const options = {
+                        key: key_id,
+                        amount: order.amount,
+                        currency: order.currency,
+                        name: "Brundavanam Goshala",
+                        description: "Transaction for Goshala Products",
+                        image: "/logo.png",
+                        order_id: order.id,
+                        handler: async function (response) {
+                            // Step 3: Send payment details AND order details to server for verification & creation
+                            const verificationResponse = await fetch('/api/razorpay/capture', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    orderDetails: finalOrderDetails // Send all order info now
+                                })
+                            });
+
+                            const verificationResult = await verificationResponse.json();
+                            if (verificationResult.success) {
+                                localStorage.removeItem('goshalaProducts');
+                                window.location.href = `order-confirmation.html?orderId=${verificationResult.orderId}`;
+                            } else {
+                                formStatus.textContent = 'Payment verification failed. Please contact support.';
+                                formStatus.className = 'mt-4 text-center font-medium text-red-600';
+                            }
+                        },
+                        prefill: {
+                            name: `${userDetails.firstname} ${userDetails.lastname}`,
+                            email: userDetails.email,
+                            contact: userDetails.phone
+                        },
+                        notes: {
+                            address: `${userDetails.address1}, ${userDetails.city}`
+                        },
+                        theme: {
+                            color: "#166534"
+                        }
+                    };
+                    
+                    const rzp1 = new Razorpay(options);
+                    rzp1.on('payment.failed', function (response){
+                        alert(response.error.description);
+                        formStatus.textContent = `Payment Failed: ${response.error.reason}. Please try again.`;
+                        formStatus.className = 'mt-4 text-center font-medium text-red-600';
+                    });
+                    
+                    rzp1.open();
+
                 } catch (error) {
-                    console.error('Checkout error:', error);
-                    formStatus.textContent = `Error: ${error.message}`;
-                    formStatus.classList.add('text-red-600');
+                    console.error('Payment initiation error:', error);
+                    formStatus.textContent = 'Could not initiate payment. Please try again.';
+                    formStatus.className = 'mt-4 text-center font-medium text-red-600';
+                } finally {
                     placeOrderBtn.disabled = false;
                     placeOrderBtn.innerHTML = originalButtonText;
                 }
-            });
+            }
         });
     </script>
 </body>

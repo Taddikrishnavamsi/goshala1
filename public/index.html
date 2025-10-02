@@ -5,17 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brundavanam Goshala - Order Natural Products Online</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="/logo.png">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { font-family: 'Poppins', sans-serif; }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: url('https://amerakulouslife.com/wp-content/uploads/2019/08/img_20190727_085502.jpg');
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            opacity: 0.8;
+        }
+        .glass-effect {
+            background: rgba(45, 44, 44, 0.3); /* Darker glass effect */
+            backdrop-filter: blur(12px); /* Increased blur */
+            -webkit-backdrop-filter: blur(12px); /* Increased blur for Safari */
+            border-radius: 1rem; /* 16px */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        .text-shadow {
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        #carousel-track { transition: transform 0.5s ease-in-out; }
         .carousel-slide { flex-shrink: 0; width: 100%; position: relative; }
         #tsparticles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
-        .cart-count-animate { animation: pop 0.3s ease-in-out; }
-        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.4) rotate(10deg); } 100% { transform: scale(1) rotate(0deg); } }
+        .cart-count-animate {
+            animation: jiggle 0.4s ease-in-out;
+        }
+        @keyframes jiggle {
+            0%, 100% { transform: rotate(0); }
+            25% { transform: rotate(-15deg); }
+            75% { transform: rotate(15deg); }
+        }
         .spinner { width: 24px; height: 24px; border: 3px solid currentColor; border-bottom-color: transparent; border-radius: 50%; display: inline-block; animation: spin 0.75s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .loader-logo { animation: pulse 1.5s ease-in-out infinite; }
@@ -24,113 +54,308 @@
         .modal-content { transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out; }
         .modal-thumbnail-active { border-color: #166534; }
         #product-grid { transition: opacity 0.2s ease-in-out; }
+        .lottie-loader {
+            width: 28px;
+            height: 28px;
+        }
+        .add-to-cart-btn .lottie-loader svg { margin: auto; }
         #header-inner { transition: height 0.3s ease-in-out; }
-        #logo-link { transition: font-size 0.3s ease-in-out; }
+        #logo-link { transition: font-size 0.3s ease-in-out; }        
+        .nav-link-glow {
+            transition: text-shadow 0.3s ease;
+        }
+        .nav-link-glow:hover {
+            text-shadow: 0 0 8px rgba(22, 101, 52, 0.7);
+        }
+        /* Header shrink styles */
+        .header-scrolled #header-container {
+            height: 3rem; /* h-12 */
+        }
+        .header-scrolled #logo-link {
+            font-size: 1.125rem; /* text-lg */
+            line-height: 1.75rem;
+        }
+    </style>
+    <style>
+        .carousel-container {
+            position: relative;
+            width: 100%;
+            max-width: 1200px; /* Increased max-width for better fit */
+            margin-left: auto;
+            margin-right: auto;
+            overflow: hidden;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.20);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            margin-bottom: 3rem; /* mb-12 */
+            height: 20rem; /* h-80 */
+        }
+        .carousel-indicators {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .indicator {
+            width: 12px; height: 12px; border-radius: 9999px; background: #d6d3d1; /* stone-300 */
+            margin: 0 4px; cursor: pointer; transition: background 0.3s;
+        }
+        .indicator.active { background: #166534; /* green-800 */ }
+        .product-card {
+            background: rgba(255,255,255,0.18);
+            border-radius: 18px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: box-shadow 0.2s, transform 0.3s;
+            overflow: hidden;
+        }
+        .product-card:hover {
+            box-shadow: 0 12px 42px 0 rgba(31, 38, 135, 0.28);
+            transform: translateY(-5px);
+        }
+        /* The inner content of the card needs a background to be readable */
+        .product-card > .p-4 { background-color: rgba(255,255,255,0.6); }
+
+        /* New Product Card Design */
+        .product-card-new {
+            background: rgba(32, 32, 32, 0.25); /* Darker glass for better contrast */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+            /* border-radius: 18px; */ /* We will use Tailwind's classes */
+            /* padding: 24px; */ /* We will use Tailwind's classes */
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s, transform 0.3s;
+        }
+        .product-card-new:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 45px rgba(0, 0, 0, 0.2);
+        }
+        .product-card-new .product-image-container {
+            border-radius: 12px;
+            /* overflow: hidden; */ /* We will use Tailwind's classes */
+            margin-bottom: 16px;
+        }
+        .product-card-new .product-name {
+            font-weight: bold;
+            font-size: 1.1em; /* Adjusted for card size */
+            margin-bottom: 8px;
+            color: #ffffff;
+            line-height: 1.3;
+        }
+        .product-card-new .product-price {
+            color: #f1f5f9; /* stone-100 */
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-top: auto; /* Pushes price and buttons to the bottom */
+            margin-bottom: 16px;
+        }
+        .product-card-new .action-button {
+            border-radius: 12px;
+            font-weight: bold;
+            padding: 12px;
+            text-align: center;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .product-card-new .action-button-primary {
+            background-color: #1e88e5;
+            color: #fff;
+        }
+        label[for="sort-select"] {
+            margin-right: 8px;
+            font-weight: 600;
+            color: #fefefe; /* text-gray-700 */
+        }
+
+        #sort-select {
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.1);
+            color: #222;
+            font-size: 1rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            transition: border 0.2s, box-shadow 0.2s;
+        }
+
+        #sort-select:focus {
+            outline: none;
+            border: 1.5px solid #22c55e; /* green-400 */
+            box-shadow: 0 0 0 2px #bbf7d0; /* green-200 */
+        }
+
     </style>
 </head>
-<body class="bg-stone-50">
+<body class="bg-stone-100">
 
-    <div id="page-loader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-white transition-opacity duration-300 ease-in-out">
+    <div id="page-loader"
+        class="fixed inset-0 z-[9999] flex items-center justify-center bg-white transition-opacity duration-300 ease-in-out">
         <img src="/logo.png" alt="Brundavanam Goshala Logo" class="loader-logo w-24 h-24">
+    </div>
+
+    <!-- Search Overlay -->
+    <div id="search-overlay" class="fixed inset-0 z-[1001] bg-black/70 backdrop-blur-sm hidden items-start justify-center p-4 pt-24 md:pt-32 transition-opacity duration-300">
+        <div class="w-full max-w-xl transform -translate-y-full transition-transform duration-300" id="search-overlay-content">
+            <div class="relative">
+                <input type="text" id="overlay-search-input" placeholder="Search for products..." class="w-full p-4 pr-12 text-lg text-stone-800 bg-white/90 border-2 border-white rounded-full focus:outline-none focus:ring-2 focus:ring-green-500" autocomplete="off">
+                <i data-lucide="search" class="absolute top-1/2 right-4 -translate-y-1/2 w-6 h-6 text-stone-500"></i>
+            </div>
+            <!-- Suggestions for overlay search -->
+            <div id="overlay-search-suggestions" class="w-full bg-white border border-stone-200 rounded-lg shadow-lg z-20 hidden mt-2 overflow-hidden max-h-80 overflow-y-auto">
+                <!-- Suggestions will be injected here -->
+            </div>
+        </div>
+        <button id="overlay-close-button" class="absolute top-6 right-6 text-white/70 hover:text-white">
+            <i data-lucide="x" class="w-10 h-10"></i>
+        </button>
     </div>
 
     <div id="tsparticles"></div>
 
-    <header class="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div id="header-inner" class="flex items-center justify-between h-16">
-                <div class="flex items-center">
-                    <a id="logo-link" href="index.html" class="text-xl sm:text-2xl font-bold text-green-800 hover:text-green-700">Brundavanam Goshala</a>
-                </div>
-                <nav class="hidden md:flex items-center space-x-8 text-base">
-                    <a href="index.html" class="text-green-700 font-semibold border-b-2 border-green-700 py-2">HOME</a>
-                    <a href="about.html" class="text-stone-600 hover:text-green-700 py-2 font-medium">ABOUT US</a>
-                    <a href="contact.html" class="text-stone-600 hover:text-green-700 py-2 font-medium">SUPPORT</a>
-                </nav>
-                <div class="flex items-center space-x-4">
-                    <a href="cart.html" class="relative text-stone-600 hover:text-green-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.16"/></svg>
-                        <span id="cart-count" class="absolute -top-2 -right-2 bg-amber-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
-                    </a>
-                    <button id="mobile-menu-button" class="md:hidden text-gray-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div id="mobile-menu" class="hidden md:hidden bg-white/80 backdrop-blur-sm border-t p-4 space-y-2">
-            <a href="index.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded">Home</a>
-            <a href="about.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded">About Us</a>
-            <a href="contact.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded">Support</a>
-        </div>
-    </header>
+    <header id="main-header" class="app-bar sticky top-0 left-0 w-full transition-all duration-300 z-[100]" style="background: rgba(200, 200, 200, 0.25); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 16px; border: 1px solid rgba(200, 200, 200, 0.3); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);">
+        <div id="header-container" class="h-12 md:h-16 px-4 md:px-8 flex items-center justify-between transition-all duration-300 container mx-auto">
+            <!-- Logo -->
+            <a id="logo-link" href="index.html" class="text-lg sm:text-xl font-bold text-green-900 hover:text-green-700 mr-6 transition-all duration-300">Brundavanam Goshala</a>
 
-    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        <div id="advertisement-carousel" role="region" aria-roledescription="carousel" aria-label="Advertisements" class="relative w-full h-64 md:h-80 rounded-lg overflow-hidden shadow-lg mb-12 group">
-            <div id="carousel-live-region" class="sr-only" aria-live="polite" aria-atomic="true"></div>
-            <div id="carousel-track" class="flex h-full">
-                <!-- Carousel slides will be dynamically inserted here -->
-            </div>
-            <button id="prev-button" aria-label="Previous slide" class="absolute top-1/2 left-4 -translate-y-1/2 bg-white/50 hover:bg-white/80 rounded-full p-2 text-stone-800 transition-opacity">
-                <i data-lucide="chevron-left" class="w-6 h-6"></i>
-            </button>
-            <button id="next-button" aria-label="Next slide" class="absolute top-1/2 right-4 -translate-y-1/2 bg-white/50 hover:bg-white/80 rounded-full p-2 text-stone-800 transition-opacity">
-                <i data-lucide="chevron-right" class="w-6 h-6"></i>
-            </button>
-            <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2" id="carousel-dots" role="tablist" aria-label="Advertisements">
-            </div>
-            <div class="absolute bottom-2.5 right-4">
-                <button id="pause-play-button" aria-label="Pause carousel" class="bg-black/30 hover:bg-black/50 rounded-full p-2 text-white transition-all">
-                    <svg id="pause-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M6 4h4v16H6z"/><path d="M14 4h4v16h-4z"/></svg>
-                    <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 hidden"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <!-- Nav Links (Desktop) -->
+            <nav class="hidden md:flex items-center gap-6 text-stone-800 font-medium">
+                <a href="index.html" class="nav-link-glow text-green-800 font-semibold">Home</a>
+                <a href="about.html" class="nav-link-glow">About Us</a>
+                <a href="index.html" class="nav-link-glow">Shop</a>
+                <a href="contact.html" class="nav-link-glow">Contact</a>
+            </nav>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-2 md:gap-4">
+                <button id="header-search-button" class="hidden md:block p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
+                    <i data-lucide="search" class="w-5 h-5"></i>
+                </button>
+                <a href="my-orders.html" class="hidden md:block p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40" title="My Account">
+                    <i data-lucide="user" class="w-5 h-5"></i>
+                </a>
+                <a href="cart.html" class="relative p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span>
+                </a>
+                <button id="mobile-menu-button" class="md:hidden p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
                 </button>
             </div>
         </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white/80 backdrop-blur-sm border rounded-2xl mt-2 p-4 pt-10 space-y-2 shadow-xl relative">
+            <button id="mobile-menu-close-btn" class="absolute top-2 right-2 p-1 text-stone-500 hover:text-stone-800">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <a href="index.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded font-semibold">Home</a>
+            <a href="about.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded">About Us</a>
+            <a href="index.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded">Shop</a>
+            <a href="contact.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded mb-2">Contact</a>
+            <button id="mobile-header-search-button" class="w-full flex items-center justify-center gap-2 text-stone-700 bg-stone-200/70 hover:bg-stone-300/70 p-2 rounded-lg font-medium">
+                <i data-lucide="search" class="w-4 h-4"></i> Search
+            </button>
+            <a href="my-orders.html" class="w-full flex items-center justify-center gap-2 text-stone-700 bg-stone-200/70 hover:bg-stone-300/70 p-2 rounded-lg font-medium">
+                <i data-lucide="user" class="w-4 h-4"></i> My Account
+            </a>
+        </div>
+    </header>
 
-        <div class="mb-8 text-center">
-            <h1 class="text-3xl md:text-4xl font-bold text-stone-800 mb-2">Pure & Natural Products</h1>
-            <p class="text-stone-600">Delivered from our Goshala, straight to your home.</p>
-            <div class="max-w-xl mx-auto mt-6">
-                <div class="relative">
-                    <input type="text" id="search-input" placeholder="Search for Ghee, Soaps, etc." class="w-full p-4 pr-12 text-stone-700 border border-stone-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-600" autocomplete="off">
-                    <button id="search-button" class="absolute top-1/2 right-4 -translate-y-1/2 text-stone-500 hover:text-green-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <div class="md:p-8">
+        <main class="container mx-auto sm:px-6 lg:px-8 py-8 glass-effect md:rounded-lg">
+            <div class="sm:px-0">
+                <div class="carousel-container group">
+                    <div id="carousel-track" class="flex h-full"></div>
+                    <button id="prev-button" aria-label="Previous slide"
+                        class="absolute top-1/2 left-4 -translate-y-1/2 bg-white/60 hover:bg-white/90 rounded-full p-3 text-stone-800 transition-opacity duration-300 z-10 opacity-0 group-hover:opacity-100 focus:opacity-100">
+                        <i data-lucide="chevron-left" class="w-8 h-8"></i>
                     </button>
-                    <div id="search-suggestions" class="absolute top-full w-full bg-white border border-stone-200 rounded-b-lg shadow-lg z-20 hidden mt-1 overflow-hidden"></div>
+                    <button id="next-button" aria-label="Next slide"
+                        class="absolute top-1/2 right-4 -translate-y-1/2 bg-white/60 hover:bg-white/90 rounded-full p-3 text-stone-800 transition-opacity duration-300 z-10 opacity-0 group-hover:opacity-100 focus:opacity-100">
+                        <i data-lucide="chevron-right" class="w-8 h-8"></i>
+                    </button>
+                </div>
+                <div class="carousel-indicators mt-4" id="carousel-indicators"></div>
+            </div>
+    
+            <!-- Featured Products Section -->
+            <div id="featured-products-section" class="mt-16 mb-12 px-2 sm:px-0">
+                <h2 class="text-2xl font-bold text-white text-center mb-8 text-shadow">Our Top Picks</h2>
+                <div class="relative">
+                    <div id="featured-products-grid" class="flex overflow-x-auto gap-0 lg:gap-4 pb-4 hide-scrollbar snap-x snap-mandatory lg:grid lg:grid-cols-4 lg:gap-6 lg:pb-0 lg:snap-none divide-x divide-stone-200 lg:divide-x-0">
+                        <!-- Featured products will be loaded here -->
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="mb-8">
-            <div class="flex justify-between items-center mb-3">
-                <h2 class="text-lg font-semibold text-stone-700 text-center md:text-left">Filter by Category</h2>
-                <button id="clear-filters-btn" class="text-sm text-green-700 hover:underline hidden font-medium">Clear All</button>
-            </div>
-            <div id="category-filters" class="flex flex-wrap justify-center md:justify-start gap-2"></div>
-        </div>
-
-        <div>
-            <div class="flex justify-between items-center mb-4">
-                <h2 id="products-heading" class="text-2xl font-bold text-stone-800">All Products</h2>
-                <div class="flex items-center space-x-2 text-sm text-stone-600">
-                    <span>Sort By:</span>
-                    <select id="sort-select" class="font-medium bg-transparent border-none focus:ring-0 cursor-pointer">
-                        <option value="relevance">Relevance</option>
-                        <option value="newest">Newest Arrivals</option>
-                        <option value="price-asc">Price: Low to High</option>
-                        <option value="price-desc">Price: High to Low</option>
-                    </select>
+    
+            <div id="shop-search-section" class="mb-8 text-center px-4 sm:px-0 scroll-mt-24">
+                <h1 class="text-3xl md:text-4xl font-bold text-white mb-2 text-shadow">Pure & Natural Products</h1>
+                <p class="text-stone-100 text-shadow">Delivered from our Goshala, straight to your home.</p>
+                <div class="max-w-xl mx-auto mt-6">
+                    <div class="relative">
+                        <input type="text" id="search-input" placeholder="Search for Ghee, Soaps, etc." class="w-full p-4 pr-12 text-stone-700 border border-stone-300 rounded-full focus:outline-none focus:ring-2 focus:ring-green-600" autocomplete="off">
+                        <button id="search-button" class="absolute top-1/2 right-4 -translate-y-1/2 text-stone-500 hover:text-green-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                        </button>
+                        <div id="search-suggestions" class="absolute top-full w-full bg-white border border-stone-200 rounded-b-lg shadow-lg z-20 hidden mt-1 overflow-hidden"></div>
+                    </div>
                 </div>
             </div>
-            <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"></div>
-            <div id="load-more-container" class="text-center mt-12 hidden">
-                <button id="load-more-btn" class="bg-green-700 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-800 transition-colors shadow-md">Load More Products</button>
+            
+            <div class="mb-8 px-4 sm:px-0">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-lg font-semibold text-white text-center md:text-left text-shadow">Filter by Category</h2>
+                    <button id="clear-filters-btn" class="text-sm text-red-400 hover:underline hidden font-medium flex items-center gap-1"><i data-lucide="x" class="w-4 h-4"></i>Clear All</button>
+                </div>
+                <div id="category-filters" class="flex overflow-x-auto flex-nowrap md:flex-wrap justify-start gap-3 pb-2 hide-scrollbar"></div>
             </div>
-        </div>
-    </main>
+    
+            <div class="px-2 sm:px-0">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 id="products-heading" class="text-xl sm:text-2xl font-bold text-white text-shadow">All Products</h2>
+                    <div class="flex items-center space-x-2 text-sm text-stone-100">
+                        <label for="sort-select" class="hidden sm:inline text-white text-shadow">Sort By:</label>
+                        <select id="sort-select" class="text-white bg-black/20 border-white/30">
+                            <option value="relevance">Relevance</option>
+                            <option value="newest">Newest Arrivals</option>
+                            <option value="price-asc">Price: Low to High</option>
+                            <option value="price-desc">Price: High to Low</option>
+                        </select>
+                    </div>
+                </div>
+                <ul id="product-grid" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-x-0 gap-y-4 sm:gap-4 md:gap-6" role="list"></ul>
+            </div>
+        </main>
+    </div>
 
-    <footer class="bg-stone-800 text-white mt-12">
+    <!-- Bottom Navigation Bar (Mobile Only) -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-[101]">
+        <div class="flex justify-around h-16">
+            <a href="index.html" class="flex flex-col items-center justify-center text-green-700 font-semibold w-full">
+                <i data-lucide="home" class="w-6 h-6 mb-1"></i>
+                <span class="text-xs">Home</span>
+            </a>
+            <button id="mobile-bottom-search" class="flex flex-col items-center justify-center text-stone-600 hover:text-green-700 w-full">
+                <i data-lucide="search" class="w-6 h-6 mb-1"></i>
+                <span class="text-xs">Search</span>
+            </button>
+            <a href="cart.html" class="relative flex flex-col items-center justify-center text-stone-600 hover:text-green-700 w-full">
+                <i data-lucide="shopping-cart" class="w-6 h-6 mb-1"></i>
+                <span class="text-xs">Cart</span>
+            </a>
+            <a href="my-orders.html" class="flex flex-col items-center justify-center text-stone-600 hover:text-green-700 w-full">
+                <i data-lucide="user" class="w-6 h-6 mb-1"></i>
+                <span class="text-xs">Account</span>
+            </a>
+        </div>
+    </nav>
+
+    <footer class="bg-stone-800 text-white mt-12 pb-16 md:pb-0">
         <div class="container mx-auto px-8 py-12 text-center">
             <p class="font-bold text-2xl mb-2">Brundavanam Goshala</p>
             <p class="text-stone-400 max-w-xl mx-auto mb-6">Promoting wellness and sustainability through sacred cow products, while supporting the care and protection of our beloved Gomata.</p>
@@ -142,11 +367,11 @@
         </div>
     </footer>
     
-    <button id="back-to-top-btn" title="Go to top" class="fixed bottom-20 right-5 z-50 p-3 rounded-full bg-green-700 text-white shadow-lg hover:bg-green-800 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none">
+    <button id="back-to-top-btn" title="Go to top" class="fixed bottom-20 right-5 z-50 p-3 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
     </button>
 
-    <div id="cart-notification" class="fixed bottom-5 right-5 bg-green-700 text-white py-3 px-6 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-500 ease-in-out z-50 max-w-md">
+    <div id="cart-notification" class="fixed top-5 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:top-auto md:bottom-5 md:right-5 bg-green-600 text-white py-3 px-6 rounded-lg shadow-lg transform -translate-y-20 md:translate-y-20 opacity-0 transition-all duration-500 ease-in-out z-[1002] w-11/12 max-w-sm md:max-w-md">
         <div class="flex items-center justify-between">
             <div class="flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 mr-3 shrink-0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
@@ -156,16 +381,18 @@
         </div>
     </div>
 
-    <div id="quick-view-modal" class="fixed inset-0 z-[60] hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="quick-view-title">
+    <div id="quick-view-modal" class="fixed inset-0 z-[60] hidden flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="quick-view-title">
         <div id="quick-view-overlay" class="absolute inset-0 bg-black/60 modal-overlay opacity-0"></div>
-        <div id="quick-view-content" class="relative bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col modal-content transform scale-95 opacity-0"></div>
+        <div id="quick-view-content" class="relative bg-white rounded-lg shadow-2xl w-11/12 max-w-md md:max-w-4xl max-h-[90vh] flex flex-col modal-content transform scale-95 opacity-0"></div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/tsparticles@3.1.0/tsparticles.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.0/lottie.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <script type="module">
-        import { loadProducts } from '/data.js';
+        import { loadProducts, ApiError } from '/js/data.js';
 
         // --- UTILITIES ---
         const debounce = (func, delay = 300) => {
@@ -180,23 +407,30 @@
 
         // --- STATE & RENDER ---
         let products = [];
-        let currentFilteredProducts = [];
-        let productsDisplayed = 0;
-        const PRODUCTS_PER_LOAD = 8;
+        let allProducts = []; // To store the master list of all products
         const productGrid = document.getElementById('product-grid');
-        const loadMoreBtn = document.getElementById('load-more-btn');
-        const loadMoreContainer = document.getElementById('load-more-container');
-        
+
+        // --- HEADER SCROLL EFFECT ---
+        const mainHeader = document.getElementById('main-header');
+        if (mainHeader) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    mainHeader.classList.add('header-scrolled');
+                } else {
+                    mainHeader.classList.remove('header-scrolled');
+                }
+            });
+        }
         function saveProductsToStorage() {
             const cartState = products
-                .filter(p => p.inCart)
+                .filter(p => p.inCart) // This is fine as it's just for saving
                 .map(({id, inCart, quantity}) => ({id, inCart, quantity}));
             localStorage.setItem('goshalaProducts', JSON.stringify(cartState));
         }
 
         const generateStars = (rating) => {
             let starsHTML = '';
-            for (let i = 1; i <= 5; i++) starsHTML += `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star ${i <= rating ? 'fill-amber-400 stroke-amber-500 text-amber-500' : 'fill-stone-200 stroke-stone-300 text-stone-300'}"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+            for (let i = 1; i <= 5; i++) starsHTML += `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star ${i <= rating ? 'fill-yellow-400 stroke-yellow-500 text-yellow-500' : 'fill-stone-200 stroke-stone-300 text-stone-300'}"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
             return starsHTML;
         };
 
@@ -212,17 +446,18 @@
             return null;
         };
         
-        const appendProducts = (productsToAppend) => {
-            if (productsToAppend.length === 0 && productsDisplayed === 0) {
+        const renderProducts = (productsToRender) => {
+            if (productsToRender.length === 0) {
                 productGrid.innerHTML = `<p class="col-span-full text-center text-stone-500 py-8">No products match your criteria.</p>`;
                 return;
             }
 
-            productsToAppend.forEach(product => {
-                const discount = product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
-                const card = document.createElement('div');
-                card.className = "product-card bg-white rounded-lg shadow-md overflow-hidden flex flex-col transform hover:scale-105 transition-transform duration-300";
-                
+            productGrid.innerHTML = ''; // Clear existing products
+            productsToRender.forEach((product, index) => {
+                const discount = product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0; 
+                const card = document.createElement('li'); // Use <li> for semantic list item
+                card.className = "product-card-new p-0 sm:p-4 md:p-6 rounded-lg flex flex-col"; // Added flex-col
+
                 let cartControlsHTML = '';
                 if (product.inCart) {
                     cartControlsHTML = `
@@ -232,55 +467,99 @@
                             <button class="quantity-change-btn text-green-700 px-4 py-2 rounded-r-md hover:bg-stone-200 active:bg-stone-300" data-product-id="${product.id}" data-change="1">+</button>
                         </div>`;
                 } else {
-                    cartControlsHTML = `<button class="add-to-cart-btn w-full font-bold py-3 px-4 rounded-lg transition-colors bg-amber-500 text-stone-900 hover:bg-amber-600 active:bg-amber-700" data-product-id="${product.id}">Add to Cart</button>`;
+                    cartControlsHTML = `<button class="add-to-cart-btn w-full font-bold text-sm py-2 px-4 rounded-lg transition-colors bg-green-600 text-white hover:bg-green-700 active:bg-green-800" data-product-id="${product.id}" aria-label="Add ${product.name} to cart">Add to Cart</button>`;
                 }
-
-                const badges = [];
-                const newStatus = getNewStatus(product.dateAdded);
-                if (newStatus === 'new') badges.push(`<span class="inline-block bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded">New Arrival</span>`);
-                else if (newStatus === 'recent') badges.push(`<span class="inline-block bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded">Recently Added</span>`);
-                if (product.originalPrice && product.originalPrice > product.price) badges.push(`<span class="inline-block bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded">On Sale</span>`);
-                else if (product.sellerTag) badges.push(`<span class="inline-block bg-red-600 text-white text-xs font-bold px-2 py-1 rounded">${product.sellerTag}</span>`);
                 
                 const imageUrl = (product.images && product.images.length > 0) ? product.images[0] : 'https://placehold.co/400x300/CCCCCC/FFFFFF?text=No+Image';
-                const shortDescription = product.description ? (product.description.length > 60 ? product.description.substring(0, 57) + '...' : product.description) : '';
 
-                card.innerHTML = `
-                    <div class="relative group">
-                        <a href="product-detail.html?id=${product.id}" class="block">
-                            <img src="${imageUrl}" alt="${product.name}" class="w-full h-48 object-cover">
+                 card.innerHTML = `
+                    <div class="product-image-container relative group">
+                        <a href="product-detail.html?id=${product.id}" class="block overflow-hidden rounded-lg" aria-label="View details for ${product.name}">
+                            <img src="${imageUrl}" alt="${product.name}" class="w-full aspect-square object-cover" loading="lazy" decoding="async">
                         </a>
-                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <button class="quick-view-btn bg-white text-stone-800 font-bold py-2 px-4 rounded-full transform scale-90 group-hover:scale-100 transition-transform" data-product-id="${product.id}">Quick View</button>
+                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
+                            <button class="quick-view-btn bg-white text-stone-800 font-bold py-2 px-4 rounded-full transform scale-90 group-hover:scale-100 transition-transform" data-product-id="${product.id}" aria-label="Quick view ${product.name}">Quick View</button>
                         </div>
                     </div>
-                    <div class="p-4 flex flex-col flex-grow">
-                        <p class="text-xs text-stone-500 mb-1">Brundavanam Goshala</p>
-                        <h3 class="font-medium text-stone-800 leading-tight mb-2 flex-grow"><a href="product-detail.html?id=${product.id}" class="hover:text-green-700">${product.name}</a></h3>
-                        <p class="text-sm text-stone-600 mb-3 h-10">${shortDescription}</p>
-                        <div class="flex items-center mb-2">
-                             <div class="flex text-amber-500">${generateStars(product.rating)}</div>
-                            <span class="text-xs text-stone-500 ml-2">(${product.reviewsCount})</span>
+                    <div class="px-4 pb-4 sm:px-0 sm:pt-2 sm:pb-0 flex flex-col flex-grow">
+                        <p class="text-xs text-stone-300 mt-2 mb-1 truncate">${product.category ? product.category[0] : 'Goshala Product'}</p>
+                        <h3 class="product-name text-sm leading-tight font-semibold">
+                            <a href="product-detail.html?id=${product.id}" class="hover:text-amber-300 before:absolute before:inset-0 before:z-0" aria-label="View details for ${product.name}">${product.name}</a>
+                        </h3>
+                        <div role="img" aria-label="${product.rating} out of 5 stars" class="flex items-center mb-2 text-yellow-500">
+                            <div class="flex">${generateStars(product.rating)}</div>
+                            <span class="text-xs text-stone-300 ml-2" aria-hidden="true">(${product.reviewsCount})</span>
                         </div>
-                        <div class="flex items-baseline mb-4">
-                            <span class="text-2xl font-bold text-stone-800">₹${product.price}</span>
-                            ${product.originalPrice ? `<span class="text-sm text-stone-500 line-through ml-2">₹${product.originalPrice}</span>` : ''}
+                        <div class="mt-auto">
+                        ${product.originalPrice ? `
+                        <div class="flex items-baseline gap-2 mb-2">
+                            <p class="text-xl font-bold text-white">₹${product.price}</p>
+                            <p class="text-sm text-stone-400 line-through">₹${product.originalPrice}</p>
+                            <p class="text-sm font-semibold text-amber-400">${discount}% off</p>
                         </div>
-                        <div class="cart-controls mt-auto" data-product-id="${product.id}">${cartControlsHTML}</div>
+                    ` : `
+                        <p class="product-price">₹${product.price}</p>
+                        `}
+                            <div class="cart-controls mt-2 relative z-10" data-product-id="${product.id}">${cartControlsHTML}</div>
+                        </div>
                     </div>`;
                 productGrid.appendChild(card);
             });
         };
-        
-        const loadMoreProducts = () => {
-            const productsToAppend = currentFilteredProducts.slice(productsDisplayed, productsDisplayed + PRODUCTS_PER_LOAD);
-            appendProducts(productsToAppend);
-            productsDisplayed += productsToAppend.length;
 
-            if (productsDisplayed >= currentFilteredProducts.length) loadMoreContainer.classList.add('hidden');
-            else loadMoreContainer.classList.remove('hidden');
-        };
+        // --- SEARCH OVERLAY LOGIC ---
+        const headerSearchButton = document.getElementById('header-search-button');
+        const mobileHeaderSearchButton = document.getElementById('mobile-header-search-button');
+        const searchOverlay = document.getElementById('search-overlay');
+        const searchOverlayContent = document.getElementById('search-overlay-content');
+        const overlaySearchInput = document.getElementById('overlay-search-input');
+        const overlayCloseButton = document.getElementById('overlay-close-button');
 
+        function openSearch() {
+            searchOverlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => {
+                searchOverlay.classList.add('opacity-100');
+                searchOverlayContent.classList.remove('-translate-y-full');
+                overlaySearchInput.focus();
+            }, 10);
+        }
+
+        function closeSearch() {
+            searchOverlay.classList.remove('opacity-100');
+            searchOverlayContent.classList.add('-translate-y-full');
+            setTimeout(() => {
+                searchOverlay.classList.add('hidden');
+                document.body.style.overflow = '';
+            }, 300);
+        }
+
+        function performSearchFromOverlay() {
+            const query = overlaySearchInput.value.trim();
+            document.getElementById('search-input').value = query;
+            closeSearch();
+            handleSearch(); // Trigger search and grid update
+        }
+
+        function renderOverlaySuggestions(results) {
+            const container = document.getElementById('overlay-search-suggestions');
+            if (!container) return;
+
+            if (results.length > 0) {
+                container.innerHTML = results.map(result => {
+                    const product = result.item;
+                    const imageUrl = (product.images && product.images.length > 0) ? product.images[0] : 'https://placehold.co/100x100';
+                    return `
+                        <a href="product-detail.html?id=${product.id}" class="flex items-center p-3 hover:bg-stone-100 transition-colors border-t border-stone-100 first:border-t-0">
+                            <img src="${imageUrl}" alt="${product.name}" class="w-12 h-12 object-cover rounded-md mr-4">
+                            <div><p class="font-medium text-stone-800 text-sm">${product.name}</p><p class="text-sm font-bold text-stone-700">₹${product.price}</p></div>
+                        </a>`;
+                }).join('');
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
         // --- Main Script Logic ---
         const cartCountElement = document.getElementById('cart-count');
         const searchInput = document.getElementById('search-input');
@@ -299,23 +578,40 @@
         }
 
         function updateProductCard(productId) {
-            const cardControls = document.querySelector(`.cart-controls[data-product-id="${productId}"]`);
-            const product = products.find(p => p.id === productId);
-            if (!cardControls || !product) return;
-            if (product.inCart) {
-                cardControls.innerHTML = `
-                    <div class="w-full flex items-center justify-between font-bold text-lg rounded-lg bg-stone-100 border-2 border-stone-200">
-                        <button class="quantity-change-btn text-green-700 px-4 py-2 rounded-l-md hover:bg-stone-200 active:bg-stone-300" data-product-id="${product.id}" data-change="-1">−</button>
-                        <span class="text-stone-800 text-base">${product.quantity}</span>
-                        <button class="quantity-change-btn text-green-700 px-4 py-2 rounded-r-md hover:bg-stone-200 active:bg-stone-300" data-product-id="${product.id}" data-change="1">+</button>
-                    </div>`;
-            } else {
-                cardControls.innerHTML = `<button class="add-to-cart-btn w-full font-bold py-3 px-4 rounded-lg transition-colors bg-amber-500 text-stone-900 hover:bg-amber-600 active:bg-amber-700" data-product-id="${product.id}">Add to Cart</button>`;
-            }
+            const allCardControls = document.querySelectorAll(`.cart-controls[data-product-id="${productId}"]`);
+            const product = allProducts.find(p => p.id === productId); // Use allProducts for consistency
+            if (allCardControls.length === 0 || !product) return;
+
+            const wasJustAdded = product.inCart && product.quantity === 1;
+            let newControlsHTML;
+
+            allCardControls.forEach(controls => {
+                if (wasJustAdded && controls.querySelector('.add-to-cart-btn')) {
+                    // Stage 1: Show "Added" animation
+                    const button = controls.querySelector('.add-to-cart-btn');
+                    button.classList.add('bg-green-800');
+                    button.innerHTML = `<i data-lucide="check" class="w-5 h-5 mr-2"></i> Added!`;
+                    lucide.createIcons({
+                        nodes: [button]
+                    });
+
+                    // Stage 2: Transition to quantity controls
+                    setTimeout(() => {
+                        newControlsHTML = `<div class="w-full flex items-center justify-between font-bold text-lg rounded-lg bg-stone-100 border-2 border-stone-200"><button class="quantity-change-btn text-green-700 px-4 py-2 rounded-l-md hover:bg-stone-200 active:bg-stone-300" data-product-id="${product.id}" data-change="-1">−</button><span class="text-stone-800 text-base">${product.quantity}</span><button class="quantity-change-btn text-green-700 px-4 py-2 rounded-r-md hover:bg-stone-200 active:bg-stone-300" data-product-id="${product.id}" data-change="1">+</button></div>`;
+                        controls.innerHTML = newControlsHTML;
+                    }, 800); // 0.8 second delay
+                } else if (product.inCart) {
+                    newControlsHTML = `<div class="w-full flex items-center justify-between font-bold text-lg rounded-lg bg-stone-100 border-2 border-stone-200"><button class="quantity-change-btn text-green-700 px-4 py-2 rounded-l-md hover:bg-stone-200 active:bg-stone-300" data-product-id="${product.id}" data-change="-1">−</button><span class="text-stone-800 text-base">${product.quantity}</span><button class="quantity-change-btn text-green-700 px-4 py-2 rounded-r-md hover:bg-stone-200 active:bg-stone-300" data-product-id="${product.id}" data-change="1">+</button></div>`;
+                    controls.innerHTML = newControlsHTML;
+                } else {
+                    newControlsHTML = `<button class="add-to-cart-btn w-full font-bold text-sm py-2 px-4 rounded-lg transition-colors bg-green-600 text-white hover:bg-green-700 active:bg-green-800" data-product-id="${product.id}">Add to Cart</button>`;
+                    controls.innerHTML = newControlsHTML;
+                }
+            });
         }
 
         function updateCartCount() {
-            const itemsInCart = products.filter(p => p.inCart).length;
+            const itemsInCart = allProducts.filter(p => p.inCart).length;
             if (itemsInCart !== parseInt(cartCountElement.textContent)) {
                 cartCountElement.textContent = itemsInCart;
                 cartCountElement.classList.add('cart-count-animate');
@@ -326,12 +622,12 @@
         let notificationTimeout;
         function showNotification(message) {
             const notification = document.getElementById('cart-notification');
-            const messageElement = document.getElementById('notification-message');
-            if (!notification || !messageElement) return;
-            messageElement.textContent = message;
+            document.getElementById('notification-message').textContent = message;
             clearTimeout(notificationTimeout);
-            notification.classList.remove('translate-y-20', 'opacity-0');
-            notificationTimeout = setTimeout(() => notification.classList.add('translate-y-20', 'opacity-0'), 3000);
+            notification.classList.remove('opacity-0', '-translate-y-20', 'md:translate-y-20');
+            notificationTimeout = setTimeout(() => {
+                notification.classList.add('opacity-0', '-translate-y-20', 'md:translate-y-20');
+            }, 3000);
         }
 
         const quickViewModal = document.getElementById('quick-view-modal');
@@ -339,7 +635,7 @@
         const quickViewContent = document.getElementById('quick-view-content');
 
         function openQuickView(productId) {
-            const product = products.find(p => p.id === productId);
+            const product = allProducts.find(p => p.id === productId);
             if (!product) return;
             const discount = product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
             const images = Array.isArray(product.images) ? product.images : [];
@@ -393,7 +689,7 @@
         }
 
         function updateModalCartControls(productId) {
-            const product = products.find(p => p.id === productId);
+            const product = allProducts.find(p => p.id === productId); // Use allProducts for consistency
             const controlsContainer = quickViewContent.querySelector(`.modal-cart-controls[data-product-id="${productId}"]`);
             if (!product || !controlsContainer) return;
             if (product.inCart) {
@@ -405,7 +701,7 @@
                        <button class="modal-quantity-btn text-green-700 px-5 py-2" data-change="1">+</button>
                     </div>`;
             } else {
-                controlsContainer.innerHTML = `<button class="modal-add-to-cart-btn w-full max-w-xs text-center bg-amber-500 text-stone-900 font-bold py-4 px-8 rounded-lg text-lg hover:bg-amber-600 transition-colors shadow-lg">Add to Cart</button>`;
+                controlsContainer.innerHTML = `<button class="modal-add-to-cart-btn w-full max-w-xs text-center bg-green-600 text-white font-bold py-4 px-8 rounded-lg text-lg hover:bg-green-700 transition-colors shadow-lg">Add to Cart</button>`;
             }
         }
 
@@ -419,15 +715,17 @@
 
         function loadAndApplyPreferences() {
             const urlParams = new URLSearchParams(window.location.search);
-            searchInput.value = (urlParams.get('q') ?? localStorage.getItem('goshalaSearch')) || '';
             sortSelect.value = (urlParams.get('sort') ?? localStorage.getItem('goshalaSort')) || 'relevance';
+            searchInput.value = urlParams.get('q') || '';
             selectedCategory = (urlParams.get('category') ?? localStorage.getItem('goshalaCategory')) || 'All';
             document.querySelectorAll('.category-filter-btn').forEach(btn => {
                 const isActive = btn.dataset.category === selectedCategory;
-                btn.classList.toggle('bg-green-700', isActive);
-                btn.classList.toggle('text-white', isActive);
-                btn.classList.toggle('bg-stone-200', !isActive);
-                btn.classList.toggle('text-stone-700', !isActive);
+                // Use the correct active/inactive classes to match the click handler
+                btn.classList.toggle('bg-green-200', isActive);
+                btn.classList.toggle('text-black', isActive);
+                btn.classList.toggle('font-semibold', isActive);
+                btn.classList.toggle('bg-white', !isActive);
+                btn.classList.toggle('text-black', isActive);
             });
             updateClearButtonVisibility();
         }
@@ -448,34 +746,65 @@
         }
 
         function renderCategoryFilters() {
+            const categories = [
+                {"id": "all", "label": "All", "icon": "lucide:list"},
+                {"id": "food_wellness", "label": "Food & Wellness", "icon": "lucide:apple"},
+                {"id": "ghee", "label": "Ghee", "icon": "lucide:droplet"},
+                {"id": "pooja", "label": "Pooja Items", "icon": "lucide:sparkles"},
+                {"id": "personal_care", "label": "Personal Care", "icon": "lucide:smile"},
+                {"id": "panchagavya", "label": "Panchagavya", "icon": "lucide:leaf"},
+                {"id": "gardening_agriculture", "label": "Gardening & Agriculture", "icon": "lucide:flower"},
+                {"id": "fertilizer", "label": "Fertilizer", "icon": "lucide:seedling"},
+                {"id": "spiritual_home", "label": "Spiritual & Home", "icon": "lucide:home"},
+                {"id": "incense", "label": "Incense", "icon": "lucide:flame"}
+            ];
+
             const filtersContainer = document.getElementById('category-filters');
             if (!filtersContainer) return;
-            const allCategories = products.flatMap(p => p.category || []).filter(Boolean);
-            const categories = ['All', ...new Set(allCategories)];
-            filtersContainer.innerHTML = categories.map(category => `
-                <button class="category-filter-btn px-5 py-2 text-base font-medium rounded-full transition-colors ${category === 'All' ? 'bg-green-700 text-white' : 'bg-stone-200 text-stone-700 hover:bg-stone-300'}" data-category="${category}">
-                    ${category}
+
+            filtersContainer.innerHTML = categories.map(category => {
+                const isActive = category.label === 'All';
+                return `
+                <button 
+                    class="category-filter-btn flex-shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 shadow-sm border border-transparent ${isActive ? 'bg-green-600 text-white' : 'bg-white/20 text-white hover:bg-white/30'}" 
+                    data-category="${category.label}"
+                >
+                    <i data-lucide="${category.icon.split(':')[1]}" class="w-4 h-4"></i>
+                    <span>${category.label}</span>
                 </button>
-            `).join('');
+            `}).join('');
+
+            // Re-initialize icons after rendering
+            lucide.createIcons();
+        }
+
+        let fuse;
+        function initializeFuzzySearch() {
+            const options = {
+                includeScore: true,
+                minMatchCharLength: 2,
+                threshold: 0.4, // Adjust this value: 0.0 is a perfect match, 1.0 matches anything.
+                keys: [
+                    { name: 'name', weight: 0.7 },
+                    { name: 'description', weight: 0.3 },
+                    { name: 'category', weight: 0.5 }
+                ]
+            };
+            fuse = new Fuse(allProducts, options);
         }
 
         function handleSearch() {
-            localStorage.setItem('goshalaSearch', searchInput.value);
             highlightedSuggestionIndex = -1;
             const query = searchInput.value.toLowerCase().trim();
             if (query.length > 1) {
-                const matchedProducts = products.filter(p => 
-                    p.name.toLowerCase().includes(query) || 
-                    (Array.isArray(p.category) && p.category.some(cat => cat.toLowerCase().includes(query)))
-                ).slice(0, 5);
-                if (matchedProducts.length > 0) {
-                    suggestionsContainer.innerHTML = matchedProducts.map(product => {
+                const results = fuse.search(query).slice(0, 5);
+                if (results.length > 0) {
+                    suggestionsContainer.innerHTML = results.map(result => {
+                        const product = result.item;
                         const imageUrl = (product.images && product.images.length > 0) ? product.images[0] : 'https://placehold.co/100x100/CCCCCC/FFFFFF?text=No+Img';
-                        const escapedQuery = query.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-                        const regex = new RegExp(escapedQuery, 'gi');
-                        const highlightedName = product.name.replace(regex, (match) => `<strong class="font-bold text-green-700">${match}</strong>`);
+                        const highlightedName = product.name.replace(new RegExp(query, 'gi'), (match) => `<strong class="font-bold text-green-700">${match}</strong>`);
                         return `
-                            <a href="product-detail.html?id=${product.id}" class="flex items-center p-3 hover:bg-stone-100 transition-colors border-t border-stone-100 first:border-t-0">
+                            <a href="product-detail.html?id=${product.id}" class="suggestion-item flex items-center p-3 hover:bg-stone-100 transition-colors border-t border-stone-100 first:border-t-0">
                                 <img src="${imageUrl}" alt="${product.name}" class="w-12 h-12 object-cover rounded-md mr-4">
                                 <div>
                                     <p class="font-medium text-stone-800 text-sm leading-tight">${highlightedName}</p>
@@ -494,25 +823,66 @@
             applyFiltersAndSort();
         }
 
-        function applyFiltersAndSort() {
+        function handleCartAction(event, product) {
+            const button = event.target.closest('.add-to-cart-btn');
+            if (!button || !product) return;
+
+            if (!button.disabled) {
+                button.disabled = true;
+                button.classList.add('flex', 'justify-center', 'items-center');
+
+                // Lottie Loader
+                const loaderContainer = document.createElement('div');
+                loaderContainer.className = 'lottie-loader';
+                button.innerHTML = '';
+                button.appendChild(loaderContainer);
+
+                const loaderAnim = lottie.loadAnimation({
+                    container: loaderContainer, renderer: 'svg', loop: true, autoplay: true, path: '/assets/shopping cart.json'
+                });
+
+                setTimeout(() => {
+                    product.inCart = true;
+                    product.quantity = 1;
+                    showNotification(`"${product.name.substring(0, 25)}..." added to cart!`);
+                    updateProductCard(product.id);
+                    updateCartCount();
+                    saveProductsToStorage();
+                    loaderAnim.destroy(); // Clean up the animation
+                }, 500);
+            }
+        }
+
+        async function applyFiltersAndSort() {
             productGrid.classList.add('opacity-0');
+            
+            let filteredProducts;
+            const query = searchInput.value.toLowerCase().trim();
+            if (query.length > 1) {
+                filteredProducts = fuse.search(query).map(result => result.item);
+            } else {
+                filteredProducts = [...allProducts];
+            }
+
+            // Apply category filter
+            if (selectedCategory !== 'All') {
+                filteredProducts = filteredProducts.filter(p => p.category && p.category.includes(selectedCategory));
+            }
+
+            // Apply sort
+            const sort = sortSelect.value;
+            if (sort === 'newest') filteredProducts.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
+            else if (sort === 'price-asc') filteredProducts.sort((a, b) => a.price - b.price);
+            else if (sort === 'price-desc') filteredProducts.sort((a, b) => b.price - a.price);
+
+            products = filteredProducts;
+            renderProducts(products);
+            
             setTimeout(() => {
-                const query = searchInput.value.toLowerCase();
-                let filteredProducts = products.filter(p => p.name.toLowerCase().includes(query) || (Array.isArray(p.category) && p.category.some(cat => cat.toLowerCase().includes(query))));
-                if (selectedCategory !== 'All') filteredProducts = filteredProducts.filter(p => Array.isArray(p.category) && p.category.includes(selectedCategory));
-                const sortValue = sortSelect.value;
-                if (sortValue === 'price-asc') filteredProducts.sort((a, b) => a.price - b.price);
-                else if (sortValue === 'price-desc') filteredProducts.sort((a, b) => b.price - a.price);
-                else if (sortValue === 'newest') filteredProducts.sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded));
-                
-                currentFilteredProducts = filteredProducts;
-                productGrid.innerHTML = '';
-                productsDisplayed = 0;
-                loadMoreProducts();
                 updateClearButtonVisibility();
                 updateUrlState();
                 productGrid.classList.remove('opacity-0');
-            }, 200);
+            }, 100);
         }
 
         function updateSuggestionHighlight(suggestions) {
@@ -523,67 +893,165 @@
         }
 
         // --- Carousel Data & Rendering ---
-        const carouselSlidesData = [
-            {
-                productId: 1,
-                imageText: 'Pure A2 Ghee',
-                imageBg: 'FBBF24',
-                title: 'Taste the Purity of A2 Ghee',
-                subtitle: 'Traditionally made for authentic flavor.',
-                buttonText: 'Shop Now',
-                buttonClass: 'bg-amber-600 hover:bg-amber-700'
-            },
-            {
-                productId: 2,
-                imageText: 'Natural Soaps',
-                imageBg: '34D399',
-                title: 'Herbal Panchagavya Soaps',
-                subtitle: 'Nourish your skin, naturally.',
-                buttonText: 'Explore Soaps',
-                buttonClass: 'bg-green-700 hover:bg-green-800'
-            },
-            {
-                productId: 3,
-                imageText: 'Organic Manure',
-                imageBg: '8B4513',
-                title: 'Enrich Your Garden',
-                subtitle: '100% Organic Cow Manure.',
-                buttonText: 'Buy Now',
-                buttonClass: 'bg-stone-700 hover:bg-stone-800'
-            },
-            {
-                productId: 4,
-                imageText: 'Panchagavya Dhoop',
-                imageBg: 'F97316',
-                title: 'Divine Fragrance Dhoop',
-                subtitle: 'Create a sacred atmosphere in your home.',
-                buttonText: 'Discover More',
-                buttonClass: 'bg-orange-600 hover:bg-orange-700'
-            }
-        ];
+        let carouselSlidesData = [];
 
-        function renderCarouselSlides() {
+        async function fetchAndRenderCarousel() {
             const track = document.getElementById('carousel-track');
-            const carousel = document.getElementById('advertisement-carousel');
-            if (!track || !carousel) return;
+            const carousel = document.querySelector('.carousel-container');
+            const featuredGrid = document.getElementById('featured-products-grid');
+            const featuredSection = document.getElementById('featured-products-section');
 
-            if (carouselSlidesData.length === 0) {
+            if (!track || !carousel || !featuredGrid || !featuredSection) return;
+
+            try {
+                const response = await fetch('/api/config/carousel-slides'); // This endpoint now fetches products
+                const slideProducts = await response.json();
+
+                if (!Array.isArray(slideProducts) || slideProducts.length === 0) {
+                    carousel.style.display = 'none';
+                    document.getElementById('carousel-indicators').style.display = 'none';
+                    return;
+                }
+
+                // Map products to slide data for carousel and featured section
+                carouselSlidesData = slideProducts.map(product => ({
+                    title: product.name,
+                    subtitle: product.description || '',
+                    imageUrl: (product.images && product.images.length > 0) ? product.images[0] : 'https://placehold.co/1200x400',
+                    linkUrl: `product-detail.html?id=${product.legacyId}`,
+                    buttonText: 'View Product'
+                }));
+
+                renderCarouselSlides(carouselSlidesData);
+                initializeCarousel();
+
+            } catch (error) {
+                console.error("Failed to load carousel slides:", error);
                 carousel.style.display = 'none';
+                document.getElementById('carousel-indicators').style.display = 'none';
+            }
+        }
+
+        function renderCarouselSlides(slides) {
+            const track = document.getElementById('carousel-track');
+            track.innerHTML = slides.map((slide, index) => {
+                return `
+                    <div class="carousel-slide" role="tabpanel" id="carousel-slide-${index + 1}" aria-labelledby="carousel-tab-${index + 1}">
+                        <img src="${slide.imageUrl}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black/50 flex items-center justify-center text-center text-white p-4">
+                            <div>
+                                <h2 class="text-2xl md:text-4xl font-bold">${slide.title}</h2>
+                                <p class="mt-2 text-base max-w-md mx-auto">${slide.subtitle}</p>
+                                <a href="${slide.linkUrl}" class="mt-4 inline-block text-white font-bold py-2 px-6 rounded-lg bg-green-600 hover:bg-green-700">${slide.buttonText}</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        async function fetchAndRenderFeaturedProducts() {
+            const featuredGrid = document.getElementById('featured-products-grid');
+            const featuredSection = document.getElementById('featured-products-section');
+            if (!featuredGrid || !featuredSection) return;
+
+            try {
+                const response = await fetch('/api/config/top-picks-products');
+                const featuredProducts = await response.json();
+
+                if (featuredProducts.length === 0) {
+                    if (featuredSection) featuredSection.style.display = 'none';
+                    return;
+                }
+                
+                featuredGrid.innerHTML = featuredProducts.map(product => {
+                     const discount = product.originalPrice ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100) : 0;
+                    const imageUrl = (product.images && product.images.length > 0) ? product.images[0] : 'https://placehold.co/400x300/CCCCCC/FFFFFF?text=No+Image';
+                    
+                    // Find the full product object from allProducts to get cart state
+                    const fullProduct = allProducts.find(p => p.id === product.legacyId) || { inCart: false, quantity: 0 };
+                    let cartControlsHTML = '';
+                    if (fullProduct.inCart) {
+                        cartControlsHTML = `
+                            <div class="w-full flex items-center justify-between font-bold text-lg rounded-lg bg-stone-100 border-2 border-stone-200">
+                                <button class="quantity-change-btn text-green-700 px-4 py-2 rounded-l-md hover:bg-stone-200 active:bg-stone-300" data-product-id="${product.legacyId}" data-change="-1">−</button>
+                                <span class="text-stone-800 text-base">${fullProduct.quantity}</span>
+                                <button class="quantity-change-btn text-green-700 px-4 py-2 rounded-r-md hover:bg-stone-200 active:bg-stone-300" data-product-id="${product.legacyId}" data-change="1">+</button>
+                            </div>`;
+                    } else {
+                        cartControlsHTML = `<button class="add-to-cart-btn w-full font-bold text-sm py-2 px-4 rounded-lg transition-colors bg-green-600 text-white hover:bg-green-700 active:bg-green-800" data-product-id="${product.legacyId}">Add to Cart</button>`;
+                    }
+                    
+                    return `
+                        <div class="product-card-new w-1/2 sm:w-1/2 lg:w-full flex-shrink-0 snap-start p-0 sm:p-4 md:p-6 rounded-lg">
+                            <div class="product-image-container relative group">
+                                <a href="product-detail.html?id=${product.legacyId}" class="block overflow-hidden rounded-lg">
+                                    <img src="${imageUrl}" alt="${product.name}" class="w-full aspect-square object-cover" loading="lazy" decoding="async">
+                                </a>
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <button class="quick-view-btn bg-white text-stone-800 font-bold py-2 px-4 rounded-full transform scale-90 group-hover:scale-100 transition-transform" data-product-id="${product.legacyId}">Quick View</button>
+                                </div>
+                            </div>
+                            <div class="px-4 pb-4 sm:px-0 sm:pt-2 sm:pb-0">
+                                <p class="text-xs text-stone-500 mt-2 mb-1 truncate">${product.category ? product.category[0] : 'Goshala Product'}</p>
+                                <h3 class="product-name text-sm leading-tight font-semibold"><a href="product-detail.html?id=${product.legacyId}" class="hover:text-blue-600">${product.name}</a></h3>
+                                <div class="flex items-center mb-2 text-yellow-500">
+                                <div class="flex">${generateStars(product.rating)}</div>
+                                <span class="text-xs text-stone-500 ml-2">(${product.reviewsCount})</span>
+                            </div>
+                                ${product.originalPrice ? `
+                                <div class="flex items-baseline gap-2 mb-2">
+                                    <p class="text-xl font-bold text-stone-900">₹${product.price}</p>
+                                    <p class="text-sm text-stone-500 line-through">₹${product.originalPrice}</p>
+                                    <p class="text-sm font-semibold text-green-700">${discount}% off</p>
+                                </div>
+                            ` : `
+                                <p class="product-price">₹${product.price}</p>
+                            `}
+                                <div class="cart-controls mt-auto" data-product-id="${product.legacyId}">${cartControlsHTML}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                if (featuredSection) featuredSection.style.display = 'block';
+            } catch (error) {
+                console.error('Failed to fetch featured products:', error);
+                featuredSection.style.display = 'none';
+            }
+        }
+
+        function renderFeaturedProducts(featuredProducts) {
+            const featuredGrid = document.getElementById('featured-products-grid');
+            if (!featuredGrid) return;
+
+            if (featuredProducts.length === 0) {
+                const section = document.getElementById('featured-products-section');
+                if(section) section.style.display = 'none';
                 return;
             }
 
-            track.innerHTML = carouselSlidesData.map((slide, index) => {
-                const imageUrl = `https://placehold.co/1200x400/${slide.imageBg}/FFFFFF?text=${slide.imageText.replace(/ /g, '+')}`;
+            featuredGrid.innerHTML = featuredProducts.map(product => {
+                const imageUrl = (product.images && product.images.length > 0) ? product.images[0] : 'https://placehold.co/400x300/CCCCCC/FFFFFF?text=No+Image';
+                
+                let cartControlsHTML = '';
+                if (product.inCart) {
+                    cartControlsHTML = `
+                        <div class="w-full flex items-center justify-between font-bold text-lg rounded-lg bg-stone-100 border-2 border-stone-200">
+                            <button class="quantity-change-btn text-green-700 px-4 py-2 rounded-l-md hover:bg-stone-200 active:bg-stone-300" data-product-id="${product.id}" data-change="-1">−</button>
+                            <span class="text-stone-800 text-base">${product.quantity}</span>
+                            <button class="quantity-change-btn text-green-700 px-4 py-2 rounded-r-md hover:bg-stone-200 active:bg-stone-300" data-product-id="${product.id}" data-change="1">+</button>
+                        </div>`;
+                } else {
+                    cartControlsHTML = `<button class="add-to-cart-btn w-full font-bold py-3 px-4 rounded-lg transition-colors bg-amber-500 text-stone-900 hover:bg-amber-600 active:bg-amber-700" data-product-id="${product.id}">Add to Cart</button>`;
+                }
+
                 return `
-                    <div class="carousel-slide" role="tabpanel" id="carousel-slide-${index + 1}" aria-labelledby="carousel-tab-${index + 1}">
-                        <img src="${imageUrl}" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center text-center text-white p-4">
-                            <div>
-                                <h2 class="text-3xl md:text-4xl font-bold">${slide.title}</h2>
-                                <p class="mt-2 text-lg">${slide.subtitle}</p>
-                                <a href="product-detail.html?id=${slide.productId}" class="mt-4 inline-block text-white font-bold py-2 px-6 rounded-lg ${slide.buttonClass}">${slide.buttonText}</a>
-                            </div>
-                        </div>
+                    <div class="product-card-new">
+                        <a href="product-detail.html?id=${product.id}" class="block">
+                            <img src="${imageUrl}" alt="${product.name}" class="w-full h-48 object-cover rounded-lg mb-4" loading="lazy" decoding="async">
+                        </a>
+                        <h3 class="product-name flex-grow"><a href="product-detail.html?id=${product.id}" class="hover:text-blue-600">${product.name}</a></h3>
+                        <div class="cart-controls mt-4" data-product-id="${product.id}">${cartControlsHTML}</div>
                     </div>
                 `;
             }).join('');
@@ -591,208 +1059,148 @@
 
         // --- Carousel Logic ---
         function initializeCarousel() {
-            const carousel = document.getElementById('advertisement-carousel');
-            if (!carousel) return;
             const track = document.getElementById('carousel-track');
+            const indicatorsContainer = document.getElementById('carousel-indicators');
             const prevButton = document.getElementById('prev-button');
             const nextButton = document.getElementById('next-button');
-            const dotsContainer = document.getElementById('carousel-dots');
-            const liveRegion = document.getElementById('carousel-live-region');
-            const pausePlayButton = document.getElementById('pause-play-button');
-            const pauseIcon = document.getElementById('pause-icon');
-            const playIcon = document.getElementById('play-icon');
-            if (!track || !prevButton || !nextButton || !dotsContainer || !liveRegion || !pausePlayButton || !pauseIcon || !playIcon) return;
+            if (!track || !indicatorsContainer) return;
 
-            let slideInterval;
-            let isPausedByUser = false;
+            const totalSlides = carouselSlidesData.length;
+            if (totalSlides === 0) return;
 
-            const originalSlides = Array.from(track.children);
-            const originalSlideCount = originalSlides.length;
-            if (originalSlideCount === 0) return;
+            // Create indicators
+            indicatorsContainer.innerHTML = carouselSlidesData.map(() => `<div class="indicator"></div>`).join('');
+            const indicators = indicatorsContainer.querySelectorAll('.indicator');
+            indicators[0].classList.add('active');
 
-            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            let currentSlide = 0;
+            let autoScroll;
 
-            function stopSlideShow() { clearInterval(slideInterval); }
-            function startSlideShow() {
-                if (prefersReducedMotion || carousel.matches(':hover') || isPausedByUser) return;
-                stopSlideShow();
-                slideInterval = setInterval(() => moveToSlide(currentSlide + 1), 3000);
-            }
-            function resetAutoplayTimer() {
-                stopSlideShow();
-                startSlideShow();
+            function goToSlide(slide) {
+                track.style.transform = `translateX(-${slide * 100}%)`;
+                indicators.forEach(ind => ind.classList.remove('active'));
+                indicators[slide].classList.add('active');
+                currentSlide = slide;
             }
 
-            function togglePause() {
-                isPausedByUser = !isPausedByUser;
-                if (isPausedByUser) {
-                    stopSlideShow();
-                    pausePlayButton.setAttribute('aria-label', 'Play carousel');
-                    pauseIcon.classList.add('hidden');
-                    playIcon.classList.remove('hidden');
-                    liveRegion.textContent = 'Carousel paused.';
-                } else {
-                    startSlideShow();
-                    pausePlayButton.setAttribute('aria-label', 'Pause carousel');
-                    playIcon.classList.add('hidden');
-                    pauseIcon.classList.remove('hidden');
-                    liveRegion.textContent = 'Carousel playing.';
-                }
+            function nextSlide() {
+                let next = (currentSlide + 1) % totalSlides;
+                goToSlide(next);
             }
 
-            originalSlides.forEach((_, i) => {
-                const dot = document.createElement('button');
-                dot.setAttribute('role', 'tab');
-                dot.id = `carousel-tab-${i + 1}`;
-                dot.setAttribute('aria-controls', `carousel-slide-${i + 1}`);
-                dot.setAttribute('aria-label', `Slide ${i + 1}`);
-                dot.classList.add('carousel-dot', 'h-3', 'w-3', 'rounded-full', 'transition-colors', 'duration-300', 'border-2', 'border-white');
-                dot.addEventListener('click', () => {
-                    moveToSlide(i + 1, true);
-                    resetAutoplayTimer();
+            function prevSlide() {
+                let prev = (currentSlide - 1 + totalSlides) % totalSlides;
+                goToSlide(prev);
+            }
+
+            function startAutoScroll() {
+                clearInterval(autoScroll);
+                autoScroll = setInterval(nextSlide, 3000);
+            }
+
+            indicators.forEach((indicator, i) => {
+                indicator.addEventListener('click', () => {
+                    goToSlide(i);
+                    startAutoScroll(); // Reset timer on manual navigation
                 });
-                dotsContainer.appendChild(dot);
             });
 
-            dotsContainer.addEventListener('keydown', (e) => {
-                const dots = Array.from(dotsContainer.children);
-                const activeDotIndex = dots.findIndex(dot => dot.getAttribute('tabindex') === '0');
-                let nextDotIndex = activeDotIndex;
-
-                const keyMap = {
-                    ArrowRight: (activeDotIndex + 1) % dots.length,
-                    ArrowLeft: (activeDotIndex - 1 + dots.length) % dots.length,
-                    Home: 0,
-                    End: dots.length - 1
-                };
-
-                if (keyMap[e.key] !== undefined) {
-                    e.preventDefault();
-                    nextDotIndex = keyMap[e.key];
-                    dots[nextDotIndex].focus();
-                    moveToSlide(nextDotIndex + 1, false); // Don't move focus to panel
-                    resetAutoplayTimer();
-                }
-            });
-            const firstClone = originalSlides[0].cloneNode(true);
-            firstClone.setAttribute('aria-hidden', 'true');
-            const lastClone = originalSlides[originalSlides.length - 1].cloneNode(true);
-            lastClone.setAttribute('aria-hidden', 'true');
-            Array.from(firstClone.querySelectorAll('a, button')).forEach(el => el.tabIndex = -1);
-            Array.from(lastClone.querySelectorAll('a, button')).forEach(el => el.tabIndex = -1);
-            track.appendChild(firstClone);
-            track.insertBefore(lastClone, originalSlides[0]);
-            let currentSlide = 1;
-            let isTransitioning = false;
-            function updateSlideState(isManual) {
-                const activeDotIndex = (currentSlide - 1 + originalSlideCount) % originalSlideCount;
-                Array.from(track.children).forEach((slide, index) => {
-                    const isActive = index === currentSlide;
-                    slide.setAttribute('aria-hidden', !isActive);
-                    Array.from(slide.querySelectorAll('a, button')).forEach(el => el.tabIndex = isActive ? 0 : -1);
-                });
-                const activeSlide = originalSlides[activeDotIndex];
-                if (isManual) {
-                    liveRegion.textContent = `Item ${activeDotIndex + 1} of ${originalSlideCount}: ${activeSlide.querySelector('h2').textContent}`;
-                    const firstFocusable = track.children[currentSlide].querySelector('a, button');
-                    if (firstFocusable) firstFocusable.focus();
-                }
-            }
-            function updateDots() {
-                const activeDotIndex = (currentSlide - 1 + originalSlideCount) % originalSlideCount;
-                Array.from(dotsContainer.children).forEach((dot, i) => {
-                    const isSelected = i === activeDotIndex;
-                    dot.classList.toggle('bg-white', isSelected);
-                    dot.classList.toggle('bg-transparent', !isSelected);
-                    dot.setAttribute('aria-selected', isSelected);
-                    dot.setAttribute('tabindex', isSelected ? '0' : '-1');
-                });
-            }
-
-            function handleInfiniteLoop() {
-                if (currentSlide === 0 || currentSlide === originalSlideCount + 1) {
-                    currentSlide = (currentSlide === 0) ? originalSlideCount : 1;
-                    track.style.transition = 'none';
-                    track.style.transform = `translateX(-${currentSlide * 100}%)`;
-                    updateSlideState(false);
-                    updateDots();
-                }
-            }
-            function moveToSlide(slideIndex, isManual = false) {
-                if (isTransitioning) return;
-                isTransitioning = true;
-                currentSlide = slideIndex;
-                updateSlideState(isManual);
-                updateDots();
-                track.style.transition = prefersReducedMotion ? 'none' : 'transform 0.5s ease-in-out';
-                track.style.transform = `translateX(-${currentSlide * 100}%)`;
-                if (prefersReducedMotion) {
-                    handleInfiniteLoop();
-                    isTransitioning = false;
-                }
-            }
-            track.addEventListener('transitionend', () => { handleInfiniteLoop(); isTransitioning = false; });
-            nextButton.addEventListener('click', () => {
-                moveToSlide(currentSlide + 1, true);
-                resetAutoplayTimer();
-            });
             prevButton.addEventListener('click', () => {
-                moveToSlide(currentSlide - 1, true);
-                resetAutoplayTimer();
+                prevSlide();
+                startAutoScroll(); // Reset timer
             });
-            pausePlayButton.addEventListener('click', togglePause);
-            carousel.addEventListener('mouseenter', stopSlideShow);
-            carousel.addEventListener('mouseleave', startSlideShow);
-            let touchStartX = 0;
-            track.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; stopSlideShow(); });
-            track.addEventListener('touchend', (e) => {
-                const touchEndX = e.changedTouches[0].clientX;
-                if (touchStartX - touchEndX > 50) {
-                    moveToSlide(currentSlide + 1, true);
-                } else if (touchEndX - touchStartX > 50) {
-                    moveToSlide(currentSlide - 1, true);
-                }
-                resetAutoplayTimer();
+
+            nextButton.addEventListener('click', () => {
+                nextSlide();
+                startAutoScroll(); // Reset timer
             });
-            track.style.transition = 'none';
-            track.style.transform = `translateX(-${currentSlide * 100}%)`;
-            updateSlideState(false);
-            updateDots();
-            startSlideShow();
+
+            startAutoScroll();
         }
 
         // --- Main Execution ---
         const initializePage = async () => {
             lucide.createIcons();
             try {
-                products = await loadProducts();
-                if (products && products.length > 0) {
-                    renderCarouselSlides();
+                allProducts = await loadProducts(false);
+                
+                // Fetch carousel and featured products in parallel
+                await Promise.all([
+                    fetchAndRenderCarousel(),
+                    fetchAndRenderFeaturedProducts()
+                ]);
+
+                if (allProducts.length > 0) {
+                    initializeFuzzySearch();
                     renderCategoryFilters();
                     loadAndApplyPreferences();
-                    applyFiltersAndSort();
                     updateCartCount();
-                    initializeCarousel();
+                    applyFiltersAndSort(); // Initial render of products
                 } else {
                     productGrid.innerHTML = `<p class="col-span-full text-center text-stone-500 py-8">No products are available at this time.</p>`;
                 }
             } catch (error) {
-                console.error("Failed to load products:", error);
-                productGrid.innerHTML = `<p class="col-span-full text-center text-red-600 py-8">Error loading products. Please try again.</p>`;
+                console.error("Failed to initialize page:", error);
+                
+                // Display a user-friendly error message
+                productGrid.innerHTML = `
+                    <div class="col-span-full text-center bg-red-50 border border-red-200 text-red-700 px-4 py-8 rounded-lg">
+                        <h3 class="font-bold text-lg mb-2">Oops! Something went wrong.</h3>
+                        <p>We couldn't load the products from our Goshala right now. Please check your internet connection and try again.</p>
+                        <button onclick="location.reload()" class="mt-4 bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700">
+                            Try Again
+                        </button>
+                    </div>
+                `;
             } finally {
                 hideLoader();
             }
         };
 
+        function handleInitialScroll() {
+            if (window.location.hash === '#shop-search') {
+                const searchSection = document.getElementById('shop-search-section');
+                if (searchSection) searchSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
         // --- Event Listeners Setup ---
         window.addEventListener('popstate', () => {
             loadAndApplyPreferences();
-            applyFiltersAndSort();
         });
+
+        headerSearchButton.addEventListener('click', openSearch);
+        mobileHeaderSearchButton.addEventListener('click', openSearch);
+        overlayCloseButton.addEventListener('click', closeSearch);
 
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
-        if (mobileMenuButton && mobileMenu) mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+        if (mobileMenuButton && mobileMenu) {
+            const closeBtn = document.getElementById('mobile-menu-close-btn');
+            
+            const toggleMenu = (show) => mobileMenu.classList.toggle('hidden', !show);
+
+            mobileMenuButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleMenu(true);
+            });
+            if(closeBtn) closeBtn.addEventListener('click', () => toggleMenu(false));
+
+            document.addEventListener('click', (e) => {
+                if (!mobileMenu.classList.contains('hidden') && !mobileMenu.contains(e.target) && e.target !== mobileMenuButton) {
+                    toggleMenu(false);
+                }
+            });
+        }
+
+        const mobileBottomSearch = document.getElementById('mobile-bottom-search');
+        if (mobileBottomSearch) {
+            mobileBottomSearch.addEventListener('click', (e) => {
+                e.preventDefault();
+                searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                searchInput.focus();
+            });
+        }
         
         const backToTopBtn = document.getElementById('back-to-top-btn');
         if (backToTopBtn) {
@@ -803,58 +1211,25 @@
             backToTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
         }
 
-        const header = document.querySelector('header');
-        const headerInner = document.getElementById('header-inner');
-        const logoLink = document.getElementById('logo-link');
-        if (header && headerInner && logoLink) {
-            window.addEventListener('scroll', () => {
-                const isShrunk = header.classList.contains('header-shrunk');
-                if (window.scrollY > 50 && !isShrunk) {
-                    header.classList.add('header-shrunk');
-                    headerInner.classList.replace('h-16', 'h-14');
-                    logoLink.classList.replace('text-xl', 'text-lg');
-                    logoLink.classList.replace('sm:text-2xl', 'sm:text-xl');
-                } else if (window.scrollY <= 50 && isShrunk) {
-                    header.classList.remove('header-shrunk');
-                    headerInner.classList.replace('h-14', 'h-16');
-                    logoLink.classList.replace('text-lg', 'text-xl');
-                    logoLink.classList.replace('sm:text-xl', 'sm:text-2xl');
-                }
-            });
-        }
-
-        loadMoreBtn.addEventListener('click', loadMoreProducts);
-        
-        productGrid.addEventListener('click', (event) => {
+        // Delegated event listener for the main product grid and featured products
+        document.addEventListener('click', (event) => {
             const target = event.target;
             const quickViewBtn = target.closest('.quick-view-btn');
-            if (quickViewBtn) {
+            const isInsideQuickView = target.closest('#quick-view-content');
+            
+            if (quickViewBtn && !isInsideQuickView) {
                 openQuickView(parseInt(quickViewBtn.dataset.productId));
-                return;
             }
 
-            const button = target.closest('.add-to-cart-btn');
             const quantityButton = target.closest('.quantity-change-btn');
             const productId = parseInt(target.closest('[data-product-id]')?.dataset.productId);
             if (!productId) return;
-
-            const product = products.find(p => p.id === productId);
-            if (!product) return;
             
-            if (button && !button.disabled) {
-                button.disabled = true;
-                button.innerHTML = `<div class="spinner"></div>`;
-                button.classList.add('flex', 'justify-center', 'items-center');
+            const product = allProducts.find(p => p.id === productId);
+            if (!product) return;
 
-                setTimeout(() => {
-                    product.inCart = true;
-                    product.quantity = 1;
-                    showNotification(`"${product.name.substring(0, 25)}..." added to cart!`);
-                    updateProductCard(product.id);
-                    updateCartCount();
-                    saveProductsToStorage();
-                }, 500);
-            } else if (quantityButton) {
+            handleCartAction(event, product); // This will now handle the 'Add to Cart' button
+            if (quantityButton) {
                 const change = parseInt(quantityButton.dataset.change);
                 product.quantity += change;
                 if (product.quantity <= 0) {
@@ -867,25 +1242,30 @@
             }
         });
 
-        quickViewOverlay.addEventListener('click', closeQuickView);
         quickViewContent.addEventListener('click', (event) => {
             const target = event.target;
-            if (target.closest('#modal-close-btn')) closeQuickView();
-            if (target.closest('#modal-thumbnail-gallery img')) {
-                const thumb = target.closest('img');
-                document.getElementById('modal-main-image').src = thumb.src;
-                document.querySelectorAll('#modal-thumbnail-gallery img').forEach(t => t.classList.remove('modal-thumbnail-active'));
-                thumb.classList.add('modal-thumbnail-active');
+
+            // Handle close button click
+            if (target.closest('#modal-close-btn')) {
+                closeQuickView();
+                return;
             }
+            
+            // Handle cart interactions
             const productId = parseInt(target.closest('[data-product-id]')?.dataset.productId);
-            const product = products.find(p => p.id === productId);
-            if (product) {
-                if (target.closest('.modal-add-to-cart-btn')) {
+            if (productId) {
+                const product = allProducts.find(p => p.id === productId);
+                if (!product) return;
+                
+                const addToCartBtn = target.closest('.modal-add-to-cart-btn');
+                const quantityBtn = target.closest('.modal-quantity-btn');
+                
+                if (addToCartBtn) {
                     product.inCart = true;
                     product.quantity = 1;
                     showNotification(`"${product.name.substring(0, 25)}..." added to cart!`);
-                } else if (target.closest('.modal-quantity-btn')) {
-                    const change = parseInt(target.closest('.modal-quantity-btn').dataset.change);
+                } else if (quantityBtn) {
+                    const change = parseInt(quantityBtn.dataset.change);
                     product.quantity += change;
                     if (product.quantity <= 0) {
                         product.inCart = false;
@@ -899,10 +1279,11 @@
             }
         });
 
+        quickViewOverlay.addEventListener('click', closeQuickView);
+
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 if (!quickViewModal.classList.contains('hidden')) closeQuickView();
-                if (!suggestionsContainer.classList.contains('hidden')) suggestionsContainer.classList.add('hidden');
             }
         });
 
@@ -910,6 +1291,7 @@
             if (event.key === 'goshalaProducts') {
                 loadProducts(true).then(newProducts => {
                     products = newProducts;
+                    allProducts = newProducts;
                     applyFiltersAndSort();
                 });
                 updateCartCount();
@@ -925,10 +1307,13 @@
                 localStorage.setItem('goshalaCategory', selectedCategory);
                 document.querySelectorAll('.category-filter-btn').forEach(btn => {
                     const isActive = btn.dataset.category === selectedCategory;
-                    btn.classList.toggle('bg-green-700', isActive);
-                    btn.classList.toggle('text-white', isActive);
-                    btn.classList.toggle('bg-stone-200', !isActive);
-                    btn.classList.toggle('text-stone-700', !isActive);
+                    // Active State: Light green background with dark text for contrast.
+                    btn.classList.toggle('bg-green-200', isActive);
+                    btn.classList.toggle('text-green-900', isActive);
+                    btn.classList.toggle('font-semibold', isActive);
+                    // Inactive State: Glassy background, white text.
+                    btn.classList.toggle('bg-white/20', !isActive); // Keep the glassy look for inactive
+                    btn.classList.toggle('text-white', !isActive);
                 });
                 applyFiltersAndSort();
             });
@@ -938,29 +1323,28 @@
             searchInput.value = '';
             sortSelect.value = 'relevance';
             selectedCategory = 'All';
-            localStorage.removeItem('goshalaSearch');
             localStorage.removeItem('goshalaCategory');
             localStorage.removeItem('goshalaSort');
             document.querySelectorAll('.category-filter-btn').forEach(btn => {
                 const isActive = btn.dataset.category === 'All';
-                btn.classList.toggle('bg-green-700', isActive);
+                btn.classList.toggle('bg-green-600', isActive);
                 btn.classList.toggle('text-white', isActive);
-                btn.classList.toggle('bg-stone-200', !isActive);
-                btn.classList.toggle('text-stone-700', !isActive);
+                btn.classList.toggle('bg-white/20', !isActive);
             });
             applyFiltersAndSort();
         });
 
-        searchInput.addEventListener('input', debounce(handleSearch, 300));
         sortSelect.addEventListener('change', () => {
             localStorage.setItem('goshalaSort', sortSelect.value);
             applyFiltersAndSort();
         });
 
+
+        searchInput.addEventListener('input', debounce(handleSearch, 300));
         searchInput.addEventListener('keydown', (e) => {
-            const suggestions = Array.from(suggestionsContainer.querySelectorAll('a'));
-            const isSuggestionsVisible = !suggestionsContainer.classList.contains('hidden');
-            if (!isSuggestionsVisible || (suggestions.length === 0 && e.key !== 'Escape')) return;
+            const suggestions = suggestionsContainer.querySelectorAll('.suggestion-item');
+            if (suggestions.length === 0) return;
+
             if (e.key === 'ArrowDown') {
                 e.preventDefault();
                 highlightedSuggestionIndex = (highlightedSuggestionIndex + 1) % suggestions.length;
@@ -969,22 +1353,49 @@
                 e.preventDefault();
                 highlightedSuggestionIndex = (highlightedSuggestionIndex - 1 + suggestions.length) % suggestions.length;
                 updateSuggestionHighlight(suggestions);
-            } else if (e.key === 'Enter' && highlightedSuggestionIndex > -1) {
+            } else if (e.key === 'Enter') {
                 e.preventDefault();
-                suggestions[highlightedSuggestionIndex].click();
+                if (highlightedSuggestionIndex > -1) {
+                    suggestions[highlightedSuggestionIndex].click();
+                } else {
+                    applyFiltersAndSort();
+                    suggestionsContainer.classList.add('hidden');
+                }
             }
         });
 
         document.addEventListener('click', (event) => {
-            if (!searchInput.parentElement.contains(event.target)) suggestionsContainer.classList.add('hidden');
+            if (!searchInput.parentElement.contains(event.target)) {
+                suggestionsContainer.classList.add('hidden');
+            }
         });
+
+        overlaySearchInput.addEventListener('input', debounce(() => {
+            const query = overlaySearchInput.value.trim();
+            if (query.length > 1) {
+                const results = fuse.search(query).slice(0, 5);
+                renderOverlaySuggestions(results);
+            } else {
+                document.getElementById('overlay-search-suggestions').classList.add('hidden');
+            }
+        }, 300));
+        overlaySearchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { performSearchFromOverlay(); document.getElementById('overlay-search-suggestions').classList.add('hidden'); } });
 
         // --- Start the application ---
         initializePage();
+        handleInitialScroll();
 
-        window.addEventListener('beforeunload', () => {
+        // Handle back/forward navigation from bfcache
+        window.addEventListener('pageshow', function(event) {
+            // When a page is restored from bfcache, the loader might be visible.
+            // We just need to hide it, not reload the whole page.
             const pageLoader = document.getElementById('page-loader');
-            if (pageLoader) pageLoader.style.display = 'flex';
+            if (event.persisted) {
+                if (pageLoader && pageLoader.style.display !== 'none') {
+                    pageLoader.classList.add('opacity-0');
+                    setTimeout(() => pageLoader.style.display = 'none', 50); // Hide it quickly
+                }
+            }
         });
     </script>
 </body>

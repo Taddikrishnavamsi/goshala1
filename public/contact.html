@@ -5,18 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Us - Brundavanam Goshala</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="icon" type="image/png" href="/logo.png">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        /* Cart count animation */
-        .cart-count-animate {
-            animation: pop 0.3s ease-in-out;
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: url('https://amerakulouslife.com/wp-content/uploads/2019/08/img_20190727_085502.jpg');
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            opacity: 0.8;
         }
-        @keyframes pop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.4) rotate(10deg); }
-            100% { transform: scale(1) rotate(0deg); }
+        .glass-effect {
+            background: rgba(0, 0, 0, 0.3); /* Darker glass effect */
+            backdrop-filter: blur(12px); /* Increased blur */
+            -webkit-backdrop-filter: blur(12px); /* Increased blur for Safari */
+            border-radius: 1rem; /* 16px */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        body { font-family: 'Poppins', sans-serif; }
+        /* Cart count animation */
+        .cart-count-animate { animation: jiggle 0.4s ease-in-out; }
+        @keyframes jiggle {
+            0%, 100% { transform: rotate(0); }
+            25% { transform: rotate(-15deg); }
+            75% { transform: rotate(15deg); }
+        }
+        .nav-link-glow {
+            transition: text-shadow 0.3s ease;
+        }
+        .nav-link-glow:hover {
+            text-shadow: 0 0 8px rgba(22, 101, 52, 0.7);
+        }
+        /* Header shrink styles */
+        .header-scrolled #header-container {
+            height: 3rem; /* h-12 */
+        }
+        .header-scrolled #logo-link {
+            font-size: 1.125rem; /* text-lg */
+            line-height: 1.75rem;
         }
         /* Spinner animation */
         .spinner {
@@ -45,16 +80,9 @@
                 opacity: 0.8;
             }
         }
-        /* Header shrink styles */
-        #header-inner {
-            transition: height 0.3s ease-in-out;
-        }
-        #logo-link {
-            transition: font-size 0.3s ease-in-out;
-        }
     </style>
-</head>
-<body class="bg-stone-50">
+</head> 
+<body>
 
     <!-- Page Loader -->
     <div id="page-loader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-white transition-opacity duration-300 ease-in-out">
@@ -62,80 +90,115 @@
         <img src="/logo.png" alt="Brundavanam Goshala Logo" class="loader-logo w-24 h-24">
     </div>
 
+    <!-- Search Overlay -->
+    <div id="search-overlay" class="fixed inset-0 z-[1001] bg-black/70 backdrop-blur-sm hidden items-start justify-center p-4 pt-24 md:pt-32 transition-opacity duration-300">
+        <div class="w-full max-w-xl transform -translate-y-full transition-transform duration-300" id="search-overlay-content">
+            <div class="relative">
+                <input type="text" id="overlay-search-input" placeholder="Search for products..." class="w-full p-4 pr-12 text-lg text-stone-800 bg-white/90 border-2 border-white rounded-full focus:outline-none focus:ring-2 focus:ring-green-500" autocomplete="off">
+                <i data-lucide="search" class="absolute top-1/2 right-4 -translate-y-1/2 w-6 h-6 text-stone-500"></i>
+            </div>
+            <!-- Suggestions for overlay search -->
+            <div id="overlay-search-suggestions" class="w-full bg-white border border-stone-200 rounded-lg shadow-lg z-20 hidden mt-2 overflow-hidden max-h-80 overflow-y-auto">
+                <!-- Suggestions will be injected here -->
+            </div>
+        </div>
+        <button id="overlay-close-button" class="absolute top-6 right-6 text-white/70 hover:text-white">
+            <i data-lucide="x" class="w-10 h-10"></i>
+        </button>
+    </div>
+
     <!-- Header -->
-    <header class="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div id="header-inner" class="flex items-center justify-between h-16">
-                <div class="flex items-center">
-                    <a id="logo-link" href="index.html" class="text-xl sm:text-2xl font-bold text-green-800 hover:text-green-700">Brundavanam Goshala</a>
-                </div>
-                <nav class="hidden md:flex items-center space-x-8 text-base">
-                    <a href="index.html" class="text-stone-600 hover:text-green-700 py-2 font-medium">HOME</a>
-                    <a href="about.html" class="text-stone-600 hover:text-green-700 py-2 font-medium">ABOUT US</a>
-                    <a href="contact.html" class="text-green-700 font-semibold border-b-2 border-green-700 py-2">SUPPORT</a>
-                </nav>
-                <div class="flex items-center space-x-4">
-                    <a href="cart.html" class="relative text-stone-600 hover:text-green-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.16"/></svg>
-                        <span id="cart-count" class="absolute -top-2 -right-2 bg-amber-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
-                    </a>
-                    <button id="mobile-menu-button" class="md:hidden text-gray-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-                    </button>
-                </div>
+    <header id="main-header" class="app-bar sticky top-0 left-0 w-full transition-all duration-300 z-[100]" style="background: rgba(200, 200, 200, 0.25); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 16px; border: 1px solid rgba(200, 200, 200, 0.3); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);">
+        <div id="header-container" class="h-12 md:h-16 px-4 md:px-8 flex items-center justify-between transition-all duration-300 container mx-auto">
+            <!-- Logo -->
+            <a id="logo-link" href="index.html" class="text-lg sm:text-xl font-bold text-green-900 hover:text-green-700 mr-6 transition-all duration-300">Brundavanam Goshala</a>
+
+            <!-- Nav Links (Desktop) -->
+            <nav class="hidden md:flex items-center gap-6 text-stone-800 font-medium">
+                <a href="index.html" class="nav-link-glow">Home</a>
+                <a href="about.html" class="nav-link-glow">About Us</a>
+                <a href="index.html" class="nav-link-glow">Shop</a>
+                <a href="contact.html" class="nav-link-glow text-green-800 font-semibold">Contact</a>
+            </nav>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-2 md:gap-4">
+                <button id="header-search-button" class="hidden md:block p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
+                    <i data-lucide="search" class="w-5 h-5"></i>
+                </button>
+                <button class="hidden md:block p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
+                    <i data-lucide="user" class="w-5 h-5"></i>
+                </button>
+                <a href="cart.html" class="relative p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span>
+                </a>
+                <button id="mobile-menu-button" class="md:hidden p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
             </div>
         </div>
         <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white/80 backdrop-blur-sm border-t p-4 space-y-2">
+        <div id="mobile-menu" class="hidden md:hidden bg-white/80 backdrop-blur-sm border rounded-2xl mt-2 p-4 pt-10 space-y-2 shadow-xl relative">
+            <button id="mobile-menu-close-btn" class="absolute top-2 right-2 p-1 text-stone-500 hover:text-stone-800">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
             <a href="index.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded">Home</a>
             <a href="about.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded">About Us</a>
-            <a href="contact.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded">Support</a>
+            <a href="index.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded">Shop</a>
+            <a href="contact.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded font-semibold mb-2">Contact</a>
+            <button id="mobile-header-search-button" class="w-full flex items-center justify-center gap-2 text-stone-700 bg-stone-200/70 hover:bg-stone-300/70 p-2 rounded-lg font-medium">
+                <i data-lucide="search" class="w-4 h-4"></i> Search
+            </button>
+            <a href="my-orders.html" class="w-full flex items-center justify-center gap-2 text-stone-700 bg-stone-200/70 hover:bg-stone-300/70 p-2 rounded-lg font-medium">
+                <i data-lucide="user" class="w-4 h-4"></i> My Account
+            </a>
         </div>
     </header>
 
     <!-- Main Content -->
     <main>
-        <!-- Hero Section -->
-        <section class="bg-stone-100 py-16">
-            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <h1 class="text-4xl md:text-5xl font-bold text-stone-800">We'd Love to Hear From You</h1>
-                <p class="mt-4 text-lg text-stone-600 max-w-2xl mx-auto">Whether you have questions, feedback, or wish to connect with us, feel free to reach out. We're here to help.</p>
+        <!-- Hero Section - Kept opaque for title readability -->
+        <section class="py-16">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center glass-effect p-8 md:p-12 rounded-lg">
+                <h1 class="text-4xl md:text-5xl font-bold text-white">We'd Love to Hear From You</h1>
+                <p class="mt-4 text-lg text-stone-100 max-w-2xl mx-auto">Whether you have questions, feedback, or wish to connect with us, feel free to reach out. We're here to help.</p>
             </div>
         </section>
 
         <!-- Contact Form and Details Section -->
         <section class="py-16">
-            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="bg-white p-8 rounded-lg shadow-lg grid md:grid-cols-2 gap-12">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 glass-effect p-8">
+                <div class="grid md:grid-cols-2 gap-12">
                     <!-- Left Side: Contact Details -->
                     <div>
-                        <h2 class="text-2xl font-bold text-stone-800 mb-6">Reach Us Through</h2>
+                        <h2 class="text-2xl font-bold text-white mb-6">Reach Us Through</h2>
                         <div class="space-y-6">
                             <div class="flex items-start">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-green-700 mr-4 mt-1 shrink-0"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
                                 <div>
-                                    <h3 class="font-semibold text-stone-700">Address</h3>
-                                    <p class="text-stone-600">4-8, Manyam Parvathipuram District, Andhra Pradesh, India. P.O 535592</p>
+                                    <h3 class="font-semibold text-white">Address</h3>
+                                    <p class="text-stone-100">4-8, Manyam Parvathipuram District, Andhra Pradesh, India. P.O 535592</p>
                                 </div>
                             </div>
                             <div class="flex items-start">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-green-700 mr-4 mt-1 shrink-0"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                                 <div>
-                                    <h3 class="font-semibold text-stone-700">Phone</h3>
-                                    <p class="text-stone-600">+91 9492602499</p>
+                                    <h3 class="font-semibold text-white">Phone</h3>
+                                    <p class="text-stone-100">+91 9492602499</p>
                                 </div>
                             </div>
                             <div class="flex items-start">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-green-700 mr-4 mt-1 shrink-0"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
                                 <div>
-                                    <h3 class="font-semibold text-stone-700">Email</h3>
-                                    <p class="text-stone-600">gokarni1967@yahoo.com</p>
+                                    <h3 class="font-semibold text-white">Email</h3>
+                                    <p class="text-stone-100">gokarni1967@yahoo.com</p>
                                 </div>
                             </div>
                              <div class="flex items-start">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-green-700 mr-4 mt-1 shrink-0"><path d="M2.5 17a24.12 24.12 0 0 1 0-10C2.5 6 4.5 4 7 4h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-1Z"/><path d="m10 15 5-3-5-3z"/></svg>
                                 <div>
-                                    <h3 class="font-semibold text-stone-700">Stay Connected</h3>
+                                    <h3 class="font-semibold text-white">Stay Connected</h3>
                                     <a href="#" class="text-amber-600 hover:underline">Visit Our YouTube Channel</a>
                                 </div>
                             </div>
@@ -144,7 +207,7 @@
 
                     <!-- Right Side: Contact Form -->
                     <div>
-                        <h2 class="text-2xl font-bold text-stone-800 mb-6">Send Us a Message</h2>
+                        <h2 class="text-2xl font-bold text-white mb-6">Send Us a Message</h2>
                         <!-- Replace YOUR_FORM_ID with the ID from Formspree -->
                         <form id="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST" class="space-y-4">
                             <div>
@@ -176,10 +239,10 @@
         </section>
         
         <!-- Google Map Section -->
-        <section class="py-16 bg-stone-100">
-             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-                 <h2 class="text-3xl font-bold text-stone-800 text-center mb-8">Find Us On The Map</h2>
-                 <div class="rounded-lg shadow-lg overflow-hidden">
+        <section class="py-16">
+             <div class="container mx-auto px-4 sm:px-6 lg:px-8 glass-effect p-8">
+                 <h2 class="text-3xl font-bold text-white text-center mb-8">Find Us On The Map</h2>
+                 <div class="rounded-lg overflow-hidden">
                     <iframe 
                         src="https://maps.google.com/maps?q=Sree%20Raghavendra%20Brundavanam%2C%20Garellavalasa%2C%20Parvathipuram%20Manyam%2C%20Andhra%20Pradesh%2C%20535592&t=&z=15&ie=UTF8&iwloc=&output=embed" 
                         width="100%" 
@@ -235,19 +298,47 @@
         </div>
     </footer>
 
-    <script>
+    <!-- Back to Top Button -->
+    <button id="back-to-top-btn" title="Go to top" class="fixed bottom-20 right-5 z-50 p-3 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+    </button>
+
+    <script type="module">
+        import { loadProducts } from '/js/data.js';
+        import Fuse from 'https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.esm.js';
+
+        lucide.createIcons();
+
+        // --- UTILITIES ---
+        const debounce = (func, delay = 300) => {
+            let timeout;
+            return (...args) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    func.apply(this, args);
+                }, delay);
+            };
+        };
+        let fuse;
+        
         // This script is now primarily for mobile menu and cart count, which don't need DOMContentLoaded
         // Mobile Menu Toggle & Active Link
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
         if (mobileMenuButton && mobileMenu) {
-            mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+            const closeBtn = document.getElementById('mobile-menu-close-btn');
+            
+            const toggleMenu = (show) => mobileMenu.classList.toggle('hidden', !show);
 
-            const currentPath = window.location.pathname.split('/').pop() || 'index.html';
-            const mobileNavLinks = mobileMenu.querySelectorAll('a');
-            mobileNavLinks.forEach(link => {
-                if (link.getAttribute('href') === currentPath) {
-                    link.classList.add('bg-green-100', 'text-green-800', 'font-semibold');
+            mobileMenuButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleMenu(true);
+            });
+            if(closeBtn) closeBtn.addEventListener('click', () => toggleMenu(false));
+
+            document.addEventListener('click', (e) => {
+                if (!mobileMenu.classList.contains('hidden') && !mobileMenu.contains(e.target) && e.target !== mobileMenuButton) {
+                    toggleMenu(false);
                 }
             });
         }
@@ -279,10 +370,101 @@
             }
         });
 
+        // --- SEARCH OVERLAY LOGIC ---
+        const headerSearchButton = document.getElementById('header-search-button');
+        const mobileHeaderSearchButton = document.getElementById('mobile-header-search-button');
+        const searchOverlay = document.getElementById('search-overlay');
+        const searchOverlayContent = document.getElementById('search-overlay-content');
+        const overlaySearchInput = document.getElementById('overlay-search-input');
+        const overlayCloseButton = document.getElementById('overlay-close-button');
+
+        function openSearch() {
+            searchOverlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => {
+                searchOverlay.classList.add('opacity-100');
+                searchOverlayContent.classList.remove('-translate-y-full');
+                overlaySearchInput.focus();
+            }, 10);
+        }
+
+        function closeSearch() {
+            searchOverlay.classList.remove('opacity-100');
+            searchOverlayContent.classList.add('-translate-y-full');
+            setTimeout(() => {
+                searchOverlay.classList.add('hidden');
+                document.body.style.overflow = '';
+            }, 300);
+        }
+
+        function performSearch() {
+            const query = overlaySearchInput.value.trim();
+            if (query) {
+                window.location.href = `index.html?q=${encodeURIComponent(query)}#shop-search`;
+            }
+        }
+
+        function renderOverlaySuggestions(results) {
+            const container = document.getElementById('overlay-search-suggestions');
+            if (!container) return;
+
+            if (results.length > 0) {
+                container.innerHTML = results.map(result => {
+                    const product = result.item;
+                    const imageUrl = (product.images && product.images.length > 0) ? product.images[0] : 'https://placehold.co/100x100';
+                    return `
+                        <a href="product-detail.html?id=${product.id}" class="flex items-center p-3 hover:bg-stone-100 transition-colors border-t border-stone-100 first:border-t-0">
+                            <img src="${imageUrl}" alt="${product.name}" class="w-12 h-12 object-cover rounded-md mr-4">
+                            <div><p class="font-medium text-stone-800 text-sm">${product.name}</p><p class="text-sm font-bold text-stone-700">₹${product.price}</p></div>
+                        </a>`;
+                }).join('');
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        headerSearchButton.addEventListener('click', openSearch);
+        mobileHeaderSearchButton.addEventListener('click', openSearch);
+        const mainHeader = document.getElementById('main-header');
+        if (mainHeader) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    mainHeader.classList.add('header-scrolled');
+                } else {
+                    mainHeader.classList.remove('header-scrolled');
+                }
+            });
+        }
+
+        // Back to Top Button
+        const backToTopBtn = document.getElementById('back-to-top-btn');
+        if (backToTopBtn) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 400) backToTopBtn.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+                else backToTopBtn.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+            });
+            backToTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        }
+
+        overlayCloseButton.addEventListener('click', closeSearch);
+        searchOverlay.addEventListener('click', (e) => { if (e.target === searchOverlay) closeSearch(); });
+        overlaySearchInput.addEventListener('input', debounce(() => {
+            const query = overlaySearchInput.value.trim();
+            if (fuse && query.length > 1) {
+                const results = fuse.search(query).slice(0, 5);
+                renderOverlaySuggestions(results);
+            } else {
+                document.getElementById('overlay-search-suggestions').classList.add('hidden');
+            }
+        }, 300));
+        overlaySearchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { performSearch(); document.getElementById('overlay-search-suggestions').classList.add('hidden'); } });
+        window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !searchOverlay.classList.contains('hidden')) closeSearch(); });
+
         // --- PAGE LOADER LOGIC ---
         const pageLoader = document.getElementById('page-loader');
         // On page load, fade out the loader
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             if (pageLoader) {
                 pageLoader.classList.add('opacity-0');
                 // After the transition, hide it so it doesn't block interactions
@@ -290,11 +472,29 @@
                     pageLoader.style.display = 'none';
                 }, 300); // Match duration-300
             }
+
+            // Initialize fuzzy search
+            const allProducts = await loadProducts(false);
+            if (allProducts) {
+                const options = {
+                    includeScore: true, minMatchCharLength: 2, threshold: 0.4,
+                    keys: [
+                        { name: 'name', weight: 0.7 }, { name: 'description', weight: 0.3 }, { name: 'category', weight: 0.5 }
+                    ]
+                };
+                fuse = new Fuse(allProducts, options);
+            }
         });
-        // Before leaving the page, show the loader
-        window.addEventListener('beforeunload', () => {
-            if (pageLoader) {
-                pageLoader.style.display = 'flex';
+        // Handle back/forward navigation from bfcache
+        window.addEventListener('pageshow', function(event) {
+            // When a page is restored from bfcache, the loader might be visible.
+            // We just need to hide it, not reload the whole page.
+            const pageLoader = document.getElementById('page-loader');
+            if (event.persisted) {
+                if (pageLoader && pageLoader.style.display !== 'none') {
+                    pageLoader.classList.add('opacity-0');
+                    setTimeout(() => pageLoader.style.display = 'none', 50); // Hide it quickly
+                }
             }
         });
     </script>

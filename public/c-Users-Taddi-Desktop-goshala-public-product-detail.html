@@ -21,14 +21,6 @@
         }
         .nav-link-glow { transition: text-shadow 0.3s ease; }
         .nav-link-glow:hover { text-shadow: 0 0 8px rgba(22, 101, 52, 0.7); }
-        /* Header shrink styles */
-        .header-scrolled #header-container {
-            height: 3rem; /* h-12 */
-        }
-        .header-scrolled #logo-link {
-            font-size: 1.125rem; /* text-lg */
-            line-height: 1.75rem;
-        }
         .spinner { width: 24px; height: 24px; border: 3px solid currentColor; border-bottom-color: transparent; border-radius: 50%; display: inline-block; animation: spin 0.75s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .loader-logo { animation: pulse 1.5s ease-in-out infinite; }
@@ -72,7 +64,7 @@
     <!-- Header -->
     <header id="main-header" class="app-bar sticky top-0 left-0 w-full transition-all duration-300 z-[100]" style="background: rgba(200, 200, 200, 0.25); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 16px; border: 1px solid rgba(200, 200, 200, 0.3); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);">
         <div id="header-container" class="h-12 md:h-16 px-4 md:px-8 flex items-center justify-between transition-all duration-300 container mx-auto">
-            <a id="logo-link" href="index.html" class="text-lg sm:text-xl font-bold text-green-900 hover:text-green-700 mr-6 transition-all duration-300">Brundavanam Goshala</a>
+            <a href="index.html" class="text-lg sm:text-xl font-bold text-green-900 hover:text-green-700 mr-6">Brundavanam Goshala</a>
             <nav class="hidden md:flex items-center gap-6 text-stone-800 font-medium">
                 <a href="index.html" class="nav-link-glow">Home</a>
                 <a href="about.html" class="nav-link-glow">About Us</a>
@@ -106,6 +98,9 @@
             <button id="mobile-header-search-button" class="w-full flex items-center justify-center gap-2 text-stone-700 bg-stone-200/70 hover:bg-stone-300/70 p-2 rounded-lg font-medium">
                 <i data-lucide="search" class="w-4 h-4"></i> Search
             </button>
+            <a href="my-orders.html" class="w-full flex items-center justify-center gap-2 text-stone-700 bg-stone-200/70 hover:bg-stone-300/70 p-2 rounded-lg font-medium">
+                <i data-lucide="user" class="w-4 h-4"></i> My Account
+            </a>
         </div>
     </header>
 
@@ -274,11 +269,6 @@
             </div>
         </div>
     </footer>
-
-    <!-- Back to Top Button -->
-    <button id="back-to-top-btn" title="Go to top" class="fixed bottom-20 right-5 z-50 p-3 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
-    </button>
 
     <!-- Cart Notification -->
     <div id="cart-notification" class="fixed top-5 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:top-auto md:bottom-5 md:right-5 bg-green-700 text-white py-3 px-6 rounded-lg shadow-lg transform -translate-y-20 md:translate-y-20 opacity-0 transition-all duration-500 ease-in-out z-[1002] w-11/12 max-w-sm md:max-w-md">
@@ -867,28 +857,6 @@
 
         // --- GLOBAL/SHARED SCRIPT (from other pages) ---
         lucide.createIcons();
-
-        // --- HEADER SCROLL EFFECT ---
-        const mainHeader = document.getElementById('main-header');
-        if (mainHeader) {
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 50) {
-                    mainHeader.classList.add('header-scrolled');
-                } else {
-                    mainHeader.classList.remove('header-scrolled');
-                }
-            });
-        }
-
-        // Back to Top Button
-        const backToTopBtn = document.getElementById('back-to-top-btn');
-        if (backToTopBtn) {
-            window.addEventListener('scroll', () => {
-                if (window.scrollY > 400) backToTopBtn.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
-                else backToTopBtn.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
-            });
-            backToTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-        }
         const mobileMenuButton = document.getElementById('mobile-menu-button');
         const mobileMenu = document.getElementById('mobile-menu');
         if (mobileMenuButton && mobileMenu) {
@@ -955,16 +923,14 @@
         overlaySearchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { performSearch(); document.getElementById('overlay-search-suggestions').classList.add('hidden'); } });
         window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !searchOverlay.classList.contains('hidden')) closeSearch(); });
 
+        window.addEventListener('beforeunload', () => {
+            if (pageLoader) pageLoader.style.display = 'flex';
+        });
+
         // Handle back/forward navigation from bfcache
         window.addEventListener('pageshow', function(event) {
-            // When a page is restored from bfcache, the loader might be visible.
-            // We just need to hide it, not reload the whole page.
-            const pageLoader = document.getElementById('page-loader');
             if (event.persisted) {
-                if (pageLoader && pageLoader.style.display !== 'none') {
-                    pageLoader.classList.add('opacity-0');
-                    setTimeout(() => pageLoader.style.display = 'none', 50); // Hide it quickly
-                }
+                location.reload();
             }
         });
 
