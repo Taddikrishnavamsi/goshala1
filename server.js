@@ -48,11 +48,17 @@ const razorpay = new Razorpay({
 // --- Multer Configuration for Image Uploads (in-memory) ---
 const upload = multer({ 
     storage: multer.memoryStorage(), // Use memory storage to handle the file as a buffer
+    fileFilter: (req, file, cb) => {
+        if (!file.mimetype.startsWith('image/')) return cb(new Error('Only image files are allowed!'), false);
+        cb(null, true);
+    }
 });
 
 // --- Middleware ---
 app.use(cors());
 app.use(express.json());
+// Serve all static files (HTML, CSS, client-side JS, images) from the 'public' directory.
+app.use(express.static('public'));
 
 // --- MongoDB Connection ---
 // Connection string is now loaded from the .env file
