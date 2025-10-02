@@ -11,6 +11,14 @@ const { put } = require('@vercel/blob');
 
 const { MONGO_URI, ADMIN_SECRET } = process.env;
 
+if (!MONGO_URI) {
+  console.error('FATAL: MONGO_URI environment variable is not set.');
+  process.exit(1);
+}
+if (!ADMIN_SECRET) {
+  console.error('FATAL: ADMIN_SECRET environment variable is not set.');
+  process.exit(1);
+}
 
 const app = express();
 const PORT = process.env.PORT || 3000;

@@ -1,4 +1,15 @@
 {
+  "name": "goshala",
+  "version": "1.0.0",
+  "description": "Brundavanam Goshala - Natural Products E-commerce Platform",
+  "main": "server.js",
+  "engines": {
+    "node": ">=20.x"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "build": "echo \"No build step required\""
+  },
   "dependencies": {
     "@vercel/blob": "^2.0.0",
     "cors": "^2.8.5",
@@ -7,12 +18,6 @@
     "mongoose": "^8.18.1",
     "multer": "^2.0.2",
     "razorpay": "^2.9.6"
-  },
-  "name": "goshala",
-  "version": "1.0.0",
-  "scripts": {
-    "start": "node server.js",
-    "build": "echo \"No build step required\""
   },
   "repository": {
     "type": "git",
@@ -24,6 +29,5 @@
   "bugs": {
     "url": "https://github.com/Taddikrishnavamsi/goshala1/issues"
   },
-  "homepage": "https://github.com/Taddikrishnavamsi/goshala1#readme",
-  "description": ""
+  "homepage": "https://github.com/Taddikrishnavamsi/goshala1#readme"
 }
