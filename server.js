@@ -9,11 +9,11 @@ const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const { put } = require('@vercel/blob');
 
+const { MONGO_URI, ADMIN_SECRET } = process.env;
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-const ADMIN_SECRET = process.env.ADMIN_SECRET || 'goshala_admin_123';
 
 // Middleware for admin authentication
 const adminAuth = (req, res, next) => {
@@ -56,14 +56,6 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // --- MongoDB Connection ---
-// Connection string is now loaded from the .env file
-const MONGO_URI = process.env.MONGO_URI;
-
-if (!MONGO_URI) {
-  console.error('FATAL ERROR: MONGO_URI is not defined in the .env file.');
-  process.exit(1); // Exit if the database connection string is not found
-}
-
 // --- Mongoose Schemas and Models ---
 const ProductSchema = new mongoose.Schema({
   legacyId: { type: Number, required: true, unique: true, index: true },
@@ -764,7 +756,7 @@ async function startServer() {
         if (productCount === 0) {
             console.log('Database is empty. Seeding from products.json...');
             try {
-                const productsJsonPath = path.resolve(process.cwd(), 'products.json');
+                const productsJsonPath = path.join(__dirname, 'products.json');
                 const productsData = await fs.readFile(productsJsonPath, 'utf-8');
                 const productsFromFile = JSON.parse(productsData);
 
@@ -806,11 +798,15 @@ async function startServer() {
             console.log('Database already contains products. Skipping seeding.');
         }
 
-        app.listen(PORT, () => {
-            console.log(`\n🚀 Server running at http://localhost:${PORT}`);
-            console.log(`Access your main site at: http://localhost:${PORT}/index.html`);
-            console.log(`Admin dashboard at: http://localhost:${PORT}/admin.html`);
-        });
+        if (process.env.VERCEL) {
+            console.log('Vercel environment detected: skipping app.listen().');
+        } else {
+            app.listen(PORT, () => {
+                console.log(`\n🚀 Server running at http://localhost:${PORT}`);
+                console.log(`Access your main site at: http://localhost:${PORT}/index.html`);
+                console.log(`Admin dashboard at: http://localhost:${PORT}/admin.html`);
+            });
+        }
     } catch (err) {
         console.error('FATAL: Server startup error:', err);
         process.exit(1);
@@ -818,3 +814,5 @@ async function startServer() {
 }
 
 startServer();
+
+module.exports = app;
