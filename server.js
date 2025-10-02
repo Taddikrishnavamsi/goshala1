@@ -13,7 +13,12 @@ const { put } = require('@vercel/blob');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const ADMIN_SECRET = process.env.ADMIN_SECRET || 'goshala_admin_123';
+const ADMIN_SECRET = process.env.ADMIN_SECRET;
+if (!ADMIN_SECRET) {
+  console.error('FATAL ERROR: ADMIN_SECRET is not defined in the .env file.');
+  // In a real production environment, you would want the app to fail to start.
+  // For Vercel/development, we can log an error but might allow it to continue.
+}
 
 // Middleware for admin authentication
 const adminAuth = (req, res, next) => {
@@ -733,88 +738,76 @@ app.put('/api/admin/orders/:orderId/status', adminAuth, async (req, res) => {
     }
 });
 
-// --- Server Startup ---
-async function startServer() {
-    const connectWithRetry = async () => {
-        try {
-            console.log('Attempting to connect to MongoDB...');
-            await mongoose.connect(MONGO_URI);
-            console.log('Successfully connected to MongoDB.');
-        } catch (err) {
-            console.error('MongoDB connection error:', err.message);
-            console.log('Retrying connection in 5 seconds...');
-            setTimeout(connectWithRetry, 5000); // Retry after 5 seconds
-        }
-    };
+// --- Database Connection and Seeding ---
+// This logic now runs at the top level of the module.
+// It establishes a connection that can be reused across serverless function invocations.
+let conn = null;
 
-    await connectWithRetry();
+const connectAndSeed = async () => {
+  if (conn == null) {
+    console.log('Creating new MongoDB connection...');
+    conn = mongoose.connect(MONGO_URI).then(() => mongoose);
 
-    mongoose.connection.on('disconnected', () => {
-        console.error('MongoDB disconnected! Attempting to reconnect...');
-        connectWithRetry();
-    });
+    // `await` the connection and then check for seeding
+    await conn;
+    console.log('Successfully connected to MongoDB.');
 
-    // This part of the code will only run after a successful initial connection.
-    try {
-        // The server logic that depends on the DB connection
-        // can now be placed here, confident that the connection is established.
-        
-        // Check if the database is empty. If so, seed it from products.json.
-        const productCount = await Product.countDocuments();
-        if (productCount === 0) {
-            console.log('Database is empty. Seeding from products.json...');
-            try {
-                const productsJsonPath = path.resolve(process.cwd(), 'products.json');
-                const productsData = await fs.readFile(productsJsonPath, 'utf-8');
-                const productsFromFile = JSON.parse(productsData);
+    const productCount = await Product.countDocuments();
+    if (productCount === 0) {
+      console.log('Database is empty. Seeding from products.json...');
+      try {
+        const productsJsonPath = path.resolve(process.cwd(), 'products.json');
+        const productsData = await fs.readFile(productsJsonPath, 'utf-8');
+        const productsFromFile = JSON.parse(productsData);
 
-                const productsToSeed = [];
-                const commentsToSeed = [];
+        const productsToSeed = [];
+        const commentsToSeed = [];
 
-                for (const product of productsFromFile) {
-                    const { reviews, id, ...productDetails } = product;
-                    
-                    // Prepare product for DB
-                    productsToSeed.push({
-                        ...productDetails,
-                        legacyId: id, // Map 'id' from JSON to 'legacyId' in schema
-                        rating: product.rating || 0,
-                        reviewsCount: reviews ? reviews.length : 0
-                    });
+        for (const product of productsFromFile) {
+          const { reviews, id, ...productDetails } = product;
+          productsToSeed.push({
+            ...productDetails,
+            legacyId: id,
+            rating: product.rating || 0,
+            reviewsCount: reviews ? reviews.length : 0,
+          });
 
-                    // Prepare comments for DB
-                    if (reviews && Array.isArray(reviews)) {
-                        reviews.forEach(review => {
-                            commentsToSeed.push({
-                                productId: id,
-                                username: review.user,
-                                comment: review.comment,
-                                rating: review.rating
-                            });
-                        });
-                    }
-                }
-
-                await Product.insertMany(productsToSeed);
-                await Comment.insertMany(commentsToSeed);
-                console.log('Database seeded successfully with products and comments.');
-
-            } catch (seedError) {
-                console.error('Error seeding database:', seedError);
-            }
-        } else {
-            console.log('Database already contains products. Skipping seeding.');
+          if (reviews && Array.isArray(reviews)) {
+            reviews.forEach(review => {
+              commentsToSeed.push({
+                productId: id,
+                username: review.user,
+                comment: review.comment,
+                rating: review.rating,
+              });
+            });
+          }
         }
 
-        app.listen(PORT, () => {
-            console.log(`\n🚀 Server running at http://localhost:${PORT}`);
-            console.log(`Access your main site at: http://localhost:${PORT}/index.html`);
-            console.log(`Admin dashboard at: http://localhost:${PORT}/admin.html`);
-        });
-    } catch (err) {
-        console.error('FATAL: Server startup error:', err);
-        process.exit(1);
+        if (productsToSeed.length > 0) await Product.insertMany(productsToSeed);
+        if (commentsToSeed.length > 0) await Comment.insertMany(commentsToSeed);
+        console.log('Database seeded successfully.');
+      } catch (seedError) {
+        console.error('Error seeding database:', seedError);
+      }
+    } else {
+      console.log('Database already contains products. Skipping seeding.');
     }
-}
+  }
 
-startServer();
+  await conn;
+};
+
+// Ensure DB is connected before handling any requests
+app.use(async (req, res, next) => {
+  try {
+    await connectAndSeed();
+    next();
+  } catch (error) {
+    console.error('MongoDB connection error in middleware:', error);
+    res.status(503).json({ error: 'Service Unavailable: Could not connect to the database.' });
+  }
+});
+
+// Export the app for Vercel
+module.exports = app;
