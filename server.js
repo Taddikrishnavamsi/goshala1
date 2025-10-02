@@ -809,5 +809,18 @@ app.use(async (req, res, next) => {
   }
 });
 
+// --- Global Error Handling Middleware ---
+// This should be the last middleware added.
+app.use((err, req, res, next) => {
+  console.error('An unexpected error occurred:', err.stack);
+
+  // If the response has already been sent, delegate to the default Express error handler.
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  res.status(500).json({ error: 'Internal Server Error', message: 'An unexpected error occurred on the server.' });
+});
+
 // Export the app for Vercel
 module.exports = app;
