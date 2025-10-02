@@ -9,15 +9,16 @@ const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const { put } = require('@vercel/blob');
 
-const { MONGO_URI, ADMIN_SECRET } = process.env;
+const MONGO_URI = process.env.MONGO_URI;
+const ADMIN_SECRET = process.env.ADMIN_SECRET;
 
+// Warn if environment variables are missing but don't exit immediately
+// This allows the server to start and fail gracefully when DB connection is attempted
 if (!MONGO_URI) {
-  console.error('FATAL: MONGO_URI environment variable is not set.');
-  process.exit(1);
+  console.warn('WARNING: MONGO_URI environment variable is not set. Database operations will fail.');
 }
 if (!ADMIN_SECRET) {
-  console.error('FATAL: ADMIN_SECRET environment variable is not set.');
-  process.exit(1);
+  console.warn('WARNING: ADMIN_SECRET environment variable is not set. Admin operations will fail.');
 }
 
 const app = express();
