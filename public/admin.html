@@ -105,7 +105,7 @@
                             <th scope="col" class="px-6 py-3">Customer</th>
                             <th scope="col" class="px-6 py-3">Date</th>
                             <th scope="col" class="px-6 py-3">Total</th>
-                            <th scope="col" class="px-6 py-3">Status</th>
+                            <th scope="col" class="px-6 py-3">Shipping Status</th>
                             <th scope="col" class="px-6 py-3"><span class="sr-only">Details</span></th>
                         </tr>
                     </thead>
@@ -506,7 +506,7 @@
                 ordersTableBody.innerHTML = orders.map(order => {
                     const fullAddress = `${order.user.address1}, ${order.user.address2 ? order.user.address2 + ', ' : ''}${order.user.city}, ${order.user.state} - ${order.user.zip}`;
                     return `
-                    <tr class="border-b hover:bg-stone-50 cursor-pointer" data-order-id="${order.orderId}">
+                    <tr class="border-b hover:bg-stone-50" data-order-id="${order.orderId}">
                         <td class="px-6 py-4 font-mono text-xs text-stone-700">${order.orderId}</td>
                         <td class="px-6 py-4">
                             <div class="font-medium text-stone-900">${order.user.firstname} ${order.user.lastname}</div>
@@ -515,12 +515,12 @@
                         <td class="px-6 py-4">${new Date(order.date).toLocaleDateString()}</td>
                         <td class="px-6 py-4 font-semibold">₹${order.total.toFixed(2)}</td>
                         <td class="px-6 py-4">
-                            <select class="shipping-status-select text-xs font-medium p-1 rounded border focus:ring-blue-500 focus:border-blue-300 transition-colors ${statusColors[order.shippingStatus] || 'bg-stone-100'}" data-order-id="${order.orderId}">
+                            <select class="shipping-status-select text-xs font-medium p-1 rounded border focus:ring-blue-500 focus:border-blue-300 transition-colors ${statusColors[order.shippingStatus] || 'bg-stone-100'}" data-order-id="${order.orderId}" data-current-status="${order.shippingStatus}">
                                 ${statusOptions.map(status => `<option value="${status}" ${order.shippingStatus === status ? 'selected' : ''}>${status}</option>`).join('')}
                             </select>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            <button class="toggle-details-btn p-1 rounded-full hover:bg-stone-200">
+                            <button class="toggle-details-btn p-1 rounded-full hover:bg-stone-200 cursor-pointer">
                                 <i data-lucide="chevron-down" class="w-5 h-5 text-stone-500 transition-transform"></i>
                             </button>
                         </td>
@@ -528,10 +528,21 @@
                     <tr class="details-row hidden bg-stone-50">
                         <td colspan="6" class="p-0">
                             <div class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                                <div class="md:col-span-1">
+                                <div class="md:col-span-1 space-y-4">
                                     <h4 class="font-semibold text-stone-700 mb-2">Shipping Address</h4>
                                     <p class="text-stone-600">${fullAddress}</p>
                                     <p class="text-stone-600 mt-1"><b>Phone:</b> ${order.user.phone}</p>
+                                    <div>
+                                        <h4 class="font-semibold text-stone-700 mb-2">Tracking Details</h4>
+                                        <div class="space-y-2">
+                                            <input type="text" placeholder="Carrier (e.g., Delhivery)" value="${order.tracking?.carrier || ''}" class="tracking-carrier-input w-full p-1.5 border border-stone-300 rounded-md text-xs" data-order-id="${order.orderId}">
+                                            <input type="text" placeholder="Tracking Number" value="${order.tracking?.number || ''}" class="tracking-number-input w-full p-1.5 border border-stone-300 rounded-md text-xs" data-order-id="${order.orderId}">
+                                            <button class="save-tracking-btn bg-blue-600 text-white text-xs font-bold py-1.5 px-3 rounded-md hover:bg-blue-700" data-order-id="${order.orderId}">
+                                                Save Tracking
+                                            </button>
+                                            <span class="tracking-status-text text-xs text-green-600 ml-2"></span>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="md:col-span-2">
                                     <h4 class="font-semibold text-stone-700 mb-2">Order Items</h4>
@@ -679,7 +690,7 @@
 
         ordersTableBody.addEventListener('click', (e) => {
             // Don't toggle if the click was on the status dropdown
-            if (e.target.closest('.shipping-status-select')) {
+            if (e.target.closest('.shipping-status-select, .save-tracking-btn, .tracking-carrier-input, .tracking-number-input')) {
                 return;
             }
 
@@ -690,26 +701,51 @@
                 row.querySelector('.toggle-details-btn i').classList.toggle('rotate-180');
             }
         });
+
+        ordersTableBody.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('save-tracking-btn')) {
+                const button = e.target;
+                const orderId = button.dataset.orderId;
+                const row = button.closest('.details-row');
+                const trackingNumber = row.querySelector(`.tracking-number-input[data-order-id="${orderId}"]`).value;
+                const trackingCarrier = row.querySelector(`.tracking-carrier-input[data-order-id="${orderId}"]`).value;
+                const statusText = row.querySelector('.tracking-status-text');
+
+                button.disabled = true;
+                button.textContent = 'Saving...';
+                statusText.textContent = '';
+
+                try {
+                    await api.put(`/api/admin/orders/${orderId}/status`, { trackingNumber, trackingCarrier });
+                    statusText.textContent = 'Saved!';
+                } catch (error) {
+                    console.error('Failed to save tracking:', error);
+                    statusText.textContent = 'Error!';
+                    statusText.classList.replace('text-green-600', 'text-red-600');
+                } finally {
+                    setTimeout(() => {
+                        button.disabled = false;
+                        button.textContent = 'Save Tracking';
+                        statusText.textContent = '';
+                        statusText.classList.replace('text-red-600', 'text-green-600');
+                    }, 2000);
+                }
+            }
+        });
+
         ordersTableBody.addEventListener('change', async (e) => {
             if (e.target.classList.contains('shipping-status-select')) {
                 const select = e.target;
                 const orderId = select.dataset.orderId;
                 const newStatus = select.value;
 
-                select.disabled = true;
-                const originalColor = select.className;
-                select.className = select.className.replace(/bg-\w+-\d+/g, 'bg-stone-200').replace(/text-\w+-\d+/g, 'text-stone-500');
                 try {
                     await api.put(`/api/admin/orders/${orderId}/status`, { status: newStatus });
-                    // On success, just update the color without a full reload
-                    select.className = originalColor.replace(/bg-\w+-\d+/g, '').replace(/text-\w+-\d+/g, '') + ` ${statusColors[newStatus]}`;
+                    // On success, reload orders to reflect changes consistently
+                    loadOrders(currentOrderPage, orderSearchQuery);
                 } catch (error) {
                     console.error('Failed to update status:', error);
                     alert(`Error: ${error.message}`);
-                    // Revert the select on error
-                    select.className = originalColor;
-                } finally {
-                    select.disabled = false;
                 }
             }
         });

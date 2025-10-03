@@ -19,6 +19,14 @@
             25% { transform: rotate(-15deg); }
             75% { transform: rotate(15deg); }
         }
+        .buy-now-animate {
+            animation: buy-now-jiggle 0.4s ease-in-out;
+        }
+        @keyframes buy-now-jiggle {
+            0%, 100% { transform: scale(1.05) rotate(0); }
+            25% { transform: scale(1.1) rotate(-2deg); }
+            75% { transform: scale(1.1) rotate(2deg); }
+        }
         .nav-link-glow { transition: text-shadow 0.3s ease; }
         .nav-link-glow:hover { text-shadow: 0 0 8px rgba(22, 101, 52, 0.7); }
         /* Header shrink styles */
@@ -31,8 +39,8 @@
         }
         .spinner { width: 24px; height: 24px; border: 3px solid currentColor; border-bottom-color: transparent; border-radius: 50%; display: inline-block; animation: spin 0.75s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .loader-logo { animation: pulse 1.5s ease-in-out infinite; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } }
+        .loader-logo { animation: blink 1.5s ease-in-out infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         .thumbnail-active { border-color: #166534; /* green-800 */ box-shadow: 0 0 0 2px #166534; }
         .lottie-loader {
             width: 28px; /* Adjust to fit button */
@@ -83,9 +91,9 @@
                 <button id="header-search-button" class="hidden md:block p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
                     <i data-lucide="search" class="w-5 h-5"></i>
                 </button>
-                <button class="hidden md:block p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
+                <a href="my-orders.html" class="hidden md:block p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40" title="My Account">
                     <i data-lucide="user" class="w-5 h-5"></i>
-                </button>
+                </a>
                 <a href="cart.html" class="relative p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
                     <i data-lucide="shopping-cart" class="w-5 h-5"></i>
                     <span id="cart-count" class="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span>
@@ -106,6 +114,9 @@
             <button id="mobile-header-search-button" class="w-full flex items-center justify-center gap-2 text-stone-700 bg-stone-200/70 hover:bg-stone-300/70 p-2 rounded-lg font-medium">
                 <i data-lucide="search" class="w-4 h-4"></i> Search
             </button>
+            <a href="my-orders.html" class="w-full flex items-center justify-center gap-2 text-stone-700 bg-stone-200/70 hover:bg-stone-300/70 p-2 rounded-lg font-medium">
+                <i data-lucide="user" class="w-4 h-4"></i> My Account
+            </a>
         </div>
     </header>
 
@@ -159,8 +170,22 @@
                         <span id="product-discount" class="text-lg text-green-700 font-semibold ml-3"></span>
                     </div>
 
+                    <!-- Delivery Info -->
+                    <div id="delivery-info-container" class="mb-6 hidden">
+                        <div class="flex items-center text-sm text-stone-700">
+                            <i data-lucide="truck" class="w-5 h-5 mr-2 text-green-700"></i>
+                            <span id="delivery-date-text" class="font-medium"></span>
+                        </div>
+                    </div>
+
                     <div id="cart-controls-container" class="max-w-sm">
                         <!-- Cart controls will be injected here -->
+                    </div>
+                    <div class="mt-4 max-w-xs">
+                        <button id="buy-now-btn" class="w-full flex items-center justify-center bg-amber-600 text-stone-900 font-bold py-4 px-6 rounded-lg text-lg hover:bg-amber-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                            <i data-lucide="zap" class="w-5 h-5 mr-2"></i>
+                            <span id="buy-now-text">Buy Now</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -367,6 +392,16 @@
             } else {
                 originalPriceEl.textContent = '';
                 discountEl.textContent = '';
+            }
+
+            // Delivery Date
+            const deliveryInfoContainer = document.getElementById('delivery-info-container');
+            const deliveryDateText = document.getElementById('delivery-date-text');
+            if (currentProduct.deliveryDate) {
+                deliveryDateText.textContent = currentProduct.deliveryDate;
+                deliveryInfoContainer.classList.remove('hidden');
+            } else {
+                deliveryInfoContainer.classList.add('hidden');
             }
 
             const newStatus = getNewStatus(currentProduct.dateAdded);
@@ -671,6 +706,24 @@
             }
         }
 
+        function handleBuyNow() {
+            const buyNowBtn = document.getElementById('buy-now-btn');
+            const pageLoader = document.getElementById('page-loader');
+
+            buyNowBtn.disabled = true; // Prevent multiple clicks
+            buyNowBtn.classList.add('buy-now-animate'); // Add animation class
+
+            const buyNowItem = { ...currentProduct, quantity: 1 };
+            sessionStorage.setItem('goshalaBuyNowItem', JSON.stringify(buyNowItem));
+
+            // After the button animation, show the loader and then redirect.
+            setTimeout(() => {
+                pageLoader.style.display = 'flex';
+                pageLoader.classList.remove('opacity-0');
+                setTimeout(() => window.location.href = 'checkout.html', 100); // Short delay before redirect
+            }, 400); // Wait for button animation to finish
+        }
+
         async function handleReviewSubmit(event) {
             event.preventDefault();
             const form = event.target;
@@ -826,6 +879,7 @@
         function setupEventListeners() {
             document.getElementById('image-gallery').addEventListener('click', handleImageGalleryClick);
             document.getElementById('cart-controls-container').addEventListener('click', handleCartAction);
+            document.getElementById('buy-now-btn').addEventListener('click', handleBuyNow);
             
             // Review related listeners
             document.getElementById('toggle-review-form-btn').addEventListener('click', () => {
@@ -957,14 +1011,16 @@
 
         // Handle back/forward navigation from bfcache
         window.addEventListener('pageshow', function(event) {
-            // When a page is restored from bfcache, the loader might be visible.
-            // We just need to hide it, not reload the whole page.
-            const pageLoader = document.getElementById('page-loader');
             if (event.persisted) {
+                // Page is restored from bfcache
+                const pageLoader = document.getElementById('page-loader');
                 if (pageLoader && pageLoader.style.display !== 'none') {
                     pageLoader.classList.add('opacity-0');
                     setTimeout(() => pageLoader.style.display = 'none', 50); // Hide it quickly
                 }
+                // Re-enable the Buy Now button in case it was disabled
+                const buyNowBtn = document.getElementById('buy-now-btn');
+                if (buyNowBtn) buyNowBtn.disabled = false;
             }
         });
 

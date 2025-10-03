@@ -48,8 +48,8 @@
         }
         .spinner { width: 24px; height: 24px; border: 3px solid currentColor; border-bottom-color: transparent; border-radius: 50%; display: inline-block; animation: spin 0.75s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .loader-logo { animation: pulse 1.5s ease-in-out infinite; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } }
+        .loader-logo { animation: blink 1.5s ease-in-out infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         .modal-overlay { transition: opacity 0.3s ease-in-out; }
         .modal-content { transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out; }
         .modal-thumbnail-active { border-color: #166534; }
@@ -500,6 +500,12 @@
                     ` : `
                         <p class="product-price">₹${product.price}</p>
                         `}
+                            ${product.deliveryDate ? `
+                                <div class="flex items-center text-xs text-stone-400 mt-2">
+                                    <i data-lucide="truck" class="w-4 h-4 mr-1.5"></i>
+                                    <span>${product.deliveryDate}</span>
+                                </div>
+                            ` : ''}
                             <div class="cart-controls mt-2 relative z-10" data-product-id="${product.id}">${cartControlsHTML}</div>
                         </div>
                     </div>`;

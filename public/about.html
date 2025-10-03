@@ -55,16 +55,14 @@
         }
         /* Custom Logo Loader */
         .loader-logo {
-            animation: pulse 1.5s ease-in-out infinite;
+            animation: blink 1.5s ease-in-out infinite;
         }
-        @keyframes pulse {
+        @keyframes blink {
             0%, 100% {
-                transform: scale(1);
                 opacity: 1;
             }
             50% {
-                transform: scale(1.1);
-                opacity: 0.8;
+                opacity: 0.3;
             }
         }
         /* Spinner animation */
@@ -126,9 +124,9 @@
                 <button id="header-search-button" class="hidden md:block p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
                     <i data-lucide="search" class="w-5 h-5"></i>
                 </button>
-                <button class="hidden md:block p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
+                <a href="my-orders.html" class="hidden md:block p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40" title="My Account">
                     <i data-lucide="user" class="w-5 h-5"></i>
-                </button>
+                </a>
                 <a href="cart.html" class="relative p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
                     <i data-lucide="shopping-cart" class="w-5 h-5"></i>
                     <span id="cart-count" class="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span>

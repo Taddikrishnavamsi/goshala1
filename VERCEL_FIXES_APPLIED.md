@@ -83,7 +83,7 @@ Go to: **Vercel Dashboard → goshala1 → Settings → Environment Variables**
 
 Add:
 ```
-GOOGLE_MAPS_API_KEY = AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8
+GOOGLE_MAPS_API_KEY = your_google_maps_api_key_here
 ```
 
 For all environments: Production, Preview, Development
@@ -105,15 +105,7 @@ ADMIN_SECRET=goshala_admin_123  ✅ Correct
 ```
 
 **Complete Fixed .env:**
-```env
-MONGO_URI=mongodb+srv://taddikrishnavamsi_db_user:vamsiqwerty@cluster0.pml3f9g.mongodb.net/ecom_reviews?retryWrites=true&w=majority&appName=Cluster0
-PORT=3000
-ADMIN_SECRET=goshala_admin_123
-RAZORPAY_KEY_ID=rzp_test_RNOsiGiVB09hGg
-RAZORPAY_KEY_SECRET=I3pCVRLtjSppCjd00WvAZWhc
-BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...
-GOOGLE_MAPS_API_KEY=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8
-```
+
 
 ---
 
@@ -150,7 +142,7 @@ git push origin main
 2. Click "Add New"
 3. Add:
    - **Key**: `GOOGLE_MAPS_API_KEY`
-   - **Value**: `AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8`
+   - **Value**: `your_google_maps_api_key_here`
    - **Environments**: Select all (Production, Preview, Development)
 4. Click "Save"
 

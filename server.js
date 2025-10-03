@@ -40,7 +40,7 @@ const userAuth = (req, res, next) => {
     if (token == null) return res.sendStatus(401);
 
     // In this simple setup, the token is the user's email.
-    req.userEmail = token;
+    req.userIdentifier = token;
     next();
 };
 
@@ -141,6 +141,10 @@ const OrderSchema = new mongoose.Schema({
     enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled'],
     default: 'Pending',
     required: true
+  },
+  tracking: {
+    carrier: { type: String, trim: true },
+    number: { type: String, trim: true }
   }
 });
 const Order = mongoose.model('Order', OrderSchema);
@@ -681,9 +685,23 @@ app.post('/api/razorpay/capture', async (req, res) => {
     }
 });
 
+app.post('/api/auth/check-email', async (req, res) => {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email is required.' });
+    // In this simple auth, we just check if the email exists in the user's local storage.
+    // A real implementation would check against a user database.
+    res.json({ success: true }); // For now, always succeed if email is provided.
+});
+
 app.get('/api/my-orders', userAuth, async (req, res) => {
     try {
-        const orders = await Order.find({ 'user.email': req.userEmail })
+        const identifier = req.userIdentifier;
+        const orders = await Order.find({
+            $or: [
+                { 'user.email': identifier },
+                { 'user.phone': identifier }
+            ]
+        })
             .sort({ date: -1 })
             .lean();
 
@@ -713,16 +731,24 @@ app.get('/api/my-orders', userAuth, async (req, res) => {
 app.put('/api/admin/orders/:orderId/status', adminAuth, async (req, res) => {
     try {
         const { orderId } = req.params;
-        const { status } = req.body;
+        const { status, trackingNumber, trackingCarrier } = req.body;
+
+        const updatePayload = {};
 
         // Validate the status against the schema enum
-        if (!Order.schema.path('shippingStatus').enumValues.includes(status)) {
-            return res.status(400).json({ error: 'Invalid status value.' });
+        if (status) {
+            if (!Order.schema.path('shippingStatus').enumValues.includes(status)) {
+                return res.status(400).json({ error: 'Invalid status value.' });
+            }
+            updatePayload.shippingStatus = status;
         }
+
+        updatePayload['tracking.number'] = trackingNumber || '';
+        updatePayload['tracking.carrier'] = trackingCarrier || '';
 
         const updatedOrder = await Order.findOneAndUpdate(
             { orderId: orderId },
-            { $set: { shippingStatus: status } },
+            { $set: updatePayload },
             { new: true }
         );
 

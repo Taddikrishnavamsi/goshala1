@@ -15,6 +15,65 @@
             border-bottom-color: transparent; border-radius: 50%;
             display: inline-block; animation: spin 0.75s linear infinite;
         }
+        /* New Shipping Form Styles */
+        .shipping-section {
+            max-width: 520px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 16px rgba(40, 60, 90, 0.12);
+        }
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+            color: #36476b;
+        }
+        .form-label .label-optional {
+            font-size: 0.95rem;
+            color: #8390a2;
+            font-weight: 400;
+            margin-left: 0.5rem;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #d2dbe5;
+            background: #fcfcfd;
+            margin-bottom: 1.1rem;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #5b96f7;
+            box-shadow: 0 0 0 2px #e4eaff;
+        }
+        .form-group {
+            display: flex;
+            gap: 1.2rem;
+        }
+        .form-group > div {
+            flex: 1;
+        }
+        .payment-btn {
+            width: 100%;
+            background: #3659e3;
+            color: #fff;
+            font-weight: 600;
+            padding: 0.85rem 0;
+            font-size: 1.1rem;
+            border-radius: 7px;
+            box-shadow: 0 2px 8px rgba(40,60,90,0.07);
+        }
+        .payment-btn:hover {
+            background: #263159;
+        }
+        @media (max-width: 600px) {
+            .shipping-section { padding: 1rem; }
+            .form-group { flex-direction: column; gap: 0; }
+        }
         @keyframes spin { to { transform: rotate(360deg); } }
         .form-invalid { border-color: #DC2626; }
         .form-invalid:focus { --tw-ring-color: #DC2626; }
@@ -33,57 +92,63 @@
         </div>
     </header>
 
-    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 md:pt-12">
+        <div class="mb-6">
+            <a href="cart.html" class="inline-flex items-center gap-2 text-sm font-medium text-stone-600 hover:text-green-700">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="m15 18-6-6 6-6"/></svg>
+                Back to Cart
+            </a>
+        </div>
         <div id="checkout-container" class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-            <div class="lg:col-span-1">
-                 <form id="checkout-form" novalidate class="space-y-4">
-                    <div id="shipping-section" class="bg-white rounded-lg shadow-md p-6">
-                        <h2 class="text-xl font-semibold text-slate-800 mb-4">Shipping Information</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="lg:col-span-1 order-2 lg:order-2">
+                 <form id="checkout-form" novalidate>
+                    <div id="shipping-section" class="shipping-section">
+                        <h2 class="text-2xl font-bold text-slate-800 mb-6">Shipping Information</h2>
+                        <div class="form-group">
                             <div>
-                                <label for="firstname" class="block text-sm font-medium text-slate-700">First Name</label>
-                                <input type="text" id="firstname" name="firstname" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                                <label for="firstname" class="form-label">First Name</label>
+                                <input type="text" id="firstname" name="firstname" required class="form-input">
                             </div>
                             <div>
-                                <label for="lastname" class="block text-sm font-medium text-slate-700">Last Name</label>
-                                <input type="text" id="lastname" name="lastname" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                                <label for="lastname" class="form-label">Last Name</label>
+                                <input type="text" id="lastname" name="lastname" required class="form-input">
                             </div>
                         </div>
                         <div>
-                            <label for="email" class="block text-sm font-medium text-slate-700">Email Address</label>
-                            <input type="email" id="email" name="email" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" id="email" name="email" required class="form-input">
                         </div>
                         <div>
-                            <label for="phone" class="block text-sm font-medium text-slate-700">Phone Number</label>
-                            <input type="tel" id="phone" name="phone" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" required class="form-input">
                         </div>
-                        <div class="pt-4 border-t mt-4">
-                            <label for="address1" class="block text-sm font-medium text-slate-700">Street Address</label>
-                            <input type="text" id="address1" name="address1" required placeholder="House No. & Street Name" class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                        <div>
+                            <label for="address1" class="form-label">Street Address</label>
+                            <input type="text" id="address1" name="address1" required placeholder="House No. & Street Name" class="form-input">
                         </div>
                          <div>
-                            <label for="address2" class="block text-sm font-medium text-slate-700">Apartment, suite, etc. (Optional)</label>
-                            <input type="text" id="address2" name="address2" class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                            <label for="address2" class="form-label">Apartment, suite, etc.<span class="label-optional">(Optional)</span></label>
+                            <input type="text" id="address2" name="address2" class="form-input">
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group">
                             <div>
-                                <label for="city" class="block text-sm font-medium text-slate-700">City</label>
-                                <input type="text" id="city" name="city" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                                <label for="city" class="form-label">City</label>
+                                <input type="text" id="city" name="city" required class="form-input">
                             </div>
                             <div>
-                                <label for="zip" class="block text-sm font-medium text-slate-700">Zip / Postal Code</label>
-                                <input type="text" id="zip" name="zip" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                                <label for="zip" class="form-label">Zip / Postal Code</label>
+                                <input type="text" id="zip" name="zip" required class="form-input">
                             </div>
                         </div>
                         <div>
-                            <label for="state" class="block text-sm font-medium text-slate-700">State / Province</label>
-                            <input type="text" id="state" name="state" required class="mt-1 block w-full border border-slate-300 rounded-md shadow-sm focus:border-green-500 focus:ring-green-500">
+                            <label for="state" class="form-label">State / Province</label>
+                            <input type="text" id="state" name="state" required class="form-input">
                         </div>
                     </div>
                  </form>
             </div>
 
-            <div class="lg:col-span-1">
+            <div class="lg:col-span-1 order-1 lg:order-1">
                 <div id="order-summary-desktop" class="bg-white p-6 rounded-lg shadow-md sticky top-24">
                     <h2 class="text-lg font-semibold text-slate-800 mb-4 border-b pb-4">Order Summary</h2>
                     <div id="order-items-summary" class="space-y-4 max-h-80 overflow-y-auto pr-2 mb-4"></div>
@@ -104,8 +169,8 @@
                         </div>
                     </div>
                     <div class="pt-6">
-                        <button id="place-order-btn" type="button" class="w-full bg-amber-600 text-stone-900 font-bold py-3 px-6 rounded-lg hover:bg-amber-700 transition-colors shadow-lg flex items-center justify-center">
-                            Pay with Razorpay
+                        <button id="place-order-btn" type="button" class="payment-btn transition-colors flex items-center justify-center">
+                            Continue to Payment
                         </button>
                         <div id="form-status" class="mt-4 text-center font-medium"></div>
                     </div>
@@ -139,14 +204,23 @@
             });
 
             let cartItems = [];
+            let isBuyNowFlow = false;
             
             try {
-                const products = await loadProducts();
-                cartItems = products.filter(p => p.inCart);
+                const buyNowItemJSON = sessionStorage.getItem('goshalaBuyNowItem');
+                if (buyNowItemJSON) {
+                    isBuyNowFlow = true;
+                    cartItems = [JSON.parse(buyNowItemJSON)];
+                } else {
+                    const products = await loadProducts();
+                    cartItems = products.filter(p => p.inCart);
+                }
+
                 if (cartItems.length === 0) {
                     checkoutContainer.innerHTML = `<div class="bg-white p-8 rounded-lg shadow-md text-center col-span-full"><h1 class="text-2xl font-semibold text-slate-700 mb-2">Your cart is empty.</h1><p class="text-slate-500 mb-6">There's nothing to check out.</p><a href="index.html" class="inline-block bg-amber-600 hover:bg-amber-700 text-stone-900 font-bold py-3 px-8 rounded-lg">Return to Shop</a></div>`;
                     return;
                 }
+
                 renderOrderSummary();
             } catch (error) {
                 console.error("Failed to load checkout:", error);
@@ -251,7 +325,12 @@
 
                             const verificationResult = await verificationResponse.json();
                             if (verificationResult.success) {
-                                localStorage.removeItem('goshalaProducts');
+                                if (isBuyNowFlow) {
+                                    sessionStorage.removeItem('goshalaBuyNowItem');
+                                } else {
+                                    localStorage.removeItem('goshalaProducts');
+                                }
+                                sessionStorage.setItem('goshalaUserEmail', finalOrderDetails.user.email); // <-- Add this line
                                 window.location.href = `order-confirmation.html?orderId=${verificationResult.orderId}`;
                             } else {
                                 formStatus.textContent = 'Payment verification failed. Please contact support.';

@@ -6,15 +6,23 @@
     <title>Order Confirmed - Brundavanam Goshala</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-   <link rel="icon" type="image/png" href="/logo.png">
-   <style>
+    <link rel="icon" type="image/png" href="/logo.png">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
         body { font-family: 'Poppins', sans-serif; }
         /* Cart count animation */
-        .cart-count-animate { 25% { tranr); }
+        .cart-count-animate { animation: jiggle 0.4s ease-in-out; }
+        @keyframes jiggle {
+            0%, 100% { transform: rotate(0); }
+            25% { transform: rotate(-15deg); }
+            75% { transform: rotate(15deg); }
         }
-        /* Header shrink styles */out;
-        }
+        .nav-link-glow:hover { text-shadow: 0 0 8px rgba(22, 101, 52, 0.7); }
+
         /* Spinner animation */
+        .spinner {
+            width: 20px; height: 20px; border: 2px solid currentColor;
+            border-bottom-color: transparent;
             border-radius: 50%;
             display: inline-block;
             animation: spin 0.75s linear infinite;
@@ -24,16 +32,14 @@
         }
         /* Custom Logo Loader */
         .loader-logo {
-            animation: pulse 1.5s ease-in-out infinite;
+            animation: blink 1.5s ease-in-out infinite;
         }
-        @keyframes pulse {
+        @keyframes blink {
             0%, 100% {
-                transform: scale(1);
                 opacity: 1;
             }
             50% {
-                transform: scale(1.1);
-                opacity: 0.8;
+                opacity: 0.3;
             }
         }
     </style>
@@ -44,32 +50,45 @@
         <img src="/logo.png" alt="Brundavanam Goshala Logo" class="loader-logo w-24 h-24">
     </div>
 
-    <header class="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div id="header-inner" class="flex items-center justify-between h-16">
-                <div class="flex items-center">
-                    <a id="logo-link" href="index.html" class="text-xl sm:text-2xl font-bold text-green-800 hover:text-green-700">Brundavanam Goshala</a>
-                </div>
-                <nav class="hidden md:flex items-center space-x-8 text-base">
-                    <a href="index.html" class="text-stone-600 hover:text-green-700 py-2 font-medium">HOME</a>
-                    <a href="about.html" class="text-stone-600 hover:text-green-700 py-2 font-medium">ABOUT US</a>
-                    <a href="contact.html" class="text-stone-600 hover:text-green-700 py-2 font-medium">SUPPORT</a>
-                </nav>
-                <div class="flex items-center space-x-4">
-                    <a href="cart.html" class="relative text-stone-600 hover:text-green-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.16"/></svg>
-                        <span id="cart-count" class="absolute -top-2 -right-2 bg-amber-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
-                    </a>
-                    <button id="mobile-menu-button" class="md:hidden text-gray-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-                    </button>
-                </div>
+    <header id="main-header" class="app-bar sticky top-0 left-0 w-full transition-all duration-300 z-[100]" style="background: rgba(200, 200, 200, 0.25); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 16px; border: 1px solid rgba(200, 200, 200, 0.3); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);">
+        <div id="header-container" class="h-12 md:h-16 px-4 md:px-8 flex items-center justify-between transition-all duration-300 container mx-auto">
+            <!-- Logo -->
+            <a id="logo-link" href="index.html" class="text-lg sm:text-xl font-bold text-green-900 hover:text-green-700 mr-6 transition-all duration-300">Brundavanam Goshala</a>
+
+            <!-- Nav Links (Desktop) -->
+            <nav class="hidden md:flex items-center gap-6 text-stone-800 font-medium">
+                <a href="index.html" class="nav-link-glow">Home</a>
+                <a href="about.html" class="nav-link-glow">About Us</a>
+                <a href="index.html" class="nav-link-glow">Shop</a>
+                <a href="contact.html" class="nav-link-glow">Contact</a>
+            </nav>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-2 md:gap-4">
+                <a href="my-orders.html" class="hidden md:block p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40" title="My Account">
+                    <i data-lucide="user" class="w-5 h-5"></i>
+                </a>
+                <a href="cart.html" class="relative p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span>
+                </a>
+                <button id="mobile-menu-button" class="md:hidden p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
             </div>
         </div>
-        <div id="mobile-menu" class="hidden md:hidden bg-white/80 backdrop-blur-sm border-t p-4 space-y-2">
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white/80 backdrop-blur-sm border rounded-2xl mt-2 p-4 pt-10 space-y-2 shadow-xl relative">
+            <button id="mobile-menu-close-btn" class="absolute top-2 right-2 p-1 text-stone-500 hover:text-stone-800">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
             <a href="index.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded">Home</a>
             <a href="about.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded">About Us</a>
-            <a href="contact.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded">Support</a>
+            <a href="index.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded">Shop</a>
+            <a href="contact.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded mb-2">Contact</a>
+            <a href="my-orders.html" class="w-full flex items-center justify-center gap-2 text-stone-700 bg-stone-200/70 hover:bg-stone-300/70 p-2 rounded-lg font-medium">
+                <i data-lucide="user" class="w-4 h-4"></i> My Account
+            </a>
         </div>
     </header>
 
@@ -84,10 +103,14 @@
             <p class="text-stone-600 text-lg mb-6">Your order has been placed successfully. We've sent a confirmation to your email address. Your support helps us care for our beloved Gaumata.</p>
             <div id="order-details" class="mb-8 text-stone-700 bg-stone-100 p-4 rounded-lg inline-block">
                 </div>
-            <br>
-            <a href="index.html" class="inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition-colors">
-                Continue Shopping
-            </a>
+            <div class="mt-8 flex flex-col sm:flex-row justify-center items-center gap-4">
+                <a href="index.html" class="w-full sm:w-auto inline-block bg-stone-200 hover:bg-stone-300 text-stone-800 font-bold py-3 px-8 rounded-lg transition-colors">
+                    Continue Shopping
+                </a>
+                <a href="my-orders.html" class="w-full sm:w-auto inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg transition-colors">
+                    Track Your Order
+                </a>
+            </div>
         </div>
     </main>
 
@@ -131,6 +154,7 @@
     </footer>
 
     <script>
+        lucide.createIcons();
         document.addEventListener('DOMContentLoaded', () => {
             // --- PAGE LOADER LOGIC ---
             const pageLoader = document.getElementById('page-loader');
@@ -149,15 +173,8 @@
             if (orderId && orderDetailsContainer) {
                 orderDetailsContainer.innerHTML = `
                     <span class="font-medium">Your Order ID:</span>
-                    <strong class="text-lg text-green-800 ml-2">${orderId}</strong>
+                    <strong class="text-lg text-green-800 ml-2 font-mono">${orderId}</strong>
                 `;
-
-                // Save the order ID to local storage for the "My Orders" page
-                const myOrders = JSON.parse(localStorage.getItem('goshalaMyOrders')) || [];
-                if (!myOrders.includes(orderId)) {
-                    myOrders.push(orderId);
-                    localStorage.setItem('goshalaMyOrders', JSON.stringify(myOrders));
-                }
             } else if (orderDetailsContainer) {
                 orderDetailsContainer.innerHTML = `<p class="text-stone-500">Your order details will be sent via email.</p>`;
             }
@@ -176,8 +193,22 @@
             // --- MOBILE MENU TOGGLE ---
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
+            const closeBtn = document.getElementById('mobile-menu-close-btn');
+
             if (mobileMenuButton && mobileMenu) {
-                mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+                const toggleMenu = (show) => mobileMenu.classList.toggle('hidden', !show);
+
+                mobileMenuButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleMenu(true);
+                });
+                if (closeBtn) closeBtn.addEventListener('click', () => toggleMenu(false));
+
+                document.addEventListener('click', (e) => {
+                    if (!mobileMenu.classList.contains('hidden') && !mobileMenu.contains(e.target) && e.target !== mobileMenuButton) {
+                        toggleMenu(false);
+                    }
+                });
             }
         });
 
