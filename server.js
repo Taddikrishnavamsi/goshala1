@@ -8,6 +8,7 @@ const path = require('path');
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const { put } = require('@vercel/blob');
+const compression = require('compression');
 
 const MONGO_URI = process.env.MONGO_URI;
 const ADMIN_SECRET = process.env.ADMIN_SECRET;
@@ -60,9 +61,17 @@ const upload = multer({
 
 // --- Middleware ---
 app.use(cors());
+app.use(compression()); // Enable gzip compression for all responses
 app.use(express.json());
 // Serve all static files (HTML, CSS, client-side JS, images) from the 'public' directory.
-app.use(express.static('public'));
+app.use(express.static('public', {
+  maxAge: '1d', // Cache static files for 1 day
+  setHeaders: (res, path) => {
+    if (path.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache'); // Don't cache HTML
+    }
+  }
+}));
 
 // --- MongoDB Connection ---
 // --- Mongoose Schemas and Models ---
