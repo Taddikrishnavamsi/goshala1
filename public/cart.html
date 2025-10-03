@@ -242,16 +242,6 @@
         lucide.createIcons();
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // --- PAGE LOADER LOGIC ---
-            const pageLoader = document.getElementById('page-loader');
-            if (pageLoader) {
-                pageLoader.classList.add('opacity-0');
-                // After the transition, hide it so it doesn't block interactions
-                setTimeout(() => {
-                    pageLoader.style.display = 'none';
-                }, 300); // Match duration-300
-            }
-
             // --- HEADER SCROLL EFFECT (NEW) ---
             const mainHeader = document.getElementById('main-header');
             if (mainHeader) {
@@ -263,7 +253,7 @@
                     }
                 });
             }
-            
+
             const cartItemsContainer = document.getElementById('cart-items-container');
             const orderSummaryContainer = document.getElementById('order-summary-container');
             const cartCountElement = document.getElementById('cart-count');
