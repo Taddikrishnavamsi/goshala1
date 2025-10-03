@@ -945,13 +945,16 @@
         const initializePage = async () => {
             lucide.createIcons();
             try {
-                allProducts = await loadProducts(false);
-                
-                // Fetch carousel and featured products in parallel
-                await Promise.all([
-                    fetchAndRenderCarousel(),
+                // Load and render carousel first
+                await fetchAndRenderCarousel();
+                hideLoader(); // Hide loader after carousel is ready
+
+                // Now load the rest in parallel
+                const [products] = await Promise.all([
+                    loadProducts(false),
                     fetchAndRenderFeaturedProducts()
                 ]);
+                allProducts = products;
 
                 if (allProducts.length > 0) {
                     initializeFuzzySearch();
@@ -964,7 +967,7 @@
                 }
             } catch (error) {
                 console.error("Failed to initialize page:", error);
-                
+
                 // Display a user-friendly error message
                 productGrid.innerHTML = `
                     <div class="col-span-full text-center bg-red-50 border border-red-200 text-red-700 px-4 py-8 rounded-lg">
@@ -975,8 +978,7 @@
                         </button>
                     </div>
                 `;
-            } finally {
-                hideLoader();
+                hideLoader(); // Ensure loader is hidden even on error
             }
         };
 
