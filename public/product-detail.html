@@ -654,57 +654,60 @@
             document.querySelectorAll('.thumbnail-img:not(.thumbnail-active)').forEach(img => img.classList.add('border-transparent', 'hover:border-stone-400'));
         }
 
-        function handleCartAction(event) {
-            const addToCartBtn = event.target.closest('#add-to-cart-btn');
-            const quantityBtn = event.target.closest('.quantity-change-btn');
+function handleCartAction(event) {
+    const addToCartBtn = event.target.closest('#add-to-cart-btn');
+    const quantityBtn = event.target.closest('.quantity-change-btn');
 
-            if (addToCartBtn) {
-                addToCartBtn.disabled = true;
-                addToCartBtn.classList.add('flex', 'justify-center', 'items-center');
+    if (addToCartBtn) {
+        // Clear buy now session storage to ensure full cart checkout
+        sessionStorage.removeItem('goshalaBuyNowItem');
 
-                const loaderContainer = document.createElement('div');
-                loaderContainer.className = 'lottie-loader';
-                addToCartBtn.innerHTML = '';
-                addToCartBtn.appendChild(loaderContainer);
+        addToCartBtn.disabled = true;
+        addToCartBtn.classList.add('flex', 'justify-center', 'items-center');
 
-                const loaderAnim = lottie.loadAnimation({
-                    container: loaderContainer, renderer: 'svg', loop: true, autoplay: true, path: '/assets/shopping cart.json'
-                });
+        const loaderContainer = document.createElement('div');
+        loaderContainer.className = 'lottie-loader';
+        addToCartBtn.innerHTML = '';
+        addToCartBtn.appendChild(loaderContainer);
 
-                setTimeout(() => {
-                    currentProduct.inCart = true;
-                    currentProduct.quantity = 1;
+        const loaderAnim = lottie.loadAnimation({
+            container: loaderContainer, renderer: 'svg', loop: true, autoplay: true, path: '/assets/shopping cart.json'
+        });
 
-                    // --- FIX: Update the master product list as well ---
-                    const productInMasterList = allProducts.find(p => p.id === currentProduct.id);
-                    if (productInMasterList) {
-                        Object.assign(productInMasterList, { inCart: true, quantity: 1 });
-                    }
+        setTimeout(() => {
+            currentProduct.inCart = true;
+            currentProduct.quantity = 1;
 
-                    showNotification(`"${currentProduct.name.substring(0, 25)}..." added to cart!`);
-                    renderCartControls();
-                    updateCartCount();
-                    saveProductsToStorage();
-                    // The button's innerHTML is replaced, so we don't need to destroy the animation manually.
-                    // The container for it is gone.
-                    // We just need to make sure the icon is re-rendered if needed.
-                    lucide.createIcons();
-
-                }, 500);
-            } else if (quantityBtn) {
-                const change = parseInt(quantityBtn.dataset.change);
-                currentProduct.quantity += change;
-                if (currentProduct.quantity <= 0) { 
-                    currentProduct.inCart = false; 
-                    currentProduct.quantity = 0; 
-                }
-                const productInMasterList = allProducts.find(p => p.id === currentProduct.id);
-                if (productInMasterList) {
-                    Object.assign(productInMasterList, { inCart: currentProduct.inCart, quantity: currentProduct.quantity });
-                }
-                renderCartControls(); updateCartCount(); saveProductsToStorage();
+            // --- FIX: Update the master product list as well ---
+            const productInMasterList = allProducts.find(p => p.id === currentProduct.id);
+            if (productInMasterList) {
+                Object.assign(productInMasterList, { inCart: true, quantity: 1 });
             }
+
+            showNotification(`"${currentProduct.name.substring(0, 25)}..." added to cart!`);
+            renderCartControls();
+            updateCartCount();
+            saveProductsToStorage();
+            // The button's innerHTML is replaced, so we don't need to destroy the animation manually.
+            // The container for it is gone.
+            // We just need to make sure the icon is re-rendered if needed.
+            lucide.createIcons();
+
+        }, 500);
+    } else if (quantityBtn) {
+        const change = parseInt(quantityBtn.dataset.change);
+        currentProduct.quantity += change;
+        if (currentProduct.quantity <= 0) { 
+            currentProduct.inCart = false; 
+            currentProduct.quantity = 0; 
         }
+        const productInMasterList = allProducts.find(p => p.id === currentProduct.id);
+        if (productInMasterList) {
+            Object.assign(productInMasterList, { inCart: currentProduct.inCart, quantity: currentProduct.quantity });
+        }
+        renderCartControls(); updateCartCount(); saveProductsToStorage();
+    }
+}
 
         function handleBuyNow() {
             const buyNowBtn = document.getElementById('buy-now-btn');

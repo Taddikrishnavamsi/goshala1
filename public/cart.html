@@ -269,6 +269,9 @@
             const cartCountElement = document.getElementById('cart-count');
             let products = []; // This will hold the cart state
 
+            // Clear buy now session storage to ensure full cart checkout
+            sessionStorage.removeItem('goshalaBuyNowItem');
+
             try {
                 products = await loadProducts(false); // Fetch all products for cart logic
             } catch (error) {
