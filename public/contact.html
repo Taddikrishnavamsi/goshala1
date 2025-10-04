@@ -237,6 +237,45 @@
                                     Send Message
                                 </button>
                             </div>
+                            //hello
+
+
+                            <form id="contact-form" class="space-y-4">
+  <div>
+    <label for="recipient" class="sr-only">Recipient</label>
+    <select class="w-full p-3 border border-stone-300 rounded-md" required id="recipient" name="recipient">
+      <option value="">Select a person</option>
+      <option value="gokarni1967@yahoo.com">Bala Krishna Davuluri</option>
+      <option value="someoneelse@example.com">Mahesh Karanam</option>
+      <!-- Add more team members here -->
+    </select>
+  </div>
+  <div>
+    <label for="subject" class="sr-only">Subject</label>
+    <input type="text" name="subject" id="subject" required class="w-full p-3 border border-stone-300 rounded-md" placeholder="Subject">
+  </div>
+  <div>
+    <label for="message" class="sr-only">Message</label>
+    <textarea name="message" id="message" rows="5" required class="w-full p-3 border border-stone-300 rounded-md" placeholder="Your Message"></textarea>
+  </div>
+  <button type="submit" class="inline-flex items-center bg-amber-500 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-amber-600 transition-colors">Send Message</button>
+</form>
+
+<script>
+document.getElementById('contact-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const recipient = document.getElementById('recipient').value;
+  const subject = encodeURIComponent(document.getElementById('subject').value);
+  const message = encodeURIComponent(document.getElementById('message').value);
+  if(recipient){
+    window.location.href = `mailto:${recipient}?subject=${subject}&body=${message}`;
+  } else {
+    alert('Please select a recipient.');
+  }
+});
+</script>
+
+                            //helo
                         </form>
                         <div id="form-status" class="mt-4 text-center font-medium"></div>
                     </div>
