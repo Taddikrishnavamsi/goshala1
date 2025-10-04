@@ -38,8 +38,16 @@
     <header id="main-header" class="app-bar sticky top-0 left-0 w-full transition-all duration-300 z-[100]" style="background: rgba(200, 200, 200, 0.25); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 16px; border: 1px solid rgba(200, 200, 200, 0.3); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);">
         <div id="header-container" class="h-12 md:h-16 px-4 md:px-8 flex items-center justify-between transition-all duration-300 container mx-auto">
             <!-- Logo -->
-            <a id="logo-link" href="index.html" class="text-lg sm:text-xl font-bold text-green-900 hover:text-green-700 mr-6 transition-all duration-300">Brundavanam Goshala</a>
-
+            <a id="logo-link" href="index.html" class="flex items-center gap-2 mr-6 transition-all duration-300">
+                <!-- Logo image -->
+                <img src="/logot.png" class="h-8 sm:h-10">
+                
+                <!-- Logo text - hidden on small screens -->
+                <span class="hidden sm:block text-lg sm:text-xl font-bold text-green-900 hover:text-green-700">
+                    Brundavanam Goshala
+                </span>
+            </a>
+            
             <!-- Nav Links (Desktop) -->
             <nav class="hidden md:flex items-center gap-6 text-stone-800 font-medium">
                 <a href="index.html" class="nav-link-glow text-green-800 font-semibold">Home</a>
