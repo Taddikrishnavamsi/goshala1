@@ -334,13 +334,14 @@
             return parseInt(params.get('id'));
         };
 
-        const generateStars = (rating, size = 'w-5 h-5') => {
-            let starsHTML = '';
-            for (let i = 1; i <= 5; i++) {
-                starsHTML += `<i data-lucide="star" class="${size} ${i <= rating ? 'fill-yellow-400 stroke-yellow-500 text-yellow-500' : 'fill-stone-200 stroke-stone-300 text-stone-300'}"></i>`;
-            }
-            return starsHTML;
-        };
+const generateStars = (rating, size = 'w-5 h-5') => {
+    let starsHTML = '';
+    const roundedRating = Math.round(rating);
+    for (let i = 1; i <= 5; i++) {
+        starsHTML += `<i data-lucide="star" class="${size} ${i <= roundedRating ? 'fill-yellow-400 stroke-yellow-500 text-yellow-500' : 'fill-stone-200 stroke-stone-300 text-stone-300'}"></i>`;
+    }
+    return starsHTML;
+};
 
         const getNewStatus = (dateString) => {
             if (!dateString) return null;
@@ -465,18 +466,18 @@
             document.getElementById('reviews-summary-count').textContent = `Based on ${totalReviews} reviews`;
 
             // Rating Breakdown
-            const ratingCounts = [0, 0, 0, 0, 0];
-            allReviews.forEach(r => ratingCounts[r.rating - 1]++);
-            const breakdownEl = document.getElementById('rating-breakdown');
-            breakdownEl.innerHTML = ratingCounts.map((count, i) => {
-                const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
-                return `
-                <div class="flex items-center gap-2 text-sm">
-                    <span class="text-stone-600 w-12">${5 - i} star</span>
-                    <div class="w-full bg-stone-200 rounded-full h-2"><div class="bg-yellow-400 h-2 rounded-full" style="width: ${percentage}%"></div></div>
-                    <span class="text-stone-500 w-8 text-right">${count}</span>
-                </div>`;
-            }).reverse().join('');
+const ratingCounts = [0, 0, 0, 0, 0];
+allReviews.forEach(r => ratingCounts[r.rating - 1]++);
+const breakdownEl = document.getElementById('rating-breakdown');
+breakdownEl.innerHTML = ratingCounts.map((count, i) => {
+    const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
+    return `
+    <div class="flex items-center gap-2 text-sm">
+        <span class="text-stone-600 w-12">${i + 1} star</span>
+        <div class="w-full bg-stone-200 rounded-full h-2"><div class="bg-yellow-400 h-2 rounded-full" style="width: ${percentage}%"></div></div>
+        <span class="text-stone-500 w-8 text-right">${count}</span>
+    </div>`;
+}).join('');
 
             // Review Highlights
             const highlightsEl = document.getElementById('review-highlights');
