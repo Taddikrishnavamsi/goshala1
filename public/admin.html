@@ -286,6 +286,7 @@
 
         let searchQuery = '';
         let totalPages = 1;
+        let activeUploads = 0;
 
 
         // --- DOM ELEMENTS ---
@@ -1113,6 +1114,10 @@
         });
 
         productForm.addEventListener('submit', async (e) => {
+            if (activeUploads > 0) {
+                e.preventDefault();
+                return;
+            }
             e.preventDefault();
             formSubmitBtn.disabled = true;
             formSubmitBtn.innerHTML = `<span class="spinner"></span> Saving...`;
@@ -1203,8 +1208,14 @@
         });
 
         async function handleFiles(files) {
+            activeUploads += files.length;
+            updateSubmitButton();
+
             for (const file of files) {
-                if (!file.type.startsWith('image/')) continue;
+                if (!file.type.startsWith('image/')) {
+                    activeUploads--;
+                    continue;
+                }
 
                 const tempId = `temp-${Date.now()}-${Math.random()}`;
                 addPreview(file, tempId);
@@ -1212,7 +1223,7 @@
                 try {
                     const result = await api.upload(file);
                     const uploadedUrl = result.url;
-                    
+
                     // Update the preview with the real URL and add to our list
                     const tempPreview = document.getElementById(tempId);
                     if (tempPreview) {
@@ -1227,6 +1238,9 @@
                         tempPreview.querySelector('.spinner-container').innerHTML = `<i data-lucide="alert-triangle" class="w-6 h-6 text-red-500"></i>`;
                         lucide.createIcons();
                     }
+                } finally {
+                    activeUploads--;
+                    updateSubmitButton();
                 }
             }
         }
@@ -1273,6 +1287,15 @@
                 container.remove();
             }
         });
+
+        function updateSubmitButton() {
+            formSubmitBtn.disabled = activeUploads > 0;
+            if (activeUploads > 0) {
+                formSubmitBtn.textContent = `Uploading ${activeUploads} image${activeUploads > 1 ? 's' : ''}...`;
+            } else {
+                formSubmitBtn.textContent = 'Save Product';
+            }
+        }
 
         // --- INITIALIZATION ---
         checkAuth();
