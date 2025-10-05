@@ -177,3 +177,9 @@ label[for="sort-select"] {
     border: 1.5px solid #22c55e; /* green-400 */
     box-shadow: 0 0 0 2px #bbf7d0; /* green-200 */
 }
+.line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}

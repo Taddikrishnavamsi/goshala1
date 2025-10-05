@@ -1,4 +1,2 @@
-- [ ] Modify initializePage function in public/index.html to load carousel first, render it, and hide loader immediately after.
-- [ ] Then load allProducts and featured products in parallel after loader is hidden.
-- [ ] Render the products grid after loading allProducts.
-- [ ] Test the page loading to ensure carousel appears quickly and rest loads progressively.
+- [ ] Add line-clamp-2 CSS class to public/style.css
+- [ ] Modify renderCarouselSlides function in public/index.html to add line-clamp-2 class to description paragraph
