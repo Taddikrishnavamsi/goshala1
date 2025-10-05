@@ -545,10 +545,10 @@
                 const isActive = btn.dataset.category === selectedCategory;
                 // Use the correct active/inactive classes to match the click handler
                 btn.classList.toggle('bg-green-200', isActive);
-                btn.classList.toggle('text-black', isActive);
+                btn.classList.toggle('text-green-900', isActive);
                 btn.classList.toggle('font-semibold', isActive);
-                btn.classList.toggle('bg-white', !isActive);
-                btn.classList.toggle('text-black', isActive);
+                btn.classList.toggle('bg-white/20', !isActive);
+                btn.classList.toggle('text-white', !isActive);
             });
             updateClearButtonVisibility();
         }
@@ -569,27 +569,23 @@
         }
 
         function renderCategoryFilters() {
-            const categories = [
-                {"id": "all", "label": "All", "icon": "lucide:list"},
-                {"id": "food_wellness", "label": "Food & Wellness", "icon": "lucide:apple"},
-                {"id": "ghee", "label": "Ghee", "icon": "lucide:droplet"},
-                {"id": "pooja", "label": "Pooja Items", "icon": "lucide:sparkles"},
-                {"id": "personal_care", "label": "Personal Care", "icon": "lucide:smile"},
-                {"id": "panchagavya", "label": "Panchagavya", "icon": "lucide:leaf"},
-                {"id": "gardening_agriculture", "label": "Gardening & Agriculture", "icon": "lucide:flower"},
-                {"id": "fertilizer", "label": "Fertilizer", "icon": "lucide:seedling"},
-                {"id": "spiritual_home", "label": "Spiritual & Home", "icon": "lucide:home"},
-                {"id": "incense", "label": "Incense", "icon": "lucide:flame"}
-            ];
+            // Collect unique categories from allProducts
+            const allCategories = new Set();
+            allProducts.forEach(product => {
+                if (product.category && Array.isArray(product.category)) {
+                    product.category.forEach(cat => allCategories.add(cat));
+                }
+            });
+            const categories = [{ label: "All", icon: "lucide:list" }, ...Array.from(allCategories).map(cat => ({ label: cat, icon: "lucide:tag" }))];
 
             const filtersContainer = document.getElementById('category-filters');
             if (!filtersContainer) return;
 
             filtersContainer.innerHTML = categories.map(category => {
-                const isActive = category.label === 'All';
+                const isActive = category.label === selectedCategory;
                 return `
-                <button 
-                    class="category-filter-btn flex-shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 shadow-sm border border-transparent ${isActive ? 'bg-green-600 text-white' : 'bg-white/20 text-white hover:bg-white/30'}" 
+                <button
+                    class="category-filter-btn flex-shrink-0 flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 shadow-sm border border-transparent ${isActive ? 'bg-green-200 text-green-900 font-semibold' : 'bg-white/20 text-white hover:bg-white/30'}"
                     data-category="${category.label}"
                 >
                     <i data-lucide="${category.icon.split(':')[1]}" class="w-4 h-4"></i>

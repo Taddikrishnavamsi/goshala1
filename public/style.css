@@ -113,13 +113,19 @@ body::before {
     background: rgba(32, 32, 32, 0.25); /* Darker glass for better contrast */
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    /* Removed white border */
+    border: none;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
     /* border-radius: 18px; */ /* We will use Tailwind's classes */
     /* padding: 24px; */ /* We will use Tailwind's classes */
     display: flex;
     flex-direction: column;
     transition: background 0.3s, transform 0.3s;
+}
+
+/* Remove white border specifically for top picks cards */
+#featured-products-grid .product-card-new {
+    border: none !important;
 }
 .product-card-new:hover {
     transform: translateY(-8px);
