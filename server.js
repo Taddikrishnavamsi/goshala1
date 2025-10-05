@@ -51,8 +51,9 @@ const razorpay = new Razorpay({
 });
 
 // --- Multer Configuration for Image Uploads (in-memory) ---
-const upload = multer({ 
+const upload = multer({
     storage: multer.memoryStorage(), // Use memory storage to handle the file as a buffer
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file size limit
     fileFilter: (req, file, cb) => {
         if (!file.mimetype.startsWith('image/')) return cb(new Error('Only image files are allowed!'), false);
         cb(null, true);
