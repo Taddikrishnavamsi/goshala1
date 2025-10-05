@@ -40,20 +40,30 @@ export async function loadProducts(forceReload = false) {
     // The IIAFE (Immediately Invoked Async Function Expression) is assigned to inFlightFetch.
     inFlightFetch = (async () => {
         try {
+            // Add timeout to prevent hanging
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
             // The API endpoint in server.js fetches all products, which is what we want for the cache.
-            const response = await fetch('/api/products');
+            const response = await fetch('/api/products', { signal: controller.signal });
+            clearTimeout(timeoutId);
+
             if (!response.ok) {
                 throw new ApiError(`Failed to fetch products. Status: ${response.status}`);
             }
             // The response from /api/products is { products: [...], hasMore: ... }
             const data = await response.json();
             const productsFromAPI = data.products || [];
-            
+
             cachedProducts = productsFromAPI;
             lastFetchTime = Date.now();
-            
+
             return productsFromAPI;
         } catch (error) {
+            if (error.name === 'AbortError') {
+                console.error("Fetch timed out after 10 seconds");
+                throw new ApiError("Request timed out. Please check your connection.");
+            }
             console.error("Could not fetch products:", error);
             // Re-throw the error so the UI layer can handle it and show a message.
             throw error;
