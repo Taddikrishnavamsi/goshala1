@@ -1,8 +1,10 @@
 {
   "version": 2,
+  "redirects": [
+    { "source": "/", "destination": "/index.html" }
+  ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/server.js" },
-    { "source": "/", "destination": "/public/index.html" },
     { "source": "/(.*)", "destination": "/public/$1" }
   ],
   "functions": {
