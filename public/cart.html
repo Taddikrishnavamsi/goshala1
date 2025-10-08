@@ -458,11 +458,120 @@
                 }
             });
 
-            // Mobile menu logic retained from your code...
+            // Mobile menu logic
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuCloseBtn = document.getElementById('mobile-menu-close-btn');
 
-            // ...Search overlay logic retained from your code...
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
 
-            // ...Back to Top logic retained...
+            if (mobileMenuCloseBtn && mobileMenu) {
+                mobileMenuCloseBtn.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            }
+
+            // Search overlay logic
+            const searchOverlay = document.getElementById('search-overlay');
+            const searchOverlayContent = document.getElementById('search-overlay-content');
+            const overlaySearchInput = document.getElementById('overlay-search-input');
+            const overlaySearchSuggestions = document.getElementById('overlay-search-suggestions');
+            const overlayCloseButton = document.getElementById('overlay-close-button');
+            const headerSearchButton = document.getElementById('header-search-button');
+            const mobileHeaderSearchButton = document.getElementById('mobile-header-search-button');
+            const mobileBottomSearch = document.getElementById('mobile-bottom-search');
+
+            function showSearchOverlay() {
+                searchOverlay.classList.remove('hidden');
+                searchOverlay.classList.add('flex');
+                setTimeout(() => {
+                    searchOverlayContent.classList.remove('-translate-y-full');
+                }, 10);
+                overlaySearchInput.focus();
+            }
+
+            function hideSearchOverlay() {
+                searchOverlayContent.classList.add('-translate-y-full');
+                setTimeout(() => {
+                    searchOverlay.classList.add('hidden');
+                    searchOverlay.classList.remove('flex');
+                }, 300);
+                overlaySearchInput.value = '';
+                overlaySearchSuggestions.classList.add('hidden');
+            }
+
+            if (headerSearchButton) {
+                headerSearchButton.addEventListener('click', showSearchOverlay);
+            }
+
+            if (mobileHeaderSearchButton) {
+                mobileHeaderSearchButton.addEventListener('click', showSearchOverlay);
+            }
+
+            if (mobileBottomSearch) {
+                mobileBottomSearch.addEventListener('click', showSearchOverlay);
+            }
+
+            if (overlayCloseButton) {
+                overlayCloseButton.addEventListener('click', hideSearchOverlay);
+            }
+
+            if (searchOverlay) {
+                searchOverlay.addEventListener('click', (e) => {
+                    if (e.target === searchOverlay) {
+                        hideSearchOverlay();
+                    }
+                });
+            }
+
+            if (overlaySearchInput) {
+                overlaySearchInput.addEventListener('input', debounce((e) => {
+                    const query = e.target.value.trim();
+                    if (query.length < 2) {
+                        overlaySearchSuggestions.classList.add('hidden');
+                        return;
+                    }
+                    const results = fuse.search(query).slice(0, 5);
+                    if (results.length > 0) {
+                        overlaySearchSuggestions.innerHTML = results.map(result => {
+                            const product = result.item;
+                            const imageUrl = (product.images && product.images.length > 0) ? product.images[0] : 'https://placehold.co/100x100/CCCCCC/FFFFFF?text=No+Image';
+                            return `
+                                <a href="product-detail.html?id=${product.id}" class="flex items-center gap-3 p-3 hover:bg-stone-50 border-b border-stone-100 last:border-b-0">
+                                    <img src="${imageUrl}" alt="${product.name}" class="w-12 h-12 object-cover rounded">
+                                    <div class="flex-grow">
+                                        <h4 class="font-medium text-stone-800">${product.name}</h4>
+                                        <p class="text-sm text-stone-500">₹${product.price}</p>
+                                    </div>
+                                </a>
+                            `;
+                        }).join('');
+                        overlaySearchSuggestions.classList.remove('hidden');
+                    } else {
+                        overlaySearchSuggestions.innerHTML = '<p class="p-3 text-stone-500">No products found</p>';
+                        overlaySearchSuggestions.classList.remove('hidden');
+                    }
+                }));
+            }
+
+            // Back to Top logic
+            const backToTopBtn = document.getElementById('back-to-top-btn');
+            if (backToTopBtn) {
+                window.addEventListener('scroll', () => {
+                    if (window.scrollY > 300) {
+                        backToTopBtn.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+                    } else {
+                        backToTopBtn.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+                    }
+                });
+                backToTopBtn.addEventListener('click', () => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
 
         });
 
