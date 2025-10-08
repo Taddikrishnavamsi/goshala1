@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - Brundavanam Goshala</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.0/lottie.min.js"></script>
+    <link rel="icon" type="image/png" href="/logo.png">
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        .cart-count-animate {
+            animation: jiggle 0.4s ease-in-out;
+        }
+        @keyframes jiggle {
+            0%, 100% { transform: rotate(0); }
+            25% { transform: rotate(-15deg); }
+            75% { transform: rotate(15deg); }
+        }
+        .buy-now-animate {
+            animation: buy-now-jiggle 0.4s ease-in-out;
+        }
+        @keyframes buy-now-jiggle {
+            0%, 100% { transform: scale(1.05) rotate(0); }
+            25% { transform: scale(1.1) rotate(-2deg); }
+            75% { transform: scale(1.1) rotate(2deg); }
+        }
+        .nav-link-glow { transition: text-shadow 0.3s ease; }
+        .nav-link-glow:hover { text-shadow: 0 0 8px rgba(22, 101, 52, 0.7); }
+        /* Header shrink styles */
+        .header-scrolled #header-container {
+            height: 3rem; /* h-12 */
+        }
+        .header-scrolled #logo-link {
+            font-size: 1.125rem; /* text-lg */
+            line-height: 1.75rem;
+        }
+        .spinner { width: 24px; height: 24px; border: 3px solid currentColor; border-bottom-color: transparent; border-radius: 50%; display: inline-block; animation: spin 0.75s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader-logo { animation: blink 1.5s ease-in-out infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .thumbnail-active { border-color: #166534; /* green-800 */ box-shadow: 0 0 0 2px #166534; }
+        .lottie-loader {
+            width: 28px; /* Adjust to fit button */
+            height: 28px; /* Adjust to fit button */
+        }
+        .review-star-input:hover ~ label svg,
+        .review-star-input:checked ~ label svg { color: #eab308; /* yellow-500 */ }
+        .review-star-input { display: none; }
+        .review-star-label { cursor: pointer; }
+        .review-filter-btn.active { background-color: #166534; color: white; }
+    </style>
+</head>
+<body class="bg-stone-100">
+
+    <!-- Page Loader -->
+    <div id="page-loader" class="fixed inset-0 z-[9999] flex items-center justify-center bg-white">
+        <img src="/logot.png" class="loader-logo w-24 h-24">
+    </div>
+
+    <!-- Search Overlay -->
+    <div id="search-overlay" class="fixed inset-0 z-[1001] bg-black/70 backdrop-blur-sm hidden items-start justify-center p-4 pt-24 md:pt-32 transition-opacity duration-300">
+        <div class="w-full max-w-xl transform -translate-y-full transition-transform duration-300" id="search-overlay-content">
+            <div class="relative">
+                <input type="text" id="overlay-search-input" placeholder="Search for products..." class="w-full p-4 pr-12 text-lg text-stone-800 bg-white/90 border-2 border-white rounded-full focus:outline-none focus:ring-2 focus:ring-green-500" autocomplete="off">
+                <i data-lucide="search" class="absolute top-1/2 right-4 -translate-y-1/2 w-6 h-6 text-stone-500"></i>
+            </div>
+            <!-- Suggestions for overlay search -->
+            <div id="overlay-search-suggestions" class="w-full bg-white border border-stone-200 rounded-lg shadow-lg z-20 hidden mt-2 overflow-hidden max-h-80 overflow-y-auto">
+                <!-- Suggestions will be injected here -->
+            </div>
+        </div>
+        <button id="overlay-close-button" class="absolute top-6 right-6 text-white/70 hover:text-white">
+            <i data-lucide="x" class="w-10 h-10"></i>
+        </button>
+    </div>
+
+    <!-- Header -->
+    <header id="main-header" class="app-bar sticky top-0 left-0 w-full transition-all duration-300 z-[100]" style="background: rgba(200, 200, 200, 0.25); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 16px; border: 1px solid rgba(200, 200, 200, 0.3); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);">
+        <div id="header-container" class="h-12 md:h-16 px-4 md:px-8 flex items-center justify-between transition-all duration-300 container mx-auto">
+            <a id="logo-link" href="/" class="flex items-center gap-2 mr-6 transition-all duration-300">
+                <!-- Logo image -->
+                <img src="/logot.png" class="h-8 sm:h-10">
+                
+                <!-- Logo text - hidden on small screens -->
+                <span class="hidden sm:block text-lg sm:text-xl font-bold text-green-900 hover:text-green-700">
+                    Brundavanam Goshala
+                </span>
+            </a>
+            
+            <nav class="hidden md:flex items-center gap-6 text-stone-800 font-medium">
+                <a href="/" class="nav-link-glow">Home</a>
+                <a href="about.html" class="nav-link-glow">About Us</a>
+                <a href="/" class="nav-link-glow">Shop</a>
+                <a href="contact.html" class="nav-link-glow">Contact</a>
+            </nav>
+            <div class="flex items-center gap-2 md:gap-4">
+                <button id="header-search-button" class="hidden md:block p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
+                    <i data-lucide="search" class="w-5 h-5"></i>
+                </button>
+                <a href="my-orders.html" class="hidden md:block p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40" title="My Account">
+                    <i data-lucide="user" class="w-5 h-5"></i>
+                </a>
+                <a href="cart.html" class="relative p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span>
+                </a>
+                <button id="mobile-menu-button" class="md:hidden p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+        <div id="mobile-menu" class="hidden md:hidden bg-white/80 backdrop-blur-sm border rounded-2xl mt-2 p-4 pt-10 space-y-2 shadow-xl relative">
+            <button id="mobile-menu-close-btn" class="absolute top-2 right-2 p-1 text-stone-500 hover:text-stone-800">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <a href="/" class="block text-gray-700 hover:bg-stone-100 p-2 rounded">Home</a>
+            <a href="about.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded">About Us</a>
+            <a href="/" class="block text-gray-700 hover:bg-stone-100 p-2 rounded">Shop</a>
+            <a href="contact.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded mb-2">Contact</a>
+            <button id="mobile-header-search-button" class="w-full flex items-center justify-center gap-2 text-stone-700 bg-stone-200/70 hover:bg-stone-300/70 p-2 rounded-lg font-medium">
+                <i data-lucide="search" class="w-4 h-4"></i> Search
+            </button>
+            <a href="my-orders.html" class="w-full flex items-center justify-center gap-2 text-stone-700 bg-stone-200/70 hover:bg-stone-300/70 p-2 rounded-lg font-medium">
+                <i data-lucide="user" class="w-4 h-4"></i> My Account
+            </a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div id="product-detail-container" class="opacity-0 transition-opacity duration-500">
+            <!-- Breadcrumbs -->
+            <nav class="text-sm text-stone-500 mb-6" aria-label="Breadcrumb">
+                <ol class="list-none p-0 inline-flex">
+                    <li class="flex items-center">
+                        <a href="/" class="hover:text-green-700">Home</a>
+                        <i data-lucide="chevron-right" class="w-4 h-4 mx-1"></i>
+                    </li>
+                    <li class="flex items-center">
+                        <a href="/" class="hover:text-green-700">Shop</a>
+                        <i data-lucide="chevron-right" class="w-4 h-4 mx-1"></i>
+                    </li>
+                    <li id="breadcrumb-product-name" aria-current="page">
+                        Product Name
+                    </li>
+                </ol>
+            </nav>
+
+            <!-- Main Product Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+                <!-- Image Gallery -->
+                <div id="image-gallery">
+                    <div class="relative mb-4 flex justify-center">
+                        <img id="main-product-image" src="https://placehold.co/600x600/e2e8f0/e2e8f0" alt="Main product image" class="w-full max-w-[350px] h-auto object-cover rounded-lg shadow-lg">
+                        <div id="product-badges" class="absolute top-4 left-4 space-y-2"></div>
+                    </div>
+                    <div id="thumbnail-gallery" class="grid grid-cols-5 gap-2 max-w-[350px] mx-auto">
+                        <!-- Thumbnails will be injected here -->
+                    </div>
+                </div>
+
+                <!-- Product Info -->
+                <div id="product-info">
+                    <div id="category-badges" class="flex flex-wrap gap-2 mb-2"></div>
+                    <h1 id="product-name" class="text-3xl md:text-4xl font-bold text-stone-800 mb-3">Product Name</h1>
+
+                    <div class="flex items-center mb-4 text-yellow-500">
+                        <div id="product-rating-stars" class="flex"></div>
+                        <a href="#reviews-section" id="product-reviews-count" class="text-sm text-stone-500 ml-2 hover:underline"></a>
+                    </div>
+
+                    <p id="product-description" class="text-stone-600 mb-6 leading-relaxed"></p>
+
+                    <div class="mb-6">
+                        <span id="product-price" class="text-4xl font-bold text-stone-900"></span>
+                        <span id="product-original-price" class="text-lg text-stone-500 line-through ml-3"></span>
+                        <span id="product-discount" class="text-lg text-green-700 font-semibold ml-3"></span>
+                    </div>
+
+                    <!-- Delivery Info -->
+                    <div id="delivery-info-container" class="mb-6 hidden">
+                        <div class="flex items-center text-sm text-stone-700">
+                            <i data-lucide="truck" class="w-5 h-5 mr-2 text-green-700"></i>
+                            <span id="delivery-date-text" class="font-medium"></span>
+                        </div>
+                    </div>
+
+                    <div id="cart-controls-container" class="max-w-sm">
+                        <!-- Cart controls will be injected here -->
+                    </div>
+                    <div class="mt-4 max-w-xs">
+                        <button id="buy-now-btn" class="w-full flex items-center justify-center bg-amber-600 text-stone-900 font-bold py-4 px-6 rounded-lg text-lg hover:bg-amber-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                            <i data-lucide="zap" class="w-5 h-5 mr-2"></i>
+                            <span id="buy-now-text">Buy Now</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reviews Section -->
+            <div id="reviews-section" class="mt-16 lg:mt-24 scroll-mt-24">
+                <h2 class="text-2xl font-bold text-stone-800 mb-6">Customer Reviews</h2>
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <!-- Review Summary -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 border-b pb-6 mb-6">
+                        <div class="text-center">
+                            <div id="reviews-summary-avg" class="text-4xl font-bold text-stone-800">0.0</div>
+                            <div id="reviews-summary-stars" class="flex justify-center text-yellow-500 mt-1"></div>
+                            <div id="reviews-summary-count" class="text-sm text-stone-500 mt-1">Based on 0 reviews</div>
+                        </div>
+                        <div class="md:col-span-2">
+                            <h3 class="font-semibold text-stone-700 mb-2">Rating Breakdown</h3>
+                            <div id="rating-breakdown" class="space-y-1">
+                                <!-- Rating bars will be injected here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Review Highlights -->
+                    <div id="review-highlights" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 hidden">
+                        <!-- Highlights will be injected here -->
+                    </div>
+
+                    <!-- Review Filters & Form Toggle -->
+                    <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+                        <div class="flex flex-wrap items-center gap-4">
+                            <div id="review-filters" class="flex flex-wrap gap-2">
+                                <!-- Filter buttons will be injected here -->
+                            </div>
+                            <select id="review-sort-select" class="text-sm p-2 border border-stone-300 rounded-md focus:ring-2 focus:ring-green-600">
+                                <option value="highest">Sort: Highest Rating</option>
+                                <option value="lowest">Sort: Lowest Rating</option>
+                                <option value="newest">Sort: Newest</option>
+                                <option value="oldest">Sort: Oldest</option>
+                            </select>
+                        </div>
+                        <button id="toggle-review-form-btn" class="font-semibold text-green-700 hover:text-green-800"><i data-lucide="plus-circle" class="inline w-5 h-5 mr-1"></i>Write a Review</button>
+                    </div>
+
+                    <!-- Review Submission Form (hidden by default) -->
+                    <div id="review-form-container" class="hidden bg-stone-50 p-6 rounded-lg border mb-8">
+                        <h3 class="text-lg font-bold text-stone-800 mb-4">Share Your Thoughts</h3>
+                        <form id="review-form" class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="reviewer-name" class="block text-sm font-medium text-stone-700 mb-1">Your Name</label>
+                                    <input type="text" id="reviewer-name" name="name" required class="w-full p-2 border border-stone-300 rounded-md focus:ring-2 focus:ring-green-600">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-stone-700 mb-1">Your Rating</label>
+                                    <div id="review-star-rating" class="flex items-center text-stone-300 text-2xl">
+                                        <!-- Stars for rating input (reversed order for correct CSS sibling selector behavior) -->
+                                        <input type="radio" id="star1" name="rating" value="1" class="review-star-input" required><label for="star1" title="1 star" class="review-star-label"><i data-lucide="star" class="w-7 h-7 fill-current"></i></label>
+                                        <input type="radio" id="star2" name="rating" value="2" class="review-star-input"><label for="star2" title="2 stars" class="review-star-label"><i data-lucide="star" class="w-7 h-7 fill-current"></i></label>
+                                        <input type="radio" id="star3" name="rating" value="3" class="review-star-input"><label for="star3" title="3 stars" class="review-star-label"><i data-lucide="star" class="w-7 h-7 fill-current"></i></label>
+                                        <input type="radio" id="star4" name="rating" value="4" class="review-star-input"><label for="star4" title="4 stars" class="review-star-label"><i data-lucide="star" class="w-7 h-7 fill-current"></i></label>
+                                        <input type="radio" id="star5" name="rating" value="5" class="review-star-input"><label for="star5" title="5 stars" class="review-star-label"><i data-lucide="star" class="w-7 h-7 fill-current"></i></label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="review-comment" class="block text-sm font-medium text-stone-700 mb-1">Your Review</label>
+                                <textarea id="review-comment" name="comment" rows="4" required class="w-full p-2 border border-stone-300 rounded-md focus:ring-2 focus:ring-green-600"></textarea>
+                            </div>
+                            <div class="flex justify-end items-center gap-4">
+                                <div id="form-status" class="text-sm font-medium"></div>
+                                <button type="submit" class="bg-green-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-green-700 transition-colors">Submit Review</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Reviews List -->
+                    <div id="reviews-list" class="space-y-6">
+                        <!-- Reviews will be injected here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Products Section -->
+            <div id="related-products-section" class="mt-16 lg:mt-24 hidden">
+                <h2 class="text-2xl font-bold text-stone-800 mb-6">You Might Also Like</h2>
+                <div id="related-products-grid" class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <!-- Related products will be injected here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Error/Not Found Container -->
+        <div id="error-container" class="hidden text-center py-16">
+            <i data-lucide="alert-triangle" class="w-16 h-16 text-amber-500 mx-auto mb-4"></i>
+            <h1 class="text-3xl font-bold text-stone-800">Product Not Found</h1>
+            <p class="text-stone-600 mt-2">We couldn't find the product you're looking for.</p>
+            <a href="/" class="mt-6 inline-block bg-green-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-800">Back to Shop</a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-stone-800 text-white mt-12">
+        <div class="container mx-auto px-8 py-12 text-center">
+            <p class="font-bold text-2xl mb-2">Brundavanam Goshala</p>
+            <p class="text-stone-400 max-w-xl mx-auto mb-6">Promoting wellness and sustainability through sacred cow products, while supporting the care and protection of our beloved Gomata.</p>
+            <div class="flex justify-center space-x-6">
+                <a href="/" class="text-stone-300 hover:text-white">Home</a>
+                <a href="/" class="text-stone-300 hover:text-white">Shop</a>
+                <a href="about.html" class="text-stone-300 hover:text-white">About Us</a>
+                <a href="contact.html" class="text-stone-300 hover:text-white">Contact Us</a>
+            </div>
+            <div class="mt-8 border-t border-stone-700 pt-6 text-center text-stone-500 text-sm">
+                <p>© Copyright 2025 | All Rights Reserved | Brundavanam Goshala | 100% Pure</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top-btn" title="Go to top" class="fixed bottom-20 right-5 z-50 p-3 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+    </button>
+
+    <!-- Cart Notification -->
+    <div id="cart-notification" class="fixed top-5 left-1/2 -translate-x-1/2 md:left-auto md:translate-x-0 md:top-auto md:bottom-5 md:right-5 bg-green-700 text-white py-3 px-6 rounded-lg shadow-lg transform -translate-y-20 md:translate-y-20 opacity-0 transition-all duration-500 ease-in-out z-[1002] w-11/12 max-w-sm md:max-w-md">
+        <div class="flex items-center">
+            <i data-lucide="check-circle" class="w-5 h-5 mr-3 shrink-0"></i>
+            <span id="notification-message">Item added to cart!</span>
+        </div>
+    </div>
+
+    <script type="module">
+        import { loadProducts, getReviewsForProduct, submitReview, loadProductById } from '/js/data.js';
+        import Fuse from 'https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.esm.js';
+
+        // --- UTILITIES ---
+        const debounce = (func, delay = 300) => {
+            let timeout;
+            return (...args) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    func.apply(this, args);
+                }, delay);
+            };
+        };
+
+        // --- UTILITIES ---
+        const getProductIdFromURL = () => {
+            const params = new URLSearchParams(window.location.search);
+            return parseInt(params.get('id'));
+        };
+
+        const generateStars = (rating, size = 'w-5 h-5') => {
+            let starsHTML = '';
+            for (let i = 1; i <= 5; i++) {
+                starsHTML += `<i data-lucide="star" class="${size} ${i <= rating ? 'fill-yellow-400 stroke-yellow-500 text-yellow-500' : 'fill-stone-200 stroke-stone-300 text-stone-300'}"></i>`;
+            }
+            return starsHTML;
+        };
+
+        const getNewStatus = (dateString) => {
+            if (!dateString) return null;
+            const now = new Date();
+            const productDate = new Date(dateString);
+            if (productDate > now) return null;
+            const diffTime = now - productDate;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            if (diffDays <= 15) return 'New Arrival';
+            if (diffDays <= 30) return 'Recently Added';
+            return null;
+        };
+
+        // --- STATE ---
+        let fuse;
+        let allProducts = [];
+        let currentProduct = null;
+        let allReviews = [];
+        let filteredReviews = [];
+        let reviewsToShow = 2; // Show 2 reviews by default
+        let currentReviewSort = 'highest';
+
+        // --- DOM ELEMENTS ---
+        const pageLoader = document.getElementById('page-loader');
+        const productDetailContainer = document.getElementById('product-detail-container');
+        const errorContainer = document.getElementById('error-container');
+        const cartCountElement = document.getElementById('cart-count');
+
+        // --- RENDER FUNCTIONS ---
+
+        function renderProductDetails() {
+            document.title = `${currentProduct.name} - Brundavanam Goshala`;
+            document.getElementById('breadcrumb-product-name').textContent = currentProduct.name;
+            document.getElementById('product-name').textContent = currentProduct.name;
+            document.getElementById('product-description').textContent = currentProduct.description;
+            document.getElementById('product-price').textContent = `₹${currentProduct.price}`;
+
+            // Price, discount, and badges
+            const originalPriceEl = document.getElementById('product-original-price');
+            const discountEl = document.getElementById('product-discount');
+            const productBadgesEl = document.getElementById('product-badges');
+            productBadgesEl.innerHTML = '';
+
+            if (currentProduct.originalPrice) {
+                const discount = Math.round(((currentProduct.originalPrice - currentProduct.price) / currentProduct.originalPrice) * 100);
+                originalPriceEl.textContent = `₹${currentProduct.originalPrice}`;
+                discountEl.textContent = `(${discount}% off)`;
+                productBadgesEl.innerHTML += `<span class="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full">On Sale</span>`;
+            } else {
+                originalPriceEl.textContent = '';
+                discountEl.textContent = '';
+            }
+
+            // Delivery Date
+            const deliveryInfoContainer = document.getElementById('delivery-info-container');
+            const deliveryDateText = document.getElementById('delivery-date-text');
+            if (currentProduct.deliveryDate) {
+                deliveryDateText.textContent = currentProduct.deliveryDate;
+                deliveryInfoContainer.classList.remove('hidden');
+            } else {
+                deliveryInfoContainer.classList.add('hidden');
+            }
+
+            const newStatus = getNewStatus(currentProduct.dateAdded);
+            if (newStatus) {
+                productBadgesEl.innerHTML += `<span class="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">${newStatus}</span>`;
+            }
+
+            // Category badges
+            const categoryBadgesEl = document.getElementById('category-badges');
+            if (currentProduct.category && currentProduct.category.length > 0) {
+                categoryBadgesEl.innerHTML = currentProduct.category.map(cat =>
+                    `<a href="/?category=${encodeURIComponent(cat)}" class="text-xs font-medium bg-stone-200 text-stone-700 px-3 py-1 rounded-full hover:bg-stone-300">${cat}</a>`
+                ).join('');
+            }
+
+            // Image Gallery
+            const mainImageEl = document.getElementById('main-product-image');
+            const thumbnailGalleryEl = document.getElementById('thumbnail-gallery');
+            mainImageEl.src = currentProduct.images[0] || 'https://placehold.co/600x600/e2e8f0/e2e8f0';
+            mainImageEl.alt = currentProduct.name;
+            thumbnailGalleryEl.innerHTML = currentProduct.images.map((img, index) => `
+                <img src="${img}" alt="Thumbnail ${index + 1}" data-index="${index}" class="thumbnail-img w-full h-20 object-cover rounded-md cursor-pointer border-2 ${index === 0 ? 'thumbnail-active' : 'border-transparent hover:border-stone-400'}">
+            `).join('');
+
+            renderCartControls();
+        }
+
+        function renderCartControls() {
+            const container = document.getElementById('cart-controls-container');
+            const wasJustAdded = currentProduct.inCart && currentProduct.quantity === 1;
+
+            if (wasJustAdded && container.querySelector('#add-to-cart-btn')) {
+                // Stage 1: Show "Added" animation
+                const button = container.querySelector('#add-to-cart-btn');
+                button.classList.add('bg-green-800');
+                button.innerHTML = `<i data-lucide="check" class="w-5 h-5 mr-2"></i> Added!`;
+                lucide.createIcons({ nodes: [button] });
+
+                // Stage 2: Transition to quantity controls
+                setTimeout(() => {
+                    container.innerHTML = `<label class="font-medium text-stone-700 mb-2 block">Quantity:</label><div class="flex items-center justify-between font-bold text-lg rounded-lg border-2 border-green-700 max-w-xs"><button class="quantity-change-btn text-green-700 px-5 py-2" data-change="-1">−</button><span class="text-green-700">${currentProduct.quantity} in cart</span><button class="quantity-change-btn text-green-700 px-5 py-2" data-change="1">+</button></div>`;
+                }, 800);
+
+            } else if (currentProduct.inCart) {
+                container.innerHTML = `<label class="font-medium text-stone-700 mb-2 block">Quantity:</label><div class="flex items-center justify-between font-bold text-lg rounded-lg border-2 border-green-700 max-w-xs"><button class="quantity-change-btn text-green-700 px-5 py-2" data-change="-1">−</button><span class="text-green-700">${currentProduct.quantity} in cart</span><button class="quantity-change-btn text-green-700 px-5 py-2" data-change="1">+</button></div>`;
+            } else {
+                container.innerHTML = `<button id="add-to-cart-btn" class="w-full max-w-xs flex items-center justify-center bg-green-600 text-white font-bold py-4 px-6 rounded-lg text-lg hover:bg-green-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"><i data-lucide="shopping-cart" class="w-5 h-5 mr-2"></i><span>Add to Cart</span></button>`;
+                lucide.createIcons({ nodes: [container.querySelector('#add-to-cart-btn')] });
+            }
+        }
+
+        function renderReviews() {
+            // Summary
+            const totalReviews = allReviews.length;
+            const avgRating = totalReviews > 0 ? (allReviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews) : 0;
+            
+            document.getElementById('product-rating-stars').innerHTML = generateStars(avgRating);
+            document.getElementById('product-reviews-count').textContent = `(${totalReviews} reviews)`;
+            document.getElementById('reviews-summary-avg').textContent = avgRating.toFixed(1);
+            document.getElementById('reviews-summary-stars').innerHTML = generateStars(avgRating, 'w-6 h-6');
+            document.getElementById('reviews-summary-count').textContent = `Based on ${totalReviews} reviews`;
+
+            // Rating Breakdown
+            const ratingCounts = [0, 0, 0, 0, 0];
+            allReviews.forEach(r => ratingCounts[r.rating - 1]++);
+            const breakdownEl = document.getElementById('rating-breakdown');
+            breakdownEl.innerHTML = ratingCounts.map((count, i) => {
+                const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
+                return `
+                <div class="flex items-center gap-2 text-sm">
+                    <span class="text-stone-600 w-12">${i + 1} star</span>
+                    <div class="w-full bg-stone-200 rounded-full h-2"><div class="bg-yellow-400 h-2 rounded-full" style="width: ${percentage}%"></div></div>
+                    <span class="text-stone-500 w-8 text-right">${count}</span>
+                </div>`;
+            }).reverse().join('');
+
+            // Review Highlights
+            const highlightsEl = document.getElementById('review-highlights');
+            const positiveReview = allReviews.length > 0 ? [...allReviews].sort((a, b) => b.rating - a.rating || new Date(b.date) - new Date(a.date))[0] : null;
+            highlightsEl.innerHTML = '';
+            if (positiveReview) {
+                highlightsEl.classList.remove('hidden');
+                highlightsEl.innerHTML += createHighlightCard(positiveReview, 'Most Positive Review', 'smile');
+            }
+
+            // Review Filters
+            const filtersEl = document.getElementById('review-filters');
+            const filterButtonsHTML = ratingCounts.map((count, i) => {
+                const rating = i + 1;
+                if (rating >= 3 && count > 0) { // Only show filters for 3, 4, and 5 stars
+                    return `<button class="review-filter-btn px-4 py-1 text-sm font-medium rounded-full transition-colors bg-stone-200 text-stone-700 hover:bg-stone-300" data-rating="${rating}">${rating} ★ (${count})</button>`;
+                }
+                return '';
+            }).reverse().join('');
+            filtersEl.innerHTML = `<button class="review-filter-btn px-4 py-1 text-sm font-medium rounded-full transition-colors bg-stone-200 text-stone-700 hover:bg-stone-300 active" data-rating="all">All (${totalReviews})</button>` + filterButtonsHTML;
+
+            // Reviews List
+            applyReviewSort(); // Apply current sort to the filtered list
+            const listEl = document.getElementById('reviews-list');
+            const existingBtn = document.getElementById('show-more-reviews-btn') || document.getElementById('show-less-reviews-btn');
+            if (existingBtn) existingBtn.remove();
+
+            listEl.innerHTML = ''; // Clear previous content
+
+            if (filteredReviews.length === 0) {
+                listEl.innerHTML = `<p class="text-stone-500 text-center py-4">No reviews match the selected filter.</p>`;
+            } else {
+                const reviewsToDisplay = filteredReviews.slice(0, reviewsToShow);
+                const reviewsHtml = reviewsToDisplay.map(review => `
+                    <div class="border-t pt-6">
+                        <div class="flex items-center mb-2 text-yellow-500">
+                            <div class="flex">${generateStars(review.rating)}</div>
+                            <h4 class="font-bold text-stone-800 ml-3">${review.author}</h4>
+                            ${review.verifiedPurchase ? `<span class="ml-2 flex items-center text-xs font-medium text-green-700 bg-green-100 px-2 py-0.5 rounded-full"><i data-lucide="shield-check" class="w-3 h-3 mr-1"></i> Verified Purchase</span>` : ''}
+                            <span class="text-xs text-stone-400 ml-auto">${new Date(review.date).toLocaleDateString()}</span>
+                        </div>
+                        <p class="text-stone-600">${review.comment}</p>
+                        <div class="mt-3">
+                            <button class="helpful-btn text-sm text-stone-500 hover:text-green-700 font-medium" data-review-id="${review.id}">
+                                <i data-lucide="thumbs-up" class="inline w-4 h-4 mr-1"></i>Helpful (<span class="helpful-count">${review.helpfulCount}</span>)
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                listEl.innerHTML = reviewsHtml;
+
+                if (filteredReviews.length > 2 && reviewsToShow < filteredReviews.length) {
+                    const showMoreBtn = document.createElement('button');
+                    showMoreBtn.id = 'show-more-reviews-btn';
+                    showMoreBtn.className = 'w-full mt-6 text-center bg-stone-200 text-stone-700 font-bold py-2 px-5 rounded-lg hover:bg-stone-300 transition-colors';
+                    showMoreBtn.textContent = `Show More Comments (${filteredReviews.length - reviewsToShow} remaining)`;
+                    listEl.insertAdjacentElement('afterend', showMoreBtn);
+                } else if (filteredReviews.length > 2 && reviewsToShow >= filteredReviews.length) {
+                    const showLessBtn = document.createElement('button');
+                    showLessBtn.id = 'show-less-reviews-btn';
+                    showLessBtn.className = 'w-full mt-6 text-center bg-stone-200 text-stone-700 font-bold py-2 px-5 rounded-lg hover:bg-stone-300 transition-colors';
+                    showLessBtn.textContent = 'Show Less Comments';
+                    listEl.insertAdjacentElement('afterend', showLessBtn);
+                }
+            }
+            lucide.createIcons();
+        }
+
+        function createHighlightCard(review, title, icon) {
+            return `
+                <div class="bg-stone-50 border rounded-lg p-4">
+                    <div class="flex items-center mb-2">
+                        <i data-lucide="${icon}" class="w-5 h-5 text-stone-600 mr-2"></i>
+                        <h4 class="font-semibold text-stone-700">${title}</h4>
+                    </div>
+                    <div class="flex text-yellow-500 mb-1">${generateStars(review.rating, 'w-4 h-4')}</div>
+                    <p class="text-sm text-stone-600 italic">"${review.comment.substring(0, 100)}${review.comment.length > 100 ? '...' : ''}"</p>
+                    <p class="text-xs text-stone-500 mt-2">- ${review.author}</p>
+                </div>`;
+        }
+
+        function renderRelatedProducts() {
+            const container = document.getElementById('related-products-grid');
+            const section = document.getElementById('related-products-section');
+            const currentCategories = new Set(currentProduct.category || []);
+            
+            let related = allProducts.filter(p => 
+                p.id !== currentProduct.id && 
+                p.category && 
+                p.category.some(cat => currentCategories.has(cat))
+            );
+
+            if (related.length < 4) {
+                const more = allProducts.filter(p => p.id !== currentProduct.id && !related.find(r => r.id === p.id));
+                related.push(...more.sort(() => 0.5 - Math.random()).slice(0, 4 - related.length));
+            }
+
+            const finalRelated = related.slice(0, 4);
+
+            if (finalRelated.length > 0) {
+                section.classList.remove('hidden');
+                container.innerHTML = finalRelated.map(product => {
+                    const imageUrl = (product.images && product.images.length > 0) ? product.images[0] : 'https://placehold.co/400x300/CCCCCC/FFFFFF?text=No+Image';
+                    return `
+                        <a href="product-detail.html?id=${product.id}" class="block bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-transform duration-300 group">
+                            <img src="${imageUrl}" alt="${product.name}" class="w-full h-48 object-cover">
+                            <div class="p-4">
+                                <h3 class="font-medium text-sm text-stone-800 leading-tight mb-2 group-hover:text-green-700 transition-colors">${product.name}</h3>
+                                <p class="text-xl font-bold text-stone-800">₹${product.price}</p>
+                            </div>
+                        </a>
+                    `;
+                }).join('');
+            }
+        }
+
+        function renderOverlaySuggestions(results) {
+            const container = document.getElementById('overlay-search-suggestions');
+            if (!container) return;
+
+            if (results.length > 0) {
+                container.innerHTML = results.map(result => {
+                    const product = result.item;
+                    const imageUrl = (product.images && product.images.length > 0) ? product.images[0] : 'https://placehold.co/100x100';
+                    return `
+                        <a href="product-detail.html?id=${product.id}" class="flex items-center p-3 hover:bg-stone-100 transition-colors border-t border-stone-100 first:border-t-0">
+                            <img src="${imageUrl}" alt="${product.name}" class="w-12 h-12 object-cover rounded-md mr-4">
+                            <div><p class="font-medium text-stone-800 text-sm">${product.name}</p><p class="text-sm font-bold text-stone-700">₹${product.price}</p></div>
+                        </a>`;
+                }).join('');
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        // --- CART & STATE LOGIC ---
+        function saveProductsToStorage() {
+            const cartState = allProducts
+                .filter(p => p.inCart)
+                .map(({id, inCart, quantity}) => ({id, inCart, quantity}));
+            localStorage.setItem('goshalaProducts', JSON.stringify(cartState));
+        }
+
+        function updateCartCount() {
+            const itemsInCart = (allProducts || []).filter(p => p.inCart).length;
+            if (itemsInCart !== parseInt(cartCountElement.textContent)) {
+                cartCountElement.textContent = itemsInCart;
+                cartCountElement.classList.add('cart-count-animate');
+                cartCountElement.addEventListener('animationend', () => cartCountElement.classList.remove('cart-count-animate'), { once: true });
+            }
+        }
+
+        let notificationTimeout;
+        function showNotification(message) {
+            const notification = document.getElementById('cart-notification');
+            document.getElementById('notification-message').textContent = message;
+            clearTimeout(notificationTimeout);
+            notification.classList.remove('opacity-0', '-translate-y-20', 'md:translate-y-20');
+            notificationTimeout = setTimeout(() => {
+                notification.classList.add('opacity-0', '-translate-y-20', 'md:translate-y-20');
+            }, 3000);
+        }
+
+        // --- EVENT HANDLERS ---
+        function handleImageGalleryClick(event) {
+            const thumbnail = event.target.closest('.thumbnail-img');
+            if (!thumbnail) return;
+
+            const index = parseInt(thumbnail.dataset.index);
+            document.getElementById('main-product-image').src = currentProduct.images[index];
+            
+            document.querySelectorAll('.thumbnail-img').forEach(img => img.classList.remove('thumbnail-active', 'border-transparent', 'hover:border-stone-400'));
+            thumbnail.classList.add('thumbnail-active');
+            document.querySelectorAll('.thumbnail-img:not(.thumbnail-active)').forEach(img => img.classList.add('border-transparent', 'hover:border-stone-400'));
+        }
+
+function handleCartAction(event) {
+    const addToCartBtn = event.target.closest('#add-to-cart-btn');
+    const quantityBtn = event.target.closest('.quantity-change-btn');
+
+    if (addToCartBtn) {
+        // Clear buy now session storage to ensure full cart checkout
+        sessionStorage.removeItem('goshalaBuyNowItem');
+
+        addToCartBtn.disabled = true;
+        addToCartBtn.classList.add('flex', 'justify-center', 'items-center');
+
+        const loaderContainer = document.createElement('div');
+        loaderContainer.className = 'lottie-loader';
+        addToCartBtn.innerHTML = '';
+        addToCartBtn.appendChild(loaderContainer);
+
+        const loaderAnim = lottie.loadAnimation({
+            container: loaderContainer, renderer: 'svg', loop: true, autoplay: true, path: '/assets/shopping cart.json'
+        });
+
+        setTimeout(() => {
+            currentProduct.inCart = true;
+            currentProduct.quantity = 1;
+
+            // --- FIX: Update the master product list as well ---
+            const productInMasterList = allProducts.find(p => p.id === currentProduct.id);
+            if (productInMasterList) {
+                Object.assign(productInMasterList, { inCart: true, quantity: 1 });
+            }
+
+            showNotification(`"${currentProduct.name.substring(0, 25)}..." added to cart!`);
+            renderCartControls();
+            updateCartCount();
+            saveProductsToStorage();
+            // The button's innerHTML is replaced, so we don't need to destroy the animation manually.
+            // The container for it is gone.
+            // We just need to make sure the icon is re-rendered if needed.
+            lucide.createIcons();
+
+        }, 500);
+    } else if (quantityBtn) {
+        const change = parseInt(quantityBtn.dataset.change);
+        currentProduct.quantity += change;
+        if (currentProduct.quantity <= 0) { 
+            currentProduct.inCart = false; 
+            currentProduct.quantity = 0; 
+        }
+        const productInMasterList = allProducts.find(p => p.id === currentProduct.id);
+        if (productInMasterList) {
+            Object.assign(productInMasterList, { inCart: currentProduct.inCart, quantity: currentProduct.quantity });
+        }
+        renderCartControls(); updateCartCount(); saveProductsToStorage();
+    }
+}
+
+        function handleBuyNow() {
+            const buyNowBtn = document.getElementById('buy-now-btn');
+            const pageLoader = document.getElementById('page-loader');
+
+            buyNowBtn.disabled = true; // Prevent multiple clicks
+            buyNowBtn.classList.add('buy-now-animate'); // Add animation class
+
+            const buyNowItem = { ...currentProduct, quantity: 1 };
+            sessionStorage.setItem('goshalaBuyNowItem', JSON.stringify(buyNowItem));
+
+            // After the button animation, show the loader and then redirect.
+            setTimeout(() => {
+                pageLoader.style.display = 'flex';
+                pageLoader.classList.remove('opacity-0');
+                setTimeout(() => window.location.href = 'checkout.html', 100); // Short delay before redirect
+            }, 400); // Wait for button animation to finish
+        }
+
+        async function handleReviewSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const statusEl = document.getElementById('form-status');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            
+            const formData = new FormData(form);
+            const newReviewData = {
+                author: formData.get('name'),
+                rating: parseInt(formData.get('rating')),
+                comment: formData.get('comment')
+            };
+
+            if (!newReviewData.author || !newReviewData.rating || !newReviewData.comment) {
+                statusEl.textContent = "Please fill all fields.";
+                statusEl.className = "text-red-600 font-medium";
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span class="spinner"></span> Submitting...`;
+            statusEl.textContent = "";
+
+            try {
+                const savedReview = await submitReview(currentProduct.id, newReviewData);
+                allReviews.unshift(savedReview); // Add to top
+                filteredReviews = allReviews; // Reset filter
+                renderReviews();
+                form.reset();
+                document.getElementById('review-form-container').classList.add('hidden');
+                statusEl.textContent = "Review submitted successfully!";
+                statusEl.className = "text-green-600 font-medium";
+            } catch (error) {
+                console.error("Review submission failed:", error);
+                statusEl.textContent = "Submission failed. Please try again.";
+                statusEl.className = "text-red-600 font-medium";
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `Submit Review`;
+                setTimeout(() => statusEl.textContent = "", 4000);
+            }
+        }
+
+        function handleReviewFilter(event) {
+            const button = event.target.closest('.review-filter-btn');
+            if (!button) return;
+
+            reviewsToShow = 2; // Reset to initial count on filter change
+            document.querySelectorAll('.review-filter-btn').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            const rating = button.dataset.rating;
+            if (rating === 'all') {
+                filteredReviews = [...allReviews];
+            } else {
+                filteredReviews = allReviews.filter(r => r.rating === parseInt(rating));
+            }
+            renderReviews();
+        }
+
+        function handleHelpfulClick(event) {
+            const button = event.target.closest('.helpful-btn');
+            if (!button || button.disabled) return;
+
+            const reviewId = button.dataset.reviewId; // Treat ID as a string, not an integer
+            const review = allReviews.find(r => r.id === reviewId);
+            if (review) {
+                review.helpfulCount++;
+                button.querySelector('.helpful-count').textContent = review.helpfulCount;
+                button.disabled = true;
+                button.classList.replace('text-stone-500', 'text-green-700');
+                // In a real app, you'd save this state.
+            }
+        }
+
+        function applyReviewSort() {
+            const sort = currentReviewSort;
+            if (sort === 'highest') {
+                filteredReviews.sort((a, b) => b.rating - a.rating || new Date(b.date) - new Date(a.date));
+            } else if (sort === 'lowest') {
+                filteredReviews.sort((a, b) => a.rating - b.rating || new Date(b.date) - new Date(a.date));
+            } else if (sort === 'newest') {
+                filteredReviews.sort((a, b) => new Date(b.date) - new Date(a.date));
+            } else if (sort === 'oldest') {
+                filteredReviews.sort((a, b) => new Date(a.date) - new Date(b.date));
+            }
+        }
+        // --- INITIALIZATION ---
+        async function initializePage() {
+            const productId = getProductIdFromURL();
+            if (!productId) {
+                showErrorPage();
+                return;
+            }
+
+            try {
+                currentProduct = await loadProductById(productId);
+
+                if (!currentProduct) {
+                    showErrorPage();
+                    return;
+                }
+
+                allReviews = await getReviewsForProduct(productId);
+                // Fetch all products in the background for related products and cart state consistency
+                loadProducts(false).then(products => {
+                    allProducts = products;
+                    renderRelatedProducts();
+                    // Initialize fuzzy search after all products are loaded
+                    const options = {
+                        includeScore: true,
+                        minMatchCharLength: 2,
+                        threshold: 0.4,
+                        keys: [
+                            { name: 'name', weight: 0.7 }, { name: 'description', weight: 0.3 }, { name: 'category', weight: 0.5 }
+                        ]
+                    };
+                    fuse = new Fuse(allProducts, options);
+                    updateCartCount(); // Update cart count after all products are loaded
+                });
+                filteredReviews = [...allReviews];
+                applyReviewSort(); // Apply the default sort
+
+                renderProductDetails();
+                renderReviews();
+                renderRelatedProducts();
+                updateCartCount();
+                setupEventListeners();
+
+                productDetailContainer.classList.remove('opacity-0');
+
+            } catch (error) {
+                console.error("Failed to initialize page:", error);
+                showErrorPage("An error occurred while loading product data.");
+            } finally {
+                hideLoader();
+            }
+        }
+
+        function showErrorPage(message) {
+            errorContainer.classList.remove('hidden');
+            if (message) {
+                errorContainer.querySelector('p').textContent = message;
+            }
+            hideLoader();
+        }
+
+        function hideLoader() {
+            pageLoader.classList.add('opacity-0');
+            setTimeout(() => pageLoader.style.display = 'none', 300);
+        }
+
+        function setupEventListeners() {
+            document.getElementById('image-gallery').addEventListener('click', handleImageGalleryClick);
+            document.getElementById('cart-controls-container').addEventListener('click', handleCartAction);
+            document.getElementById('buy-now-btn').addEventListener('click', handleBuyNow);
+            
+            // Review related listeners
+            document.getElementById('toggle-review-form-btn').addEventListener('click', () => {
+                document.getElementById('review-form-container').classList.toggle('hidden');
+            });
+            document.getElementById('review-form').addEventListener('submit', handleReviewSubmit);
+            document.getElementById('review-filters').addEventListener('click', handleReviewFilter);
+            document.getElementById('review-sort-select').addEventListener('change', (e) => {
+                currentReviewSort = e.target.value;
+                applyReviewSort();
+                renderReviews();
+            });
+            document.getElementById('reviews-list').addEventListener('click', handleHelpfulClick);
+            
+            // Use event delegation for the "Show More" button
+            document.getElementById('reviews-section').addEventListener('click', (e) => {
+                const targetId = e.target.id;
+                if (targetId === 'show-more-reviews-btn') {
+                    reviewsToShow = Infinity; // Show all
+                    renderReviews();
+                } else if (targetId === 'show-less-reviews-btn') {
+                    reviewsToShow = 2; // Collapse to default
+                    renderReviews();
+                }
+            });
+
+            // Sync with other tabs
+            window.addEventListener('storage', (event) => {
+                if (event.key === 'goshalaProducts') {
+                    loadProducts(true).then(newProducts => {
+                        allProducts = newProducts;
+                        currentProduct = allProducts.find(p => p.id === currentProduct.id);
+                        renderCartControls();
+                        updateCartCount();
+                    });
+                }
+            });
+        }
+
+        // --- GLOBAL/SHARED SCRIPT (from other pages) ---
+        lucide.createIcons();
+
+        // --- HEADER SCROLL EFFECT ---
+        const mainHeader = document.getElementById('main-header');
+        if (mainHeader) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    mainHeader.classList.add('header-scrolled');
+                } else {
+                    mainHeader.classList.remove('header-scrolled');
+                }
+            });
+        }
+
+        // Back to Top Button
+        const backToTopBtn = document.getElementById('back-to-top-btn');
+        if (backToTopBtn) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 400) backToTopBtn.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+                else backToTopBtn.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+            });
+            backToTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        }
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (mobileMenuButton && mobileMenu) {
+            const closeBtn = document.getElementById('mobile-menu-close-btn');
+            
+            const toggleMenu = (show) => mobileMenu.classList.toggle('hidden', !show);
+
+            mobileMenuButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleMenu(true);
+            });
+            if(closeBtn) closeBtn.addEventListener('click', () => toggleMenu(false));
+
+            document.addEventListener('click', (e) => {
+                if (!mobileMenu.classList.contains('hidden') && !mobileMenu.contains(e.target) && e.target !== mobileMenuButton) {
+                    toggleMenu(false);
+                }
+            });
+        }
+
+        const headerSearchButton = document.getElementById('header-search-button');
+        const mobileHeaderSearchButton = document.getElementById('mobile-header-search-button');
+        const searchOverlay = document.getElementById('search-overlay');
+        const searchOverlayContent = document.getElementById('search-overlay-content');
+        const overlaySearchInput = document.getElementById('overlay-search-input');
+        const overlayCloseButton = document.getElementById('overlay-close-button');
+
+        function openSearch() {
+            searchOverlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => {
+                searchOverlay.classList.add('opacity-100');
+                searchOverlayContent.classList.remove('-translate-y-full');
+                overlaySearchInput.focus();
+            }, 10);
+        }
+
+        function closeSearch() {
+            searchOverlay.classList.remove('opacity-100');
+            searchOverlayContent.classList.add('-translate-y-full');
+            setTimeout(() => {
+                searchOverlay.classList.add('hidden');
+                document.body.style.overflow = '';
+            }, 300);
+        }
+
+        function performSearch() {
+            const query = overlaySearchInput.value.trim();
+            if (query) window.location.href = `/?q=${encodeURIComponent(query)}#shop-search`;
+        }
+
+        headerSearchButton.addEventListener('click', openSearch);
+        mobileHeaderSearchButton.addEventListener('click', openSearch);
+        overlayCloseButton.addEventListener('click', closeSearch);
+        overlaySearchInput.addEventListener('input', debounce(() => {
+            const query = overlaySearchInput.value.trim();
+            if (fuse && query.length > 1) {
+                const results = fuse.search(query).slice(0, 5);
+                renderOverlaySuggestions(results);
+            } else {
+                document.getElementById('overlay-search-suggestions').classList.add('hidden');
+            }
+        }, 300));
+        overlaySearchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { performSearch(); document.getElementById('overlay-search-suggestions').classList.add('hidden'); } });
+        window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !searchOverlay.classList.contains('hidden')) closeSearch(); });
+
+        // Handle back/forward navigation from bfcache
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                // Page is restored from bfcache
+                const pageLoader = document.getElementById('page-loader');
+                if (pageLoader && pageLoader.style.display !== 'none') {
+                    pageLoader.classList.add('opacity-0');
+                    setTimeout(() => pageLoader.style.display = 'none', 50); // Hide it quickly
+                }
+                // Re-enable the Buy Now button in case it was disabled
+                const buyNowBtn = document.getElementById('buy-now-btn');
+                if (buyNowBtn) buyNowBtn.disabled = false;
+            }
+        });
+
+        // --- START ---
+        initializePage();
+
+    </script>
+</body>
+</html>

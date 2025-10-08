@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Brundavanam Goshala</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+   <link rel="icon" type="image/png" href="/favicon.png">
+   <style>
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: url('https://amerakulouslife.com/wp-content/uploads/2019/08/img_20190727_085502.jpg');
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            opacity: 0.8;
+        }
+        .glass-effect {
+            background: rgba(0, 0, 0, 0.3); /* Darker glass effect */
+            backdrop-filter: blur(12px); /* Increased blur */
+            -webkit-backdrop-filter: blur(12px); /* Increased blur for Safari */
+            border-radius: 1rem; /* 16px */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        body { font-family: 'Poppins', sans-serif; }
+        /* Cart count animation */
+        .cart-count-animate { animation: jiggle 0.4s ease-in-out; }
+        @keyframes jiggle {
+            0%, 100% { transform: rotate(0); }
+            25% { transform: rotate(-15deg); }
+            75% { transform: rotate(15deg); }
+        }
+        .nav-link-glow {
+            transition: text-shadow 0.3s ease;
+        }
+        .nav-link-glow:hover {
+            text-shadow: 0 0 8px rgba(22, 101, 52, 0.7);
+        }
+        /* Header shrink styles */
+        .header-scrolled #header-container {
+            height: 3rem; /* h-12 */
+        }
+        .header-scrolled #logo-link {
+            font-size: 1.125rem; /* text-lg */
+            line-height: 1.75rem;
+        }
+        /* Custom Logo Loader */
+        .loader-logo {
+            animation: blink 1.5s ease-in-out infinite;
+        }
+        @keyframes blink {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+        /* Spinner animation */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid currentColor;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            animation: spin 0.75s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head> 
+<body>
+
+    <!-- Page Loader -->
+    <div id="page-loader"
+        class="fixed inset-0 z-[9999] flex items-center justify-center bg-white transition-opacity duration-300 ease-in-out">
+        <img src="/logot.png" class="loader-logo w-24 h-24">
+    </div>
+
+    <!-- Search Overlay -->
+    <div id="search-overlay" class="fixed inset-0 z-[1001] bg-black/70 backdrop-blur-sm hidden items-start justify-center p-4 pt-24 md:pt-32 transition-opacity duration-300">
+        <div class="w-full max-w-xl transform -translate-y-full transition-transform duration-300" id="search-overlay-content">
+            <div class="relative">
+                <input type="text" id="overlay-search-input" placeholder="Search for products..." class="w-full p-4 pr-12 text-lg text-stone-800 bg-white/90 border-2 border-white rounded-full focus:outline-none focus:ring-2 focus:ring-green-500" autocomplete="off">
+                <i data-lucide="search" class="absolute top-1/2 right-4 -translate-y-1/2 w-6 h-6 text-stone-500"></i>
+            </div>
+            <!-- Suggestions for overlay search -->
+            <div id="overlay-search-suggestions" class="w-full bg-white border border-stone-200 rounded-lg shadow-lg z-20 hidden mt-2 overflow-hidden max-h-80 overflow-y-auto">
+                <!-- Suggestions will be injected here -->
+            </div>
+        </div>
+        <button id="overlay-close-button" class="absolute top-6 right-6 text-white/70 hover:text-white">
+            <i data-lucide="x" class="w-10 h-10"></i>
+        </button>
+    </div>
+
+    <!-- Header -->
+    <header id="main-header" class="app-bar sticky top-0 left-0 w-full transition-all duration-300 z-[100]" style="background: rgba(200, 200, 200, 0.25); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 16px; border: 1px solid rgba(200, 200, 200, 0.3); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);">
+        <div id="header-container" class="h-12 md:h-16 px-4 md:px-8 flex items-center justify-between transition-all duration-300 container mx-auto">
+            <!-- Logo -->
+            <a id="logo-link" href="/" class="flex items-center gap-2 mr-6 transition-all duration-300">
+                <!-- Logo image -->
+                <img src="/logot.png" class="h-8 sm:h-10">
+                
+                <!-- Logo text - hidden on small screens -->
+                <span class="hidden sm:block text-lg sm:text-xl font-bold text-green-900 hover:text-green-700">
+                    Brundavanam Goshala
+                </span>
+            </a>
+            
+            <!-- Nav Links (Desktop) -->
+            <nav class="hidden md:flex items-center gap-6 text-stone-800 font-medium">
+                <a href="/" class="nav-link-glow">Home</a>
+                <a href="about.html" class="nav-link-glow text-green-800 font-semibold">About Us</a>
+
+                <a href="contact.html" class="nav-link-glow">Contact</a>
+            </nav>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-2 md:gap-4">
+                <button id="header-search-button" class="hidden md:block p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
+                    <i data-lucide="search" class="w-5 h-5"></i>
+                </button>
+                <a href="my-orders.html" class="hidden md:block p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40" title="My Account">
+                    <i data-lucide="user" class="w-5 h-5"></i>
+                </a>
+                <a href="cart.html" class="relative p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
+                    <i data-lucide="shopping-cart" class="w-5 h-5"></i>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span>
+                </a>
+                <button id="mobile-menu-button" class="md:hidden p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white/80 backdrop-blur-sm border rounded-2xl mt-2 p-4 pt-10 space-y-2 shadow-xl relative">
+            <button id="mobile-menu-close-btn" class="absolute top-2 right-2 p-1 text-stone-500 hover:text-stone-800">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            <a href="/" class="block text-gray-700 hover:bg-stone-100 p-2 rounded">Home</a>
+            <a href="about.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded font-semibold">About Us</a>
+
+            <a href="contact.html" class="block text-gray-700 hover:bg-stone-100 p-2 rounded mb-2">Contact</a>
+            <button id="mobile-header-search-button" class="w-full flex items-center justify-center gap-2 text-stone-700 bg-stone-200/70 hover:bg-stone-300/70 p-2 rounded-lg font-medium">
+                <i data-lucide="search" class="w-4 h-4"></i> Search
+            </button>
+            <a href="my-orders.html" class="w-full flex items-center justify-center gap-2 text-stone-700 bg-stone-200/70 hover:bg-stone-300/70 p-2 rounded-lg font-medium">
+                <i data-lucide="user" class="w-4 h-4"></i> My Account
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Hero Section -->
+        <section class="py-16">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center glass-effect p-8 md:p-16">
+                <h1 class="text-4xl md:text-5xl font-bold text-white">About Brundavanam Goshala</h1>
+                <p class="mt-4 text-lg md:text-xl max-w-3xl mx-auto text-stone-100">Our journey of sustainable farming, holistic healing, and devotion to Gaumata.</p>
+            </div>
+        </section>
+
+        <!-- Our Journey Section -->
+        <section class="py-16">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-12 items-center glass-effect p-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-white mb-4">Our Journey Since 2015</h2>
+                    <p class="text-stone-100 leading-relaxed">
+                        We began our journey in 2015 as a cow-based farming station, dedicated to sustainable and natural farming practices. BRUNDAVANAM holds significant geographical advantages, being situated at the foothills of the Eastern Ghats, an area rich in natural beauty and resources. A key benefit of this location is its proximity to dense forests, which provide a diverse range of medicinal herbs. These herbs play a crucial role in the preparation of Panchagavya medicines, enhancing the effectiveness of our natural healing practices.
+                    </p>
+                </div>
+                <div>
+                    <img src="/aboutimg1.jpg" class="rounded-lg shadow-lg">
+                </div>
+            </div>
+        </section>
+
+        <!-- Vision Section -->
+        <section class="py-16">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center glass-effect p-8">
+                <h2 class="text-3xl font-bold text-white mb-4">What We Aim For</h2>
+                <p class="text-stone-100 max-w-4xl mx-auto mb-6">
+                    Gaumata is revered as Viswa Mata, the universal mother, who selflessly nurtures and sustains all life. She provides everything essential for the well-being of the world, expecting nothing in return. It is our sacred duty to protect and care for her, ensuring the health, prosperity, and spiritual harmony of mankind. At Brundavanam, we do not seek or demand donations in any form. Instead, we invite you to support our Gaushala by choosing our ethically produced cow-based products. Every purchase contributes to the welfare of our cows, helps preserve Gouvansh, and strengthens the bond between humanity and nature.
+                </p>
+                <div class="bg-green-800/50 text-white italic p-6 rounded-lg shadow-inner max-w-3xl mx-auto">
+                    <p>"Honor Gaumata, the Universal Mother—nurture nature, support ethical cow-based living, and build a sustainable future with every mindful choice."</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Mission & Commitments -->
+        <section class="py-16">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 glass-effect p-8">
+                <h2 class="text-3xl font-bold text-white text-center mb-12">Our Mission and Commitments</h2>
+                <div class="grid md:grid-cols-3 gap-8 text-center">
+                    <!-- Commitment 1 -->
+                    <div class="p-6">
+                        <div class="flex justify-center mb-4">
+                            <div class="bg-green-100 p-4 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-800"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-semibold text-white mb-2">Empowering Farmers & Spreading Awareness</h3>
+                        <p class="text-stone-100">We are dedicated to training local farmers in cow-based farming and the art of making Panchagavya products to promote sustainable agriculture.</p>
+                    </div>
+                    <!-- Commitment 2 -->
+                    <div class="p-6">
+                        <div class="flex justify-center mb-4">
+                            <div class="bg-green-100 p-4 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-800"><path d="M22 12h-7l-2 9-4-18-2 9H2"/><path d="m13 2-2 4-2-4"/><path d="m21 12-2-4-2 4"/></svg>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-semibold text-white mb-2">Harnessing Panchagavya for Holistic Healing</h3>
+                        <p class="text-stone-100">Based on ancient sutras, we use Panchagavya and natural herbs to create remedies that balance the body's Trigunas for overall well-being.</p>
+                    </div>
+                    <!-- Commitment 3 -->
+                    <div class="p-6">
+                         <div class="flex justify-center mb-4">
+                            <div class="bg-green-100 p-4 rounded-full">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-800"><path d="M11 20A7 7 0 0 1 4 13H2a9 9 0 0 0 9 9z"/><path d="M12 22s8-4 8-10-3-9-3-9-8 4-8 10 3 9 3 9"/><path d="M12 10a2 2 0 0 1 2 2c0 2-3 3-3 3"/></svg>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-semibold text-white mb-2">Reviving Ancient Wisdom for Health</h3>
+                        <p class="text-stone-100">We produce Panchagavya-based products to enhance health and longevity, inspired by the divine gifts of Gaumata.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Core Team Section -->
+        <section class="py-16">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 glass-effect p-8">
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold text-white mb-4">Our Core Team</h2>
+                    <p class="text-stone-100 mb-12">
+                        Behind Brundavanam is a dedicated team of passionate individuals committed to ethical living, sustainable farming, and the service of Gaumata.
+                    </p>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8">
+                    <!-- Team Member -->
+                    <div class="text-center">
+                        <img src="https://placehold.co/200x200/cccccc/333333?text=B+K+D" alt="Bala Krishna Davuluri" class="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg">
+                        <h4 class="font-bold text-white">Bala Krishna Davuluri</h4>
+                        <p class="text-stone-100">President</p>
+                    </div>
+                     <!-- Team Member -->
+                    <div class="text-center">
+                        <img src="https://placehold.co/200x200/cccccc/333333?text=R" alt="Ramji" class="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg">
+                        <h4 class="font-bold text-white">Ramji</h4>
+                        <p class="text-stone-100">President</p>
+                    </div>
+                     <!-- Team Member -->
+                    <div class="text-center">
+                        <img src="https://placehold.co/200x200/cccccc/333333?text=M+K" alt="Mahesh Karanam" class="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg">
+                        <h4 class="font-bold text-white">Mahesh Karanam</h4>
+                        <p class="text-stone-100">Incharge</p>
+                    </div>
+                     <!-- Team Member -->
+                    <div class="text-center">
+                        <img src="https://placehold.co/200x200/cccccc/333333?text=L+R" alt="Lakshmana Rao" class="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg">
+                        <h4 class="font-bold text-white">Lakshmana Rao</h4>
+                        <p class="text-stone-100">Incharge</p>
+                    </div>
+                     <!-- Team Member -->
+                    <div class="text-center">
+                        <img src="https://placehold.co/200x200/cccccc/333333?text=S" alt="Sreenu" class="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg">
+                        <h4 class="font-bold text-white">Srinu</h4>
+                        <p class="text-stone-100">Incharge</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+         <!-- YouTube CTA -->
+        <section class="bg-amber-500/20">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+                <h2 class="text-3xl font-bold text-stone-900">Join Our Community</h2>
+                <p class="text-stone-800 mt-2 mb-6 max-w-2xl mx-auto">Follow our journey and learn more about our work by visiting our YouTube channel.</p>
+                <div class="relative mx-auto mb-4" style="width: 100%; max-width: 640px; aspect-ratio: 16 / 9;">
+                  <iframe
+                    class="absolute top-0 left-0 w-full h-full rounded-xl shadow-lg"
+                    src="https://www.youtube.com/embed/TRjFsACirhU?si=D8VAggy5pVINQc30"
+                    title="YouTube video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowfullscreen>
+                  </iframe>
+                </div>
+                <a href="https://www.youtube.com/@BrundavanamGaushala" class="inline-flex items-center bg-white text-stone-800 font-bold py-3 px-6 rounded-lg shadow-md hover:bg-stone-100 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 mr-2 text-red-600"><path d="M2.5 17a24.12 24.12 0 0 1 0-10C2.5 6 4.5 4 7 4h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-1Z"/><path d="m10 15 5-3-5-3z"/></svg>
+                    Visit Our YouTube Channel
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-stone-800 text-white mt-12">
+        <div class="container mx-auto px-8 py-12 text-center">
+            <p class="font-bold text-2xl mb-2">Brundavanam Goshala</p>
+            <p class="text-stone-400 max-w-xl mx-auto mb-6">Promoting wellness and sustainability through sacred cow products, while supporting the care and protection of our beloved Gomata.</p>
+            <div class="flex justify-center space-x-6">
+                <a href="/" class="text-stone-300 hover:text-white">Home</a>
+
+                <a href="about.html" class="text-stone-300 hover:text-white">About Us</a>
+                <a href="contact.html" class="text-stone-300 hover:text-white">Contact Us</a>
+            </div>
+            <div class="mt-8 border-t border-stone-700 pt-6 text-center text-stone-500 text-sm">
+                <p>© Copyright 2025 | All Rights Reserved | Brundavanam Goshala | 100% Pure</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top-btn" title="Go to top" class="fixed bottom-20 right-5 z-50 p-3 rounded-full bg-green-600 text-white shadow-lg hover:bg-green-700 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>
+    </button>
+
+    <script type="module">
+        import { loadProducts } from '/js/data.js';
+        import Fuse from 'https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.esm.js';
+
+        lucide.createIcons();
+
+        // --- UTILITIES ---
+        const debounce = (func, delay = 300) => {
+            let timeout;
+            return (...args) => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    func.apply(this, args);
+                }, delay);
+            };
+        };
+        let fuse;
+        
+        // This script is now primarily for mobile menu and cart count, which don't need DOMContentLoaded
+        // Mobile Menu Toggle & Active Link
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (mobileMenuButton && mobileMenu) {
+            const closeBtn = document.getElementById('mobile-menu-close-btn');
+            
+            const toggleMenu = (show) => mobileMenu.classList.toggle('hidden', !show);
+
+            mobileMenuButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleMenu(true);
+            });
+            if(closeBtn) closeBtn.addEventListener('click', () => toggleMenu(false));
+
+            document.addEventListener('click', (e) => {
+                if (!mobileMenu.classList.contains('hidden') && !mobileMenu.contains(e.target) && e.target !== mobileMenuButton) {
+                    toggleMenu(false);
+                }
+            });
+        }
+
+        // --- Cart Count Logic ---
+        const cartCountElement = document.getElementById('cart-count');
+        
+        function updateCartCount() {
+            const storedProducts = JSON.parse(localStorage.getItem('goshalaProducts')) || [];
+            const itemsInCart = storedProducts.filter(p => p.inCart).length;
+            const currentCount = parseInt(cartCountElement.textContent);
+
+            if (cartCountElement && itemsInCart !== currentCount) {
+                cartCountElement.textContent = itemsInCart;
+                cartCountElement.classList.add('cart-count-animate');
+                cartCountElement.addEventListener('animationend', () => {
+                    cartCountElement.classList.remove('cart-count-animate');
+                }, { once: true });
+            }
+        }
+
+        // Initial count on page load
+        updateCartCount();
+
+        // Listen for changes in other tabs
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'goshalaProducts') {
+                updateCartCount();
+            }
+        });
+
+        // --- SEARCH OVERLAY LOGIC ---
+        const headerSearchButton = document.getElementById('header-search-button');
+        const mobileHeaderSearchButton = document.getElementById('mobile-header-search-button');
+        const searchOverlay = document.getElementById('search-overlay');
+        const searchOverlayContent = document.getElementById('search-overlay-content');
+        const overlaySearchInput = document.getElementById('overlay-search-input');
+        const overlayCloseButton = document.getElementById('overlay-close-button');
+
+        function openSearch() {
+            searchOverlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => {
+                searchOverlay.classList.add('opacity-100');
+                searchOverlayContent.classList.remove('-translate-y-full');
+                overlaySearchInput.focus();
+            }, 10);
+        }
+
+        function closeSearch() {
+            searchOverlay.classList.remove('opacity-100');
+            searchOverlayContent.classList.add('-translate-y-full');
+            setTimeout(() => {
+                searchOverlay.classList.add('hidden');
+                document.body.style.overflow = '';
+            }, 300);
+        }
+
+        function performSearch() {
+            const query = overlaySearchInput.value.trim();
+            if (query) {
+                window.location.href = `/?q=${encodeURIComponent(query)}#shop-search`;
+            }
+        }
+
+        function renderOverlaySuggestions(results) {
+            const container = document.getElementById('overlay-search-suggestions');
+            if (!container) return;
+
+            if (results.length > 0) {
+                container.innerHTML = results.map(result => {
+                    const product = result.item;
+                    const imageUrl = (product.images && product.images.length > 0) ? product.images[0] : 'https://placehold.co/100x100';
+                    return `
+                        <a href="product-detail.html?id=${product.id}" class="flex items-center p-3 hover:bg-stone-100 transition-colors border-t border-stone-100 first:border-t-0">
+                            <img src="${imageUrl}" alt="${product.name}" class="w-12 h-12 object-cover rounded-md mr-4">
+                            <div><p class="font-medium text-stone-800 text-sm">${product.name}</p><p class="text-sm font-bold text-stone-700">₹${product.price}</p></div>
+                        </a>`;
+                }).join('');
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        }
+
+        headerSearchButton.addEventListener('click', openSearch);
+        mobileHeaderSearchButton.addEventListener('click', openSearch);
+        const mainHeader = document.getElementById('main-header');
+        if (mainHeader) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    mainHeader.classList.add('header-scrolled');
+                } else {
+                    mainHeader.classList.remove('header-scrolled');
+                }
+            });
+        }
+
+        // Back to Top Button
+        const backToTopBtn = document.getElementById('back-to-top-btn');
+        if (backToTopBtn) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 400) backToTopBtn.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
+                else backToTopBtn.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+            });
+            backToTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        }
+
+
+        overlayCloseButton.addEventListener('click', closeSearch);
+        searchOverlay.addEventListener('click', (e) => { if (e.target === searchOverlay) closeSearch(); });
+        overlaySearchInput.addEventListener('input', debounce(() => {
+            const query = overlaySearchInput.value.trim();
+            if (fuse && query.length > 1) {
+                const results = fuse.search(query).slice(0, 5);
+                renderOverlaySuggestions(results);
+            } else {
+                document.getElementById('overlay-search-suggestions').classList.add('hidden');
+            }
+        }, 300));
+        overlaySearchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { performSearch(); document.getElementById('overlay-search-suggestions').classList.add('hidden'); } });
+        window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !searchOverlay.classList.contains('hidden')) closeSearch(); });
+
+        // --- PAGE LOADER LOGIC ---
+        const pageLoader = document.getElementById('page-loader');
+        // On page load, fade out the loader
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (pageLoader) {
+                pageLoader.classList.add('opacity-0');
+                // After the transition, hide it so it doesn't block interactions
+                setTimeout(() => {
+                    pageLoader.style.display = 'none';
+                }, 300); // Match duration-300
+            }
+
+            // Initialize fuzzy search
+            const allProducts = await loadProducts(false);
+            if (allProducts) {
+                const options = {
+                    includeScore: true, minMatchCharLength: 2, threshold: 0.4,
+                    keys: [
+                        { name: 'name', weight: 0.7 }, { name: 'description', weight: 0.3 }, { name: 'category', weight: 0.5 }
+                    ]
+                };
+                fuse = new Fuse(allProducts, options);
+            }
+        });
+        // Handle back/forward navigation from bfcache
+        window.addEventListener('pageshow', function(event) {
+            // When a page is restored from bfcache, the loader might be visible.
+            // We just need to hide it, not reload the whole page.
+            const pageLoader = document.getElementById('page-loader');
+            if (event.persisted) {
+                if (pageLoader && pageLoader.style.display !== 'none') {
+                    pageLoader.classList.add('opacity-0');
+                    setTimeout(() => pageLoader.style.display = 'none', 50); // Hide it quickly
+                }
+            }
+        });
+    </script>
+</body>
+</html>

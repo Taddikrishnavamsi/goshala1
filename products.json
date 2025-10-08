@@ -1,0 +1,208 @@
+[
+    {
+        "id": 1,
+        "name": "Amrutha Dhara",
+        "dateAdded": "2025-09-28",
+        "category": [
+            "Food & Wellness",
+            "Ghee",
+            "Pooja Items"
+        ],
+        "images": [
+            "https://im.ge/i/IMG-20250818-WA0014.nm4cjh",
+            "https://im.ge/i/IMG-20250818-WA0016.nm4gWM",
+            "https://im.ge/i/IMG-20250818-WA0018.nm4WUD",
+            "https://im.ge/i/IMG-20250818-WA0017.nm4RTY"
+        ],
+        "description": "Authentic A2 Ghee prepared traditionally, ideal for cooking, health, and spiritual rituals.",
+        "rating": 4,
+        "reviewsCount": 2,
+        "sellerTag": "Limited time deal",
+        "price": 225,
+        "originalPrice": 900,
+        "deliveryDate": "FREE Delivery by Tomorrow",
+        "reviews": [
+            {
+                "user": "Anjali P.",
+                "rating": 5,
+                "comment": "Excellent quality and authentic taste. Highly recommended!"
+            },
+            {
+                "user": "Vikram S.",
+                "rating": 4,
+                "comment": "Good product, well-packaged and delivered on time."
+            }
+        ]
+    },
+    {
+        "id": 2,
+        "name": "Gau Dhara",
+        "dateAdded": "2025-09-28",
+        "category": [
+            "Personal Care",
+            "Panchagavya"
+        ],
+        "images": [
+            "https://im.ge/i/IMG-20250818-WA0019.nm4Z34",
+            "https://im.ge/i/IMG-20250818-WA0020.nm4K4C",
+            "https://im.ge/i/IMG-20250818-WA0021.nm4fsq",
+            "https://im.ge/i/IMG-20250818-WA0024.nm40qL"
+        ],
+        "description": "Handmade soap with Panchagavya and natural herbs for glowing skin.",
+        "rating": 5,
+        "reviewsCount": 2,
+        "sellerTag": "Best Seller",
+        "price": 225,
+        "originalPrice": 180,
+        "deliveryDate": "FREE Delivery by Tomorrow",
+        "reviews": [
+            {
+                "user": "Sunita M.",
+                "rating": 5,
+                "comment": "The aroma is so pure and natural. Will buy again."
+            },
+            {
+                "user": "Rohan D.",
+                "rating": 5,
+                "comment": "Very effective. I can feel the difference."
+            }
+        ]
+    },
+    {
+        "id": 3,
+        "name": "Gau-danta manjan",
+        "dateAdded": "2025-09-28",
+        "category": [
+            "Gardening & Agriculture",
+            "Fertilizer"
+        ],
+        "images": [
+            "https://im.ge/i/Gau-danta-manjan.nm4IQW",
+            "https://im.ge/i/IMG-20250818-WA0037.nm4suf",
+            "https://im.ge/i/IMG-20250818-WA0038.nm4U3T",
+            "https://im.ge/i/IMG-20250818-WA0036.nm47Rr"
+        ],
+        "description": "Natural composted cow manure to improve soil fertility and plant health.",
+        "rating": 4,
+        "reviewsCount": 2,
+        "sellerTag": null,
+        "price": 225,
+        "originalPrice": null,
+        "deliveryDate": "FREE Delivery in 2-3 days",
+        "reviews": [
+            {
+                "user": "Meera N.",
+                "rating": 4,
+                "comment": "A must-have for a healthy lifestyle. Great value for money."
+            },
+            {
+                "user": "Arjun K.",
+                "rating": 5,
+                "comment": "I'm very happy with my purchase. The product is exactly as described."
+            }
+        ]
+    },
+    {
+        "id": 4,
+        "name": "Gomayaadi tailam",
+        "dateAdded": "2025-09-28",
+        "category": [
+            "Spiritual & Home",
+            "Pooja Items",
+            "Incense"
+        ],
+        "images": [
+            "https://im.ge/i/IMG-20250818-WA0031.nm4PTS",
+            "https://im.ge/i/IMG-20250818-WA0032.nm4tLz",
+            "https://im.ge/i/IMG-20250818-WA0029.nm4w9J",
+            "https://im.ge/i/IMG-20250818-WA0025.nm45PG"
+        ],
+        "description": "Traditional cow dung dhoop sticks for pooja and meditation.",
+        "rating": 5,
+        "reviewsCount": 2,
+        "sellerTag": "Limited time deal",
+        "price": 225,
+        "originalPrice": 150,
+        "deliveryDate": "FREE Delivery by Tomorrow",
+        "reviews": [
+            {
+                "user": "Kavita R.",
+                "rating": 5,
+                "comment": "The best I've found online. The quality is top-notch."
+            },
+            {
+                "user": "Sameer V.",
+                "rating": 4,
+                "comment": "Good value for the price. The packaging was also very secure."
+            }
+        ]
+    },
+    {
+        "id": 5,
+        "name": "Panchagavya ghrutam",
+        "dateAdded": "2025-09-28",
+        "category": [
+            "Spiritual & Home",
+            "Pooja Items"
+        ],
+        "images": [
+            "https://im.ge/i/IMG-20250818-WA0027.nm4mFa",
+            "https://im.ge/i/WhatsApp-Image-2025-08-18-at-18-23-16-da7b7798.nm4A4F",
+            "https://im.ge/i/IMG-20250818-WA0023.nm4hnc",
+            "https://im.ge/i/IMG-20250818-WA0026.nm49kx"
+        ],
+        "description": "Eco-friendly cow dung diyas perfect for Diwali and other festivals.",
+        "rating": 5,
+        "reviewsCount": 2,
+        "sellerTag": "Festival Offer",
+        "price": 249,
+        "originalPrice": 299,
+        "deliveryDate": "FREE Delivery in 2 days",
+        "reviews": [
+            {
+                "user": "Nisha G.",
+                "rating": 5,
+                "comment": "This has become a staple in our household. Love it!"
+            },
+            {
+                "user": "Aditya B.",
+                "rating": 4,
+                "comment": "Slightly expensive, but the quality justifies the price."
+            }
+        ]
+    },
+    {
+        "id": 6,
+        "name": "Sahaja Kumkuma",
+        "dateAdded": "2025-09-28",
+        "category": [
+            "Personal Care",
+            "Pooja Items"
+        ],
+        "images": [
+            "https://im.ge/i/WhatsApp-Image-2025-07-26-at-11-27-35-cf56386c.nm4a9m",
+            "https://im.ge/i/IMG-20250818-WA0010.nm4xt9",
+            "https://im.ge/i/IMG-20250818-WA0012.nm43zX",
+            "https://im.ge/i/IMG-20250818-WA0034.nm4y36"
+        ],
+        "description": "A natural and chemical-free kumkuma for daily pooja and spiritual use.",
+        "rating": 5,
+        "reviewsCount": 2,
+        "sellerTag": "Best Seller",
+        "price": 249,
+        "originalPrice": 100,
+        "deliveryDate": "FREE Delivery by Tomorrow",
+        "reviews": [
+            {
+                "user": "Anjali P.",
+                "rating": 5,
+                "comment": "Excellent quality and authentic taste. Highly recommended!"
+            },
+            {
+                "user": "Vikram S.",
+                "rating": 5,
+                "comment": "A pure product for spiritual practices. Very happy with the purchase."
+            }
+        ]
+    }
+]

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Checkout - Brundavanam Goshala</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/logo.png">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        .spinner {
+            width: 20px; height: 20px; border: 2px solid currentColor;
+            border-bottom-color: transparent; border-radius: 50%;
+            display: inline-block; animation: spin 0.75s linear infinite;
+        }
+        /* New Shipping Form Styles */
+        .shipping-section {
+            max-width: 520px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 16px rgba(40, 60, 90, 0.12);
+        }
+        .form-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.3rem;
+            color: #36476b;
+        }
+        .form-label .label-optional {
+            font-size: 0.95rem;
+            color: #8390a2;
+            font-weight: 400;
+            margin-left: 0.5rem;
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #d2dbe5;
+            background: #fcfcfd;
+            margin-bottom: 1.1rem;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #5b96f7;
+            box-shadow: 0 0 0 2px #e4eaff;
+        }
+        .form-group {
+            display: flex;
+            gap: 1.2rem;
+        }
+        .form-group > div {
+            flex: 1;
+        }
+        .payment-btn {
+            width: 100%;
+            background: #3659e3;
+            color: #fff;
+            font-weight: 600;
+            padding: 0.85rem 0;
+            font-size: 1.1rem;
+            border-radius: 7px;
+            box-shadow: 0 2px 8px rgba(40,60,90,0.07);
+        }
+        .payment-btn:hover {
+            background: #263159;
+        }
+        @media (max-width: 600px) {
+            .shipping-section { padding: 1rem; }
+            .form-group { flex-direction: column; gap: 0; }
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .form-invalid { border-color: #DC2626; }
+        .form-invalid:focus { --tw-ring-color: #DC2626; }
+    </style>
+</head>
+<body class="bg-stone-100">
+    <header class="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-40">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <a href="/" class="text-2xl font-bold text-green-800">Brundavanam Goshala</a>
+                <div class="flex items-center space-x-2 text-sm text-slate-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-slate-500"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <span>Secure Checkout</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 pt-8 md:pt-12">
+        <div class="mb-6">
+            <a href="cart.html" class="inline-flex items-center gap-2 text-sm font-medium text-stone-600 hover:text-green-700">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="m15 18-6-6 6-6"/></svg>
+                Back to Cart
+            </a>
+        </div>
+        <div id="checkout-container" class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+            <div class="lg:col-span-1 order-2 lg:order-2">
+                 <form id="checkout-form" novalidate>
+                    <div id="shipping-section" class="shipping-section">
+                        <h2 class="text-2xl font-bold text-slate-800 mb-6">Shipping Information</h2>
+                        <div class="form-group">
+                            <div>
+                                <label for="firstname" class="form-label">First Name</label>
+                                <input type="text" id="firstname" name="firstname" required class="form-input">
+                            </div>
+                            <div>
+                                <label for="lastname" class="form-label">Last Name</label>
+                                <input type="text" id="lastname" name="lastname" required class="form-input">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" id="email" name="email" required class="form-input">
+                        </div>
+                        <div>
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" required class="form-input">
+                        </div>
+                        <div>
+                            <label for="address1" class="form-label">Street Address</label>
+                            <input type="text" id="address1" name="address1" required placeholder="House No. & Street Name" class="form-input">
+                        </div>
+                         <div>
+                            <label for="address2" class="form-label">Apartment, suite, etc.<span class="label-optional">(Optional)</span></label>
+                            <input type="text" id="address2" name="address2" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <div>
+                                <label for="city" class="form-label">City</label>
+                                <input type="text" id="city" name="city" required class="form-input">
+                            </div>
+                            <div>
+                                <label for="zip" class="form-label">Zip / Postal Code</label>
+                                <input type="text" id="zip" name="zip" required class="form-input">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="state" class="form-label">State / Province</label>
+                            <input type="text" id="state" name="state" required class="form-input">
+                        </div>
+                    </div>
+                 </form>
+            </div>
+
+            <div class="lg:col-span-1 order-1 lg:order-1">
+                <div id="order-summary-desktop" class="bg-white p-6 rounded-lg shadow-md sticky top-24">
+                    <h2 class="text-lg font-semibold text-slate-800 mb-4 border-b pb-4">Order Summary</h2>
+                    <div id="order-items-summary" class="space-y-4 max-h-80 overflow-y-auto pr-2 mb-4"></div>
+                    <div class="space-y-2 mb-4 border-t pt-4">
+                        <div class="flex justify-between text-slate-600">
+                            <span>Subtotal</span>
+                            <span id="subtotal">₹0.00</span>
+                        </div>
+                         <div class="flex justify-between text-slate-600">
+                            <span>Shipping</span>
+                            <span class="font-medium text-green-600">FREE</span>
+                        </div>
+                    </div>
+                    <div class="border-t pt-4">
+                        <div class="flex justify-between font-bold text-lg text-slate-800">
+                            <span>You Pay</span>
+                            <span id="total">₹0.00</span>
+                        </div>
+                    </div>
+                    <div class="pt-6">
+                        <button id="place-order-btn" type="button" class="payment-btn transition-colors flex items-center justify-center">
+                            Continue to Payment
+                        </button>
+                        <div id="form-status" class="mt-4 text-center font-medium"></div>
+                    </div>
+                    <div class="mt-6 border-t pt-4">
+                        <div class="flex items-center justify-center text-sm text-slate-500">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            <span>Secure SSL Encrypted Payment</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { loadProducts } from '/js/data.js';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const checkoutContainer = document.getElementById('checkout-container');
+            const orderItemsContainer = document.getElementById('order-items-summary');
+            const subtotalEl = document.getElementById('subtotal');
+            const totalEl = document.getElementById('total');
+            const formStatus = document.getElementById('form-status');
+            const checkoutForm = document.getElementById('checkout-form');
+            const placeOrderBtn = document.getElementById('place-order-btn');
+
+            const savedUser = JSON.parse(localStorage.getItem('goshalaUser')) || {};
+            Object.keys(savedUser).forEach(key => {
+                const el = document.getElementById(key);
+                if(el) el.value = savedUser[key];
+            });
+
+            let cartItems = [];
+            let isBuyNowFlow = false;
+            
+            try {
+                const buyNowItemJSON = sessionStorage.getItem('goshalaBuyNowItem');
+                if (buyNowItemJSON) {
+                    isBuyNowFlow = true;
+                    cartItems = [JSON.parse(buyNowItemJSON)];
+                } else {
+                    const products = await loadProducts();
+                    cartItems = products.filter(p => p.inCart);
+                }
+
+                if (cartItems.length === 0) {
+                    checkoutContainer.innerHTML = `<div class="bg-white p-8 rounded-lg shadow-md text-center col-span-full"><h1 class="text-2xl font-semibold text-slate-700 mb-2">Your cart is empty.</h1><p class="text-slate-500 mb-6">There's nothing to check out.</p><a href="/" class="inline-block bg-amber-600 hover:bg-amber-700 text-stone-900 font-bold py-3 px-8 rounded-lg">Return to Shop</a></div>`;
+                    return;
+                }
+
+                renderOrderSummary();
+            } catch (error) {
+                console.error("Failed to load checkout:", error);
+                checkoutContainer.innerHTML = `<p class="col-span-full text-center text-red-600 py-8">Error loading checkout page. Please try again.</p>`;
+            }
+
+            function renderOrderSummary() {
+                orderItemsContainer.innerHTML = '';
+                let subtotal = 0;
+                cartItems.forEach(item => {
+                    subtotal += item.price * item.quantity;
+                    const itemElement = document.createElement('div');
+                    itemElement.className = "flex items-start justify-between text-sm";
+                    itemElement.innerHTML = `<div class="flex items-start"><img src="${(item.images && item.images.length > 0) ? item.images[0] : 'https://placehold.co/40x40'}" alt="${item.name}" class="w-16 h-16 object-cover rounded-md mr-4"><div><p class="font-semibold text-slate-800">${item.name}</p><p class="text-slate-500">Qty: ${item.quantity}</p></div></div><p class="font-medium text-slate-700 shrink-0">₹${(item.price * item.quantity).toFixed(2)}</p>`;
+                    orderItemsContainer.appendChild(itemElement);
+                });
+                subtotalEl.textContent = `₹${subtotal.toFixed(2)}`;
+                totalEl.textContent = `₹${subtotal.toFixed(2)}`;
+            }
+            
+            placeOrderBtn.addEventListener('click', () => {
+                // Validate form before initiating payment
+                let isFormValid = true;
+                const requiredFields = checkoutForm.querySelectorAll('[required]');
+                requiredFields.forEach(field => {
+                    field.classList.remove('form-invalid');
+                    if (!field.value.trim()) {
+                        field.classList.add('form-invalid');
+                        isFormValid = false;
+                    }
+                });
+                if (!isFormValid) {
+                    formStatus.textContent = 'Please fill out all required fields.';
+                    formStatus.className = 'mt-4 text-center font-medium text-red-600';
+                    return;
+                }
+                formStatus.textContent = '';
+                initiatePayment();
+            });
+
+            async function initiatePayment() {
+                const originalButtonText = "Pay with Razorpay";
+                placeOrderBtn.disabled = true;
+                placeOrderBtn.innerHTML = `<span class="spinner mr-2"></span> Processing...`;
+                formStatus.textContent = '';
+
+                const userDetails = {
+                    firstname: document.getElementById('firstname').value,
+                    lastname: document.getElementById('lastname').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    address1: document.getElementById('address1').value,
+                    address2: document.getElementById('address2').value,
+                    city: document.getElementById('city').value,
+                    state: document.getElementById('state').value,
+                    zip: document.getElementById('zip').value,
+                };
+                localStorage.setItem('goshalaUser', JSON.stringify(userDetails));
+
+                const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                
+                // This object now holds all data needed to create the order AFTER payment
+                const finalOrderDetails = { 
+                    user: userDetails, 
+                    items: cartItems.map(item => ({ id: item.id, name: item.name, quantity: item.quantity, price: item.price })), 
+                    total: total.toFixed(2) 
+                };
+
+                try {
+                    // Step 1: Create a Razorpay order ID on your server
+                    const response = await fetch('/api/razorpay/create-order', { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify({ total: total.toFixed(2) }) 
+                    });
+
+                    if (!response.ok) throw new Error('Failed to create Razorpay order.');
+                    
+                    const { order, key_id } = await response.json();
+
+                    // Step 2: Open Razorpay Checkout
+                    const options = {
+                        key: key_id,
+                        amount: order.amount,
+                        currency: order.currency,
+                        name: "Brundavanam Goshala",
+                        description: "Transaction for Goshala Products",
+                        image: "/logo.png",
+                        order_id: order.id,
+                        handler: async function (response) {
+                            // Step 3: Send payment details AND order details to server for verification & creation
+                            const verificationResponse = await fetch('/api/razorpay/capture', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                    orderDetails: finalOrderDetails // Send all order info now
+                                })
+                            });
+
+                            const verificationResult = await verificationResponse.json();
+                            if (verificationResult.success) {
+                                if (isBuyNowFlow) {
+                                    sessionStorage.removeItem('goshalaBuyNowItem');
+                                } else {
+                                    localStorage.removeItem('goshalaProducts');
+                                }
+                                sessionStorage.setItem('goshalaUserEmail', finalOrderDetails.user.email); // <-- Add this line
+                                window.location.href = `order-confirmation.html?orderId=${verificationResult.orderId}`;
+                            } else {
+                                formStatus.textContent = 'Payment verification failed. Please contact support.';
+                                formStatus.className = 'mt-4 text-center font-medium text-red-600';
+                            }
+                        },
+                        prefill: {
+                            name: `${userDetails.firstname} ${userDetails.lastname}`,
+                            email: userDetails.email,
+                            contact: userDetails.phone
+                        },
+                        notes: {
+                            address: `${userDetails.address1}, ${userDetails.city}`
+                        },
+                        theme: {
+                            color: "#166534"
+                        }
+                    };
+                    
+                    const rzp1 = new Razorpay(options);
+                    rzp1.on('payment.failed', function (response){
+                        alert(response.error.description);
+                        formStatus.textContent = `Payment Failed: ${response.error.reason}. Please try again.`;
+                        formStatus.className = 'mt-4 text-center font-medium text-red-600';
+                    });
+                    
+                    rzp1.open();
+
+                } catch (error) {
+                    console.error('Payment initiation error:', error);
+                    formStatus.textContent = 'Could not initiate payment. Please try again.';
+                    formStatus.className = 'mt-4 text-center font-medium text-red-600';
+                } finally {
+                    placeOrderBtn.disabled = false;
+                    placeOrderBtn.innerHTML = originalButtonText;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

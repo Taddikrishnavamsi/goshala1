@@ -1,0 +1,2 @@
+- [ ] Add line-clamp-2 CSS class to public/style.css
+- [ ] Modify renderCarouselSlides function in public/index.html to add line-clamp-2 class to description paragraph
