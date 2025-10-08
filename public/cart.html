@@ -48,11 +48,12 @@
     </div>
 
     <!-- Search Overlay -->
-    <div id="search-overlay" class="fixed inset-0 z-[1001] bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 transition-opacity duration-300">
-        <div class="w-full max-w-2xl transform -translate-y-full transition-transform duration-300" id="search-overlay-content">
+    <div id="search-overlay" class="fixed inset-0 z-[1001] bg-black/70 backdrop-blur-sm hidden items-start justify-center p-4 pt-20 transition-opacity duration-300">
+        <div class="w-full max-w-4xl transform -translate-y-full transition-transform duration-300" id="search-overlay-content">
             <div class="relative">
                 <i data-lucide="search" class="absolute top-1/2 left-4 -translate-y-1/2 w-6 h-6 text-stone-500"></i>
-                <input type="text" id="overlay-search-input" placeholder="Search for products..." class="w-full pl-12 pr-4 py-4 text-xl text-stone-800 bg-white border-2 border-white rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 shadow-lg" autocomplete="off">
+                <input type="text" id="overlay-search-input" placeholder="Search for products..." class="w-full pl-12 pr-12 py-4 text-xl text-stone-800 bg-white border-2 border-white rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 shadow-lg" autocomplete="off">
+                <i data-lucide="mic" class="absolute top-1/2 right-4 -translate-y-1/2 w-6 h-6 text-stone-500"></i>
             </div>
             <div id="overlay-search-suggestions" class="w-full bg-white border border-stone-200 rounded-lg shadow-lg z-20 hidden mt-4 overflow-hidden max-h-80 overflow-y-auto"></div>
         </div>
