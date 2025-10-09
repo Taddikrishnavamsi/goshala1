@@ -46,7 +46,9 @@
             width: 28px; /* Adjust to fit button */
             height: 28px; /* Adjust to fit button */
         }
+        .review-star-input:hover + label svg,
         .review-star-input:hover ~ label svg,
+        .review-star-input:checked + label svg,
         .review-star-input:checked ~ label svg { color: #eab308; /* yellow-500 */ }
         .review-star-input { display: none; }
         .review-star-label { cursor: pointer; }
@@ -250,13 +252,13 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-stone-700 mb-1">Your Rating</label>
-                                    <div id="review-star-rating" class="flex items-center text-stone-300 text-2xl">
+                                    <div id="review-star-rating" class="flex items-center text-stone-300 text-2xl flex-row-reverse">
                                         <!-- Stars for rating input (reversed order for correct CSS sibling selector behavior) -->
-                                        <input type="radio" id="star1" name="rating" value="1" class="review-star-input" required><label for="star1" title="1 star" class="review-star-label"><i data-lucide="star" class="w-7 h-7 fill-current"></i></label>
-                                        <input type="radio" id="star2" name="rating" value="2" class="review-star-input"><label for="star2" title="2 stars" class="review-star-label"><i data-lucide="star" class="w-7 h-7 fill-current"></i></label>
-                                        <input type="radio" id="star3" name="rating" value="3" class="review-star-input"><label for="star3" title="3 stars" class="review-star-label"><i data-lucide="star" class="w-7 h-7 fill-current"></i></label>
-                                        <input type="radio" id="star4" name="rating" value="4" class="review-star-input"><label for="star4" title="4 stars" class="review-star-label"><i data-lucide="star" class="w-7 h-7 fill-current"></i></label>
                                         <input type="radio" id="star5" name="rating" value="5" class="review-star-input"><label for="star5" title="5 stars" class="review-star-label"><i data-lucide="star" class="w-7 h-7 fill-current"></i></label>
+                                        <input type="radio" id="star4" name="rating" value="4" class="review-star-input"><label for="star4" title="4 stars" class="review-star-label"><i data-lucide="star" class="w-7 h-7 fill-current"></i></label>
+                                        <input type="radio" id="star3" name="rating" value="3" class="review-star-input"><label for="star3" title="3 stars" class="review-star-label"><i data-lucide="star" class="w-7 h-7 fill-current"></i></label>
+                                        <input type="radio" id="star2" name="rating" value="2" class="review-star-input"><label for="star2" title="2 stars" class="review-star-label"><i data-lucide="star" class="w-7 h-7 fill-current"></i></label>
+                                        <input type="radio" id="star1" name="rating" value="1" class="review-star-input" required><label for="star1" title="1 star" class="review-star-label"><i data-lucide="star" class="w-7 h-7 fill-current"></i></label>
                                     </div>
                                 </div>
                             </div>
@@ -350,7 +352,13 @@
         const generateStars = (rating, size = 'w-5 h-5') => {
             let starsHTML = '';
             for (let i = 1; i <= 5; i++) {
-                starsHTML += `<i data-lucide="star" class="${size} ${i <= rating ? 'fill-yellow-400 stroke-yellow-500 text-yellow-500' : 'fill-stone-200 stroke-stone-300 text-stone-300'}"></i>`;
+                if (i <= Math.floor(rating)) {
+                    starsHTML += `<i data-lucide="star" class="${size} fill-yellow-400 stroke-yellow-500 text-yellow-500"></i>`;
+                } else if (i === Math.ceil(rating) && rating % 1 !== 0) {
+                    starsHTML += `<i data-lucide="star-half" class="${size} fill-yellow-400 stroke-yellow-500 text-yellow-500"></i>`;
+                } else {
+                    starsHTML += `<i data-lucide="star" class="${size} fill-stone-200 stroke-stone-300 text-stone-300"></i>`;
+                }
             }
             return starsHTML;
         };
@@ -504,7 +512,7 @@
             const filtersEl = document.getElementById('review-filters');
             const filterButtonsHTML = ratingCounts.map((count, i) => {
                 const rating = i + 1;
-                if (rating >= 3 && count > 0) { // Only show filters for 3, 4, and 5 stars
+                if (count > 0) {
                     return `<button class="review-filter-btn px-4 py-1 text-sm font-medium rounded-full transition-colors bg-stone-200 text-stone-700 hover:bg-stone-300" data-rating="${rating}">${rating} ★ (${count})</button>`;
                 }
                 return '';
