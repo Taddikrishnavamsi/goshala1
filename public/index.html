@@ -949,30 +949,54 @@
                 startAutoScroll(); // Reset timer
             });
 
-            // Swipe support for mobile
+            // Swipe support for mobile - improved
+            const carouselContainer = document.querySelector('.carousel-container');
             let touchStartX = 0;
-            let touchEndX = 0;
+            let touchStartY = 0;
+            let touchStartTime = 0;
             const swipeThreshold = 50; // Minimum distance in px to be considered swipe
+            const swipeTimeThreshold = 500; // Max time in ms for a swipe to be valid
 
-            track.addEventListener('touchstart', (e) => {
-                touchStartX = e.changedTouches[0].clientX;
-            });
-
-            track.addEventListener('touchmove', (e) => {
-                touchEndX = e.changedTouches[0].clientX;
-            });
-
-            track.addEventListener('touchend', () => {
-                const distance = touchEndX - touchStartX;
-                if (Math.abs(distance) > swipeThreshold) {
-                    if (distance < 0) {
-                        nextSlide();
-                    } else {
-                        prevSlide();
+            if (carouselContainer) {
+                carouselContainer.addEventListener('touchstart', (e) => {
+                    if (e.touches.length === 1) {
+                        touchStartX = e.touches[0].clientX;
+                        touchStartY = e.touches[0].clientY;
+                        touchStartTime = Date.now();
                     }
-                    startAutoScroll(); // Reset timer on swipe
-                }
-            });
+                }, { passive: true });
+
+                carouselContainer.addEventListener('touchmove', (e) => {
+                    if (e.touches.length === 1) {
+                        const touchCurrentX = e.touches[0].clientX;
+                        const touchCurrentY = e.touches[0].clientY;
+                        const deltaX = Math.abs(touchCurrentX - touchStartX);
+                        const deltaY = Math.abs(touchCurrentY - touchStartY);
+
+                        // If horizontal swipe is detected, prevent vertical scrolling
+                        if (deltaX > deltaY) {
+                            e.preventDefault();
+                        }
+                    }
+                }, { passive: false });
+
+                carouselContainer.addEventListener('touchend', (e) => {
+                    const touchEndX = e.changedTouches[0].clientX;
+                    const touchEndY = e.changedTouches[0].clientY;
+                    const distanceX = touchEndX - touchStartX;
+                    const distanceY = touchEndY - touchStartY;
+                    const elapsedTime = Date.now() - touchStartTime;
+
+                    if (elapsedTime <= swipeTimeThreshold && Math.abs(distanceX) > swipeThreshold && Math.abs(distanceX) > Math.abs(distanceY)) {
+                        if (distanceX < 0) {
+                            nextSlide();
+                        } else {
+                            prevSlide();
+                        }
+                        startAutoScroll(); // Reset timer on swipe
+                    }
+                }, { passive: true });
+            }
 
             startAutoScroll();
         }
