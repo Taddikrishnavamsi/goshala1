@@ -17,16 +17,14 @@
     </div>
 
     <!-- Search Overlay -->
-    <div id="search-overlay" class="fixed inset-0 z-[1001] bg-black/70 backdrop-blur-sm hidden items-start justify-center p-4 pt-24 md:pt-32 transition-opacity duration-300">
-        <div class="w-full max-w-xl transform -translate-y-full transition-transform duration-300" id="search-overlay-content">
+    <div id="search-overlay" class="fixed inset-0 z-[1001] bg-black/70 backdrop-blur-sm hidden items-start justify-center p-4 pt-20 transition-opacity duration-300">
+        <div class="w-full max-w-4xl transform -translate-y-full transition-transform duration-300" id="search-overlay-content">
             <div class="relative">
-                <input type="text" id="overlay-search-input" placeholder="Search for products..." class="w-full p-4 pr-12 text-lg text-stone-800 bg-white/90 border-2 border-white rounded-full focus:outline-none focus:ring-2 focus:ring-green-500" autocomplete="off">
-                <i data-lucide="search" class="absolute top-1/2 right-4 -translate-y-1/2 w-6 h-6 text-stone-500"></i>
+                <i data-lucide="search" class="absolute top-1/2 left-4 -translate-y-1/2 w-6 h-6 text-stone-500"></i>
+                <input type="text" id="overlay-search-input" placeholder="Search for products..." class="w-full pl-12 pr-12 py-4 text-xl text-stone-800 bg-white border-2 border-white rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 shadow-lg" autocomplete="off">
+                <i data-lucide="mic" class="absolute top-1/2 right-4 -translate-y-1/2 w-6 h-6 text-stone-500"></i>
             </div>
-            <!-- Suggestions for overlay search -->
-            <div id="overlay-search-suggestions" class="w-full bg-white border border-stone-200 rounded-lg shadow-lg z-20 hidden mt-2 overflow-hidden max-h-80 overflow-y-auto">
-                <!-- Suggestions will be injected here -->
-            </div>
+            <div id="overlay-search-suggestions" class="w-full bg-white border border-stone-200 rounded-lg shadow-lg z-20 hidden mt-4 overflow-hidden max-h-80 overflow-y-auto"></div>
         </div>
         <button id="overlay-close-button" class="absolute top-6 right-6 text-white/70 hover:text-white">
             <i data-lucide="x" class="w-10 h-10"></i>
@@ -950,6 +948,55 @@
                 nextSlide();
                 startAutoScroll(); // Reset timer
             });
+
+            // Swipe support for mobile - improved
+            const carouselContainer = document.querySelector('.carousel-container');
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let touchStartTime = 0;
+            const swipeThreshold = 50; // Minimum distance in px to be considered swipe
+            const swipeTimeThreshold = 500; // Max time in ms for a swipe to be valid
+
+            if (carouselContainer) {
+                carouselContainer.addEventListener('touchstart', (e) => {
+                    if (e.touches.length === 1) {
+                        touchStartX = e.touches[0].clientX;
+                        touchStartY = e.touches[0].clientY;
+                        touchStartTime = Date.now();
+                    }
+                }, { passive: true });
+
+                carouselContainer.addEventListener('touchmove', (e) => {
+                    if (e.touches.length === 1) {
+                        const touchCurrentX = e.touches[0].clientX;
+                        const touchCurrentY = e.touches[0].clientY;
+                        const deltaX = Math.abs(touchCurrentX - touchStartX);
+                        const deltaY = Math.abs(touchCurrentY - touchStartY);
+
+                        // If horizontal swipe is detected, prevent vertical scrolling
+                        if (deltaX > deltaY) {
+                            e.preventDefault();
+                        }
+                    }
+                }, { passive: false });
+
+                carouselContainer.addEventListener('touchend', (e) => {
+                    const touchEndX = e.changedTouches[0].clientX;
+                    const touchEndY = e.changedTouches[0].clientY;
+                    const distanceX = touchEndX - touchStartX;
+                    const distanceY = touchEndY - touchStartY;
+                    const elapsedTime = Date.now() - touchStartTime;
+
+                    if (elapsedTime <= swipeTimeThreshold && Math.abs(distanceX) > swipeThreshold && Math.abs(distanceX) > Math.abs(distanceY)) {
+                        if (distanceX < 0) {
+                            nextSlide();
+                        } else {
+                            prevSlide();
+                        }
+                        startAutoScroll(); // Reset timer on swipe
+                    }
+                }, { passive: true });
+            }
 
             startAutoScroll();
         }
