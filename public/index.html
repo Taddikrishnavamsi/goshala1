@@ -949,6 +949,31 @@
                 startAutoScroll(); // Reset timer
             });
 
+            // Swipe support for mobile
+            let touchStartX = 0;
+            let touchEndX = 0;
+            const swipeThreshold = 50; // Minimum distance in px to be considered swipe
+
+            track.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+
+            track.addEventListener('touchmove', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+            });
+
+            track.addEventListener('touchend', () => {
+                const distance = touchEndX - touchStartX;
+                if (Math.abs(distance) > swipeThreshold) {
+                    if (distance < 0) {
+                        nextSlide();
+                    } else {
+                        prevSlide();
+                    }
+                    startAutoScroll(); // Reset timer on swipe
+                }
+            });
+
             startAutoScroll();
         }
 
