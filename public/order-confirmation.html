@@ -122,6 +122,18 @@
         </div>
     </main>
 
+    <!-- Order Popup Modal -->
+    <div id="order-popup" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm mx-4">
+            <h2 class="text-xl font-bold text-stone-800 mb-4">Order Placed Successfully!</h2>
+            <p class="text-stone-600 mb-6">Your order has been confirmed. You can track and view your orders anytime.</p>
+            <div class="flex justify-end gap-4">
+                <button id="close-popup" class="px-4 py-2 bg-stone-200 text-stone-800 rounded hover:bg-stone-300">Close</button>
+                <a href="my-orders.html" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">View My Orders</a>
+            </div>
+        </div>
+    </div>
+
     <footer class="bg-stone-800 text-white mt-12">
         <div class="container mx-auto px-8 py-12">
             <div class="grid md:grid-cols-4 gap-8">
@@ -218,6 +230,25 @@
                     }
                 });
             }
+
+            // --- ORDER POPUP LOGIC ---
+            setTimeout(() => {
+                const popup = document.getElementById('order-popup');
+                if (popup) {
+                    popup.classList.remove('hidden');
+                }
+            }, 2000); // Show after 2 seconds
+
+            // Close popup on button click
+            const closeBtnPopup = document.getElementById('close-popup');
+            if (closeBtnPopup) {
+                closeBtnPopup.addEventListener('click', () => {
+                    const popup = document.getElementById('order-popup');
+                    if (popup) {
+                        popup.classList.add('hidden');
+                    }
+                });
+            }
         });
 
         // --- SHARED LOGIC (can run outside DOMContentLoaded) ---
@@ -245,52 +276,6 @@
                     pageLoader.classList.add('opacity-0');
                     setTimeout(() => pageLoader.style.display = 'none', 50); // Hide it quickly
                 }
-            }
-        });
-    </script>
-</body>
-</html>
-        <div class="container mx-auto px-8 py-12 text-center">
-             <p class="font-bold text-2xl mb-2">Brundavanam Goshala</p>
-             <p class="text-stone-400 max-w-xl mx-auto mb-6">Promoting wellness and sustainability through sacred cow products, while supporting the care and protection of our beloved Gomata.</p>
-             <div class="flex justify-center space-x-6">
-                 <a href="about.html" class="text-stone-300 hover:text-white">About Us</a>
-                 <a href="contact.html" class="text-stone-300 hover:text-white">Contact & Support</a>
-                 <a href="#" class="text-stone-300 hover:text-white">Terms of Service</a>
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        // This script is now primarily for mobile menu and cart count, which don't need DOMContentLoaded
-        // --- Cart Count Logic ---
-        const cartCountElement = document.getElementById('cart-count');
-        function updateCartCount() {
-            const storedProducts = JSON.parse(localStorage.getItem('goshalaProducts')) || [];
-            const itemsInCart = storedProducts.filter(p => p.inCart).length;
-            if (cartCountElement) {
-                cartCountElement.textContent = itemsInCart;
-            }
-        }
-        updateCartCount();
-        window.addEventListener('storage', (event) => {
-            if (event.key === 'goshalaProducts') {
-                updateCartCount();
-            }
-        });
-
-        // --- Mobile Menu Toggle ---
-        const mobileMenuButton = document.getElementById('mobile-menu-button');
-        const mobileMenu = document.getElementById('mobile-menu');
-        if (mobileMenuButton && mobileMenu) {
-            mobileMenuButton.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
-        }
-
-        // --- Before leaving the page, show the loader ---
-        window.addEventListener('beforeunload', () => {
-            const pageLoader = document.getElementById('page-loader');
-            if (pageLoader) {
-                pageLoader.style.display = 'flex';
             }
         });
     </script>
