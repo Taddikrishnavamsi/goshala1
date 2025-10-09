@@ -51,3 +51,10 @@ out
 # Temporary files
 .tmp
 temp/
+
+# Database data directories
+backend/databases/*_data/
+backend/databases/influxdb_data/
+backend/databases/mongodb_data/
+backend/databases/postgresql_data/
+backend/databases/redis_data/
