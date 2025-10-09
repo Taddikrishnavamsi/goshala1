@@ -300,14 +300,14 @@
                 const imageUrl = (product.images && product.images.length > 0) ? product.images[0] : 'https://placehold.co/400x300/CCCCCC/FFFFFF?text=No+Image';
 
                  card.innerHTML = `
-                    <div class="product-image-container relative group">
-                        <a href="product-detail.html?id=${product.id}" class="block overflow-hidden rounded-lg" aria-label="View details for ${product.name}">
-                            <img src="${imageUrl}" alt="${product.name}" class="w-full aspect-square object-cover" loading="lazy" decoding="async">
-                        </a>
-                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
-                            <button class="quick-view-btn bg-white text-stone-800 font-bold py-2 px-4 rounded-full transform scale-90 group-hover:scale-100 transition-transform" data-product-id="${product.id}" aria-label="Quick view ${product.name}">Quick View</button>
+                        <div class="product-image-container relative group">
+                            <a href="product-detail.html?id=${product.id}" class="block overflow-hidden rounded-lg" aria-label="View details for ${product.name}">
+                                <img src="${imageUrl}" alt="${product.name}" class="w-full aspect-square object-cover" loading="lazy" decoding="async">
+                            </a>
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity hidden md:flex items-center justify-center z-10">
+                                <button class="quick-view-btn bg-white text-stone-800 font-bold py-2 px-4 rounded-full transform scale-90 group-hover:scale-100 transition-transform" data-product-id="${product.id}" aria-label="Quick view ${product.name}">Quick View</button>
+                            </div>
                         </div>
-                    </div>
                     <div class="px-4 pb-4 sm:px-0 sm:pt-2 sm:pb-0 flex flex-col flex-grow">
                         <p class="text-xs text-stone-300 mt-2 mb-1 truncate">${product.category ? product.category[0] : 'Goshala Product'}</p>
                         <h3 class="product-name text-sm leading-tight font-semibold">
@@ -823,7 +823,7 @@
                                 <a href="product-detail.html?id=${product.legacyId}" class="block overflow-hidden rounded-lg">
                                     <img src="${imageUrl}" alt="${product.name}" class="w-full aspect-square object-cover" loading="lazy" decoding="async">
                                 </a>
-                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity hidden md:flex items-center justify-center">
                                     <button class="quick-view-btn bg-white text-stone-800 font-bold py-2 px-4 rounded-full transform scale-90 group-hover:scale-100 transition-transform" data-product-id="${product.legacyId}">Quick View</button>
                                 </div>
                             </div>
