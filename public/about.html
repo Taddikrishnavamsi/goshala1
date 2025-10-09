@@ -423,11 +423,9 @@
             }, 300);
         }
 
-        function performSearch() {
+        function performSearchFromOverlay() {
             const query = overlaySearchInput.value.trim();
-            if (query) {
-                window.location.href = `/?q=${encodeURIComponent(query)}#shop-search`;
-            }
+            window.location.href = `/?q=${encodeURIComponent(query)}#shop-search`;
         }
 
         function renderOverlaySuggestions(results) {
@@ -485,7 +483,7 @@
                 document.getElementById('overlay-search-suggestions').classList.add('hidden');
             }
         }, 300));
-        overlaySearchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { performSearch(); document.getElementById('overlay-search-suggestions').classList.add('hidden'); } });
+        overlaySearchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { performSearchFromOverlay(); document.getElementById('overlay-search-suggestions').classList.add('hidden'); } });
         window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !searchOverlay.classList.contains('hidden')) closeSearch(); });
 
         // --- PAGE LOADER LOGIC ---
