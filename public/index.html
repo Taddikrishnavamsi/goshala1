@@ -133,7 +133,7 @@
             <div class="mb-8 px-4 sm:px-0">
                 <div class="flex justify-between items-center mb-3">
                     <h2 class="text-lg font-semibold text-white text-center md:text-left text-shadow">Filter by Category</h2>
-                    <button id="clear-filters-btn" class="text-sm text-red-400 hover:underline hidden font-medium flex items-center gap-1"><i data-lucide="x" class="w-4 h-4"></i>Clear All</button>
+        <button id="clear-filters-btn" class="text-sm text-red-400 hover:underline hidden font-medium flex items-center gap-1"><i data-lucide="x" class="w-4 h-4"></i>Clear All</button>
                 </div>
                 <div id="category-filters" class="flex overflow-x-auto flex-nowrap md:flex-wrap justify-start gap-3 pb-2 hide-scrollbar"></div>
             </div>
@@ -553,12 +553,13 @@
             selectedCategory = (urlParams.get('category') ?? localStorage.getItem('goshalaCategory')) || 'All';
             document.querySelectorAll('.category-filter-btn').forEach(btn => {
                 const isActive = btn.dataset.category === selectedCategory;
-                // Use the correct active/inactive classes to match the click handler
+                // Active State: Light green background with dark text for contrast.
                 btn.classList.toggle('bg-green-200', isActive);
-                btn.classList.toggle('text-black', isActive);
+                btn.classList.toggle('text-green-900', isActive);
                 btn.classList.toggle('font-semibold', isActive);
-                btn.classList.toggle('bg-white', !isActive);
-                btn.classList.toggle('text-black', isActive);
+                // Inactive State: Glassy background, white text.
+                btn.classList.toggle('bg-white/20', !isActive);
+                btn.classList.toggle('text-white', !isActive);
             });
             updateClearButtonVisibility();
         }
@@ -608,7 +609,7 @@
             ];
 
             const filtersContainer = document.getElementById('category-filters');
-            filtersContainer.innerHTML = categories.map(category => `<button class="category-filter-btn flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${category.label === 'All' ? 'bg-green-200 text-green-900 font-semibold' : 'bg-white/20 text-white'} backdrop-blur-sm border border-white/30 hover:bg-white/40" data-category="${category.label}"><i data-lucide="${category.icon}" class="w-4 h-4"></i>${category.label}</button>`).join('');
+            filtersContainer.innerHTML = categories.map(category => `<button class="category-filter-btn flex items-center gap-2 whitespace-nowrap px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${category.label === 'All' ? 'bg-green-200 text-green-900 font-semibold' : 'bg-white/20 text-white'} backdrop-blur-sm border border-white/30 hover:bg-white/40" data-category="${category.label}"><i data-lucide="${category.icon}" class="w-4 h-4"></i>${category.label}</button>`).join('');
 
         }
 
@@ -1212,9 +1213,13 @@
             localStorage.removeItem('goshalaSort');
             document.querySelectorAll('.category-filter-btn').forEach(btn => {
                 const isActive = btn.dataset.category === 'All';
-                btn.classList.toggle('bg-green-600', isActive);
-                btn.classList.toggle('text-white', isActive);
+                // Active State: Light green background with dark text for contrast.
+                btn.classList.toggle('bg-green-200', isActive);
+                btn.classList.toggle('text-green-900', isActive);
+                btn.classList.toggle('font-semibold', isActive);
+                // Inactive State: Glassy background, white text.
                 btn.classList.toggle('bg-white/20', !isActive);
+                btn.classList.toggle('text-white', !isActive);
             });
             applyFiltersAndSort();
         });
