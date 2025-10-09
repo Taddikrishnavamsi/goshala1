@@ -955,11 +955,11 @@
             const swipeThreshold = 50; // Minimum distance in px to be considered swipe
 
             track.addEventListener('touchstart', (e) => {
-                touchStartX = e.changedTouches[0].screenX;
+                touchStartX = e.changedTouches[0].clientX;
             });
 
             track.addEventListener('touchmove', (e) => {
-                touchEndX = e.changedTouches[0].screenX;
+                touchEndX = e.changedTouches[0].clientX;
             });
 
             track.addEventListener('touchend', () => {
