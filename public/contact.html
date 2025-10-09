@@ -132,9 +132,9 @@
                 <button id="header-search-button" class="hidden md:block p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
                     <i data-lucide="search" class="w-5 h-5"></i>
                 </button>
-                <button href="my-orders.html" class="hidden md:block p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
+                <a href="my-orders.html" class="hidden md:block p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
                     <i data-lucide="user" class="w-5 h-5"></i>
-                </button>
+                </a>
                 <a href="cart.html" class="relative p-2 rounded-full bg-white/20 backdrop-blur-sm text-stone-700 hover:bg-white/40">
                     <i data-lucide="shopping-cart" class="w-5 h-5"></i>
                     <span id="cart-count" class="absolute -top-1 -right-1 bg-amber-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span>
@@ -389,11 +389,9 @@
             }, 300);
         }
 
-        function performSearch() {
+        function performSearchFromOverlay() {
             const query = overlaySearchInput.value.trim();
-            if (query) {
-                window.location.href = `/?q=${encodeURIComponent(query)}#shop-search`;
-            }
+            window.location.href = `/?q=${encodeURIComponent(query)}#shop-search`;
         }
 
         function renderOverlaySuggestions(results) {
@@ -450,7 +448,7 @@
                 document.getElementById('overlay-search-suggestions').classList.add('hidden');
             }
         }, 300));
-        overlaySearchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { performSearch(); document.getElementById('overlay-search-suggestions').classList.add('hidden'); } });
+        overlaySearchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { performSearchFromOverlay(); document.getElementById('overlay-search-suggestions').classList.add('hidden'); } });
         window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !searchOverlay.classList.contains('hidden')) closeSearch(); });
 
         // --- PAGE LOADER LOGIC ---

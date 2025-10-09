@@ -183,3 +183,10 @@ label[for="sort-select"] {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
 }
+
+/* Hide carousel arrows on mobile */
+@media (max-width: 767px) {
+    #prev-button, #next-button {
+        display: none;
+    }
+}
