@@ -37,11 +37,15 @@ async function connectToDatabase() {
     const connection = await mongoose.connect(MONGO_URI, {
       maxPoolSize: 5,           // Reduced for serverless
       minPoolSize: 1,
-      serverSelectionTimeoutMS: 5000,
+      serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
-      family: 4,
+      family: 0, // Auto-detect IP family
       // Crucial for serverless: reuse connections
       bufferCommands: true,
+      ssl: true,
+      tls: true,
+      tlsAllowInvalidCertificates: false,
+      tlsAllowInvalidHostnames: false,
     });
 
     cachedDb = connection;
