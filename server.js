@@ -39,7 +39,6 @@ async function connectToDatabase() {
       minPoolSize: 1,
       serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
-      family: 0, // Auto-detect IP family
       // Crucial for serverless: reuse connections
       bufferCommands: true,
       ssl: true,
@@ -955,3 +954,4 @@ if (process.env.NODE_ENV !== 'production') {
 
     startLocalServer();
 }
+
