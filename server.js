@@ -1,6 +1,5 @@
-require('dotenv').config(); // Load environment variables from .env file
+require('dotenv').config();
 const express = require('express');
-const fs = require('fs').promises;
 const multer = require('multer');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -13,17 +12,46 @@ const compression = require('compression');
 const MONGO_URI = process.env.MONGO_URI;
 const ADMIN_SECRET = process.env.ADMIN_SECRET;
 
-// Warn if environment variables are missing but don't exit immediately
-// This allows the server to start and fail gracefully when DB connection is attempted
 if (!MONGO_URI) {
-  console.warn('WARNING: MONGO_URI environment variable is not set. Database operations will fail.');
+  console.warn('WARNING: MONGO_URI environment variable is not set.');
 }
 if (!ADMIN_SECRET) {
-  console.warn('WARNING: ADMIN_SECRET environment variable is not set. Admin operations will fail.');
+  console.warn('WARNING: ADMIN_SECRET environment variable is not set.');
 }
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// ============================================
+// VERCEL-OPTIMIZED MONGOOSE CONNECTION
+// ============================================
+let cachedDb = null;
+
+async function connectToDatabase() {
+  if (cachedDb && mongoose.connection.readyState === 1) {
+    console.log('Using cached database connection');
+    return cachedDb;
+  }
+
+  try {
+    const connection = await mongoose.connect(MONGO_URI, {
+      maxPoolSize: 5,           // Reduced for serverless
+      minPoolSize: 1,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      family: 4,
+      // Crucial for serverless: reuse connections
+      bufferCommands: false,
+    });
+
+    cachedDb = connection;
+    console.log('New database connection established');
+    return cachedDb;
+  } catch (error) {
+    console.error('Database connection error:', error);
+    throw error;
+  }
+}
 
 // Middleware for admin authentication
 const adminAuth = (req, res, next) => {
@@ -34,13 +62,11 @@ const adminAuth = (req, res, next) => {
     next();
 };
 
-// Middleware for user authentication (simple email-based)
+// Middleware for user authentication
 const userAuth = (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer <token>
+    const token = authHeader && authHeader.split(' ')[1];
     if (token == null) return res.sendStatus(401);
-
-    // In this simple setup, the token is the user's email.
     req.userIdentifier = token;
     next();
 };
@@ -50,32 +76,85 @@ const razorpay = new Razorpay({
     key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// --- Multer Configuration for Image Uploads (in-memory) ---
+// ============================================
+// SIMPLE RATE LIMITING (IP-based, in-memory)
+// Note: This is per-function instance on Vercel
+// For production, use Vercel's rate limiting or external service
+// ============================================
+const requestCounts = new Map();
+
+const simpleRateLimit = (maxRequests, windowMs) => {
+  return (req, res, next) => {
+    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    const now = Date.now();
+    const key = `${ip}-${req.path}`;
+    
+    if (!requestCounts.has(key)) {
+      requestCounts.set(key, []);
+    }
+    
+    const requests = requestCounts.get(key).filter(time => now - time < windowMs);
+    
+    if (requests.length >= maxRequests) {
+      return res.status(429).json({ error: 'Too many requests, please try again later.' });
+    }
+    
+    requests.push(now);
+    requestCounts.set(key, requests);
+    
+    // Cleanup old entries every 100 requests
+    if (Math.random() < 0.01) {
+      for (const [k, times] of requestCounts.entries()) {
+        const filtered = times.filter(time => now - time < windowMs);
+        if (filtered.length === 0) {
+          requestCounts.delete(k);
+        } else {
+          requestCounts.set(k, filtered);
+        }
+      }
+    }
+    
+    next();
+  };
+};
+
+const generalLimiter = simpleRateLimit(100, 15 * 60 * 1000);
+const strictLimiter = simpleRateLimit(20, 15 * 60 * 1000);
+const uploadLimiter = simpleRateLimit(10, 60 * 60 * 1000);
+
+// ============================================
+// MULTER CONFIGURATION
+// ============================================
 const upload = multer({
-    storage: multer.memoryStorage(), // Use memory storage to handle the file as a buffer
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file size limit
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
     fileFilter: (req, file, cb) => {
-        if (!file.mimetype.startsWith('image/')) return cb(new Error('Only image files are allowed!'), false);
+        if (!file.mimetype.startsWith('image/')) {
+            return cb(new Error('Only image files are allowed!'), false);
+        }
         cb(null, true);
     }
 });
 
-// --- Middleware ---
+// Middleware
 app.use(cors());
-app.use(compression()); // Enable gzip compression for all responses
-app.use(express.json());
-// Serve all static files (HTML, CSS, client-side JS, images) from the 'public' directory.
+app.use(compression());
+app.use(express.json({ limit: '1mb' }));
 app.use(express.static('public', {
-  maxAge: '1d', // Cache static files for 1 day
+  maxAge: '1d',
   setHeaders: (res, path) => {
     if (path.endsWith('.html')) {
-      res.setHeader('Cache-Control', 'no-cache'); // Don't cache HTML
+      res.setHeader('Cache-Control', 'no-cache');
     }
   }
 }));
 
-// --- MongoDB Connection ---
-// --- Mongoose Schemas and Models ---
+// Apply rate limiting to API routes
+app.use('/api/', generalLimiter);
+
+// ============================================
+// MONGOOSE SCHEMAS WITH INDEXES
+// ============================================
 const ProductSchema = new mongoose.Schema({
   legacyId: { type: Number, required: true, unique: true, index: true },
   name: { 
@@ -85,8 +164,8 @@ const ProductSchema = new mongoose.Schema({
     minlength: 3,
     maxlength: 150
   },
-  dateAdded: { type: Date, default: Date.now },
-  category: [String],
+  dateAdded: { type: Date, default: Date.now, index: true },
+  category: { type: [String], index: true },
   images: [String],
   description: { type: String, trim: true, maxlength: 2000 },
   rating: { type: Number, default: 0 },
@@ -95,32 +174,37 @@ const ProductSchema = new mongoose.Schema({
   price: { 
     type: Number, 
     required: [true, 'Product price is required.'],
-    min: 0 
+    min: 0,
+    index: true
   },
   originalPrice: { type: Number },
   deliveryDate: { type: String }
 });
-const Product = mongoose.model('Product', ProductSchema);
+
+const Product = mongoose.models.Product || mongoose.model('Product', ProductSchema);
 
 const CommentSchema = new mongoose.Schema({
   productId: { type: Number, required: true, index: true },
   username: { type: String, required: true, trim: true },
   comment: { type: String, required: true, trim: true },
-  rating: { type: Number, min: 1, max: 5 },
-  createdAt: { type: Date, default: Date.now },
+  rating: { type: Number, min: 1, max: 5, index: true },
+  createdAt: { type: Date, default: Date.now, index: true },
   verifiedPurchase: { type: Boolean, default: false }
 });
-const Comment = mongoose.model('Comment', CommentSchema);
+
+CommentSchema.index({ productId: 1, createdAt: -1 });
+CommentSchema.index({ productId: 1, rating: -1 });
+
+const Comment = mongoose.models.Comment || mongoose.model('Comment', CommentSchema);
 
 const OrderSchema = new mongoose.Schema({
-  orderId: { type: String, required: true, unique: true },
-  date: { type: Date, default: Date.now },
+  orderId: { type: String, required: true, unique: true, index: true },
+  date: { type: Date, default: Date.now, index: true },
   user: {
-    // userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Future enhancement
     firstname: { type: String, required: true, trim: true },
     lastname: { type: String, required: true, trim: true },
-    email: { type: String, required: true, trim: true, match: [/.+@.+\..+/, 'Please enter a valid email address'] },
-    phone: { type: String, required: true, trim: true },
+    email: { type: String, required: true, trim: true, match: [/.+@.+\..+/, 'Please enter a valid email address'], index: true },
+    phone: { type: String, required: true, trim: true, index: true },
     address1: { type: String, required: true, trim: true },
     address2: { type: String, trim: true },
     city: { type: String, required: true, trim: true },
@@ -140,7 +224,7 @@ const OrderSchema = new mongoose.Schema({
         { validator: (val) => val.length > 0, msg: 'Order must have at least one item.' }
     ]
   },
-  paymentStatus: { type: String, default: 'pending' },
+  paymentStatus: { type: String, default: 'pending', index: true },
   razorpay: {
     orderId: String,
     paymentId: String,
@@ -150,22 +234,43 @@ const OrderSchema = new mongoose.Schema({
     type: String,
     enum: ['Pending', 'Shipped', 'Delivered', 'Cancelled'],
     default: 'Pending',
-    required: true
+    required: true,
+    index: true
   },
   tracking: {
     carrier: { type: String, trim: true },
     number: { type: String, trim: true }
   }
 });
-const Order = mongoose.model('Order', OrderSchema);
+
+OrderSchema.index({ 'user.email': 1, date: -1 });
+OrderSchema.index({ 'user.phone': 1, date: -1 });
+
+const Order = mongoose.models.Order || mongoose.model('Order', OrderSchema);
 
 const ConfigSchema = new mongoose.Schema({
   key: { type: String, required: true, unique: true, index: true },
   value: mongoose.Schema.Types.Mixed
 });
-const Config = mongoose.model('Config', ConfigSchema);
 
-// --- Main API Endpoints ---
+const Config = mongoose.models.Config || mongoose.model('Config', ConfigSchema);
+
+// ============================================
+// MIDDLEWARE TO ENSURE DB CONNECTION
+// ============================================
+app.use(async (req, res, next) => {
+  try {
+    await connectToDatabase();
+    next();
+  } catch (error) {
+    console.error('Database connection failed:', error);
+    res.status(503).json({ error: 'Service temporarily unavailable' });
+  }
+});
+
+// ============================================
+// API ENDPOINTS
+// ============================================
 
 app.get('/api/products', async (req, res) => {
     try {
@@ -190,16 +295,17 @@ app.get('/api/products', async (req, res) => {
         if (sort === 'newest') { sortOptions = { dateAdded: -1 }; }
         else if (sort === 'price-asc') { sortOptions = { price: 1 }; }
         else if (sort === 'price-desc') { sortOptions = { price: -1 }; }
-        else { sortOptions = { legacyId: 1 }; } // Default sort for admin
+        else { sortOptions = { legacyId: 1 }; }
 
-        const pageNum = parseInt(page);
-        const limitNum = parseInt(limit);
+        const pageNum = Math.max(1, parseInt(page));
+        const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
         const skip = (pageNum - 1) * limitNum;
 
         const totalProducts = await Product.countDocuments(query);
         const totalPages = Math.ceil(totalProducts / limitNum);
 
         const productsFromDB = await Product.find(query)
+            .select('-__v -_id')
             .sort(sortOptions)
             .skip(skip)
             .limit(limitNum)
@@ -207,10 +313,8 @@ app.get('/api/products', async (req, res) => {
 
         const formattedProducts = (productsFromDB || []).map(product => {
             const productObj = { ...product };
-            productObj.id = productObj.legacyId; // Add the numeric id for frontend compatibility
+            productObj.id = productObj.legacyId;
             delete productObj.legacyId;
-            delete productObj.__v;
-            delete productObj._id;
             return productObj;
         });
 
@@ -228,53 +332,52 @@ app.get('/api/products', async (req, res) => {
 
 app.get('/api/products/:id', async (req, res) => {
     try {
-        const product = await Product.findOne({ legacyId: parseInt(req.params.id) });
+        const product = await Product.findOne({ legacyId: parseInt(req.params.id) })
+            .select('-__v')
+            .lean();
+            
         if (!product) {
             return res.status(404).json({ error: 'Product not found.' });
         }
 
-        const productObj = product.toObject();
-        productObj.id = productObj.legacyId;
-        delete productObj.legacyId;
-        delete productObj.__v;
+        product.id = product.legacyId;
+        delete product.legacyId;
         
-        res.json(productObj);
+        res.json(product);
     } catch (error) {
         console.error('Error fetching single product:', error);
         res.status(500).json({ error: 'Failed to fetch product.' });
     }
 });
 
-app.post('/api/upload', adminAuth, upload.single('image'), async (req, res) => {
+app.post('/api/upload', uploadLimiter, adminAuth, upload.single('image'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded.' });
     }
 
     try {
         const filename = `${Date.now()}-${req.file.originalname}`;
-        // Upload the file buffer to Vercel Blob
         const blob = await put(filename, req.file.buffer, {
-          access: 'public', // Make the file publicly accessible
+          access: 'public',
         });
-        res.status(201).json({ url: blob.url }); // Return the permanent URL
+        res.status(201).json({ url: blob.url });
     } catch (error) {
         console.error('Error uploading to Vercel Blob:', error);
         res.status(500).json({ error: 'Failed to upload image.' });
     }
 }, (error, req, res, next) => {
-    // Multer error handler
     res.status(400).json({ error: error.message });
 });
 
 app.post('/api/products', adminAuth, async (req, res) => {
     try {
         const productData = { ...req.body };
-        delete productData._id; // Ensure we don't pass an invalid _id
+        delete productData._id;
         delete productData.id;
 
         const newProduct = new Product({
             ...productData,
-            legacyId: productData.legacyId, // Use the provided legacyId
+            legacyId: productData.legacyId,
             dateAdded: new Date()
         });
         await newProduct.save();
@@ -297,7 +400,8 @@ app.put('/api/products/:id', adminAuth, async (req, res) => {
             { legacyId: parseInt(req.params.id) }, 
             req.body, 
             { new: true, runValidators: true }
-        );
+        ).select('-__v');
+        
         if (!updatedProduct) {
             return res.status(404).json({ error: 'Product not found.' });
         }
@@ -305,7 +409,6 @@ app.put('/api/products/:id', adminAuth, async (req, res) => {
         const productObj = updatedProduct.toObject();
         productObj.id = productObj.legacyId;
         delete productObj.legacyId;
-        delete productObj.__v;
         
         res.json(productObj);
     } catch (error) {
@@ -328,7 +431,7 @@ app.get('/api/comments/:productId', async (req, res) => {
     try {
         const { productId: legacyId } = req.params;
         const sort = req.query.sort || 'newest';
-        const stars = req.query.stars; // e.g., "5,4"
+        const stars = req.query.stars;
         
         const query = { productId: parseInt(legacyId) };
         if (stars) {
@@ -338,15 +441,16 @@ app.get('/api/comments/:productId', async (req, res) => {
             }
         }
 
-        // Build the sort object
-        let sortOptions = { createdAt: -1 }; // Default: newest
+        let sortOptions = { createdAt: -1 };
         if (sort === 'oldest') sortOptions = { createdAt: 1 };
         else if (sort === 'highest') sortOptions = { rating: -1, createdAt: -1 };
         else if (sort === 'lowest') sortOptions = { rating: 1, createdAt: -1 };
 
-        // Fetch all comments that match the query, without pagination
         const comments = await Comment.find(query)
-            .sort(sortOptions);
+            .sort(sortOptions)
+            .select('-__v')
+            .limit(100)
+            .lean();
         
         res.json(comments);
     } catch (error) {
@@ -355,7 +459,7 @@ app.get('/api/comments/:productId', async (req, res) => {
     }
 });
 
-app.post('/api/products/:id/reviews', async (req, res) => {
+app.post('/api/products/:id/reviews', strictLimiter, async (req, res) => {
     const productId = req.params.id;
     try {
         const product = await Product.findOne({ legacyId: parseInt(productId) });
@@ -363,28 +467,26 @@ app.post('/api/products/:id/reviews', async (req, res) => {
             return res.status(404).json({ error: `Product with ID ${productId} not found.` });
         }
 
-        // --- Verification Logic ---
         const { user, rating, comment } = req.body;
         if (!user || !rating || !comment || rating < 1 || rating > 5) {
             return res.status(400).json({ error: 'Missing required review fields: user, rating, comment' });
         }
 
         let isVerified = false;
-        // Find orders that contain this product's legacyId
-        const ordersWithProduct = await Order.find({ 'items.id': product.legacyId, });
-        // Check if any of those orders were placed by a user with a matching name
+        const ordersWithProduct = await Order.find({ 
+            'items.id': product.legacyId 
+        }).select('user.firstname user.lastname').lean();
+        
         if (ordersWithProduct.length > 0) {
             const reviewerName = user.toLowerCase().trim();
             isVerified = ordersWithProduct.some(order => {
                 const customerName = `${order.user.firstname || ''} ${order.user.lastname || ''}`.toLowerCase().trim();
-                // Check if the reviewer's name is part of the customer's full name
                 return customerName.includes(reviewerName);
             });
         }
-        // --- End Verification Logic ---
 
         const newComment = new Comment({
-            productId: product.legacyId, // Use the numeric legacyId
+            productId: product.legacyId,
             username: user,
             rating: parseInt(rating),
             comment: comment,
@@ -398,7 +500,7 @@ app.post('/api/products/:id/reviews', async (req, res) => {
         ]);
 
         if (stats.length > 0) {
-            product.rating = Math.round(stats[0].avgRating * 10) / 10; // Keep decimal for accuracy
+            product.rating = Math.round(stats[0].avgRating * 10) / 10;
             product.reviewsCount = stats[0].count;
             await product.save();
         }
@@ -414,73 +516,93 @@ app.post('/api/products/:id/reviews', async (req, res) => {
     }
 });
 
-// --- Config Endpoints (for homepage carousel and top picks) ---
-
-// GET the list of product IDs for the carousel
+// Config Endpoints
 app.get('/api/admin/config/carousel', adminAuth, async (req, res) => {
-    const config = await Config.findOne({ key: 'carouselProductIds' });
-    res.json(config ? config.value : []);
+    try {
+        const config = await Config.findOne({ key: 'carouselProductIds' }).lean();
+        res.json(config ? config.value : []);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch carousel config' });
+    }
 });
 
-// SET the list of product IDs for the carousel
 app.put('/api/admin/config/carousel', adminAuth, async (req, res) => {
-    const { productIds } = req.body;
-    await Config.findOneAndUpdate(
-        { key: 'carouselProductIds' },
-        { value: productIds },
-        { upsert: true, new: true }
-    );
-    res.status(200).json({ success: true });
+    try {
+        const { productIds } = req.body;
+        await Config.findOneAndUpdate(
+            { key: 'carouselProductIds' },
+            { value: productIds },
+            { upsert: true, new: true }
+        );
+        res.status(200).json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update carousel config' });
+    }
 });
 
-// GET the list of product IDs for top picks
 app.get('/api/admin/config/top-picks', adminAuth, async (req, res) => {
-    const config = await Config.findOne({ key: 'topPicksProductIds' });
-    res.json(config ? config.value : []);
+    try {
+        const config = await Config.findOne({ key: 'topPicksProductIds' }).lean();
+        res.json(config ? config.value : []);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch top picks config' });
+    }
 });
 
-// SET the list of product IDs for top picks
 app.put('/api/admin/config/top-picks', adminAuth, async (req, res) => {
-    const { productIds } = req.body;
-    await Config.findOneAndUpdate(
-        { key: 'topPicksProductIds' },
-        { value: productIds },
-        { upsert: true, new: true }
-    );
-    res.status(200).json({ success: true });
+    try {
+        const { productIds } = req.body;
+        await Config.findOneAndUpdate(
+            { key: 'topPicksProductIds' },
+            { value: productIds },
+            { upsert: true, new: true }
+        );
+        res.status(200).json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to update top picks config' });
+    }
 });
 
-// PUBLIC: Get the full product data for the carousel slides
 app.get('/api/config/carousel-slides', async (req, res) => {
-    const config = await Config.findOne({ key: 'carouselProductIds' });
-    if (!config || !config.value || config.value.length === 0) {
-        return res.json([]);
+    try {
+        const config = await Config.findOne({ key: 'carouselProductIds' }).lean();
+        if (!config || !config.value || config.value.length === 0) {
+            return res.json([]);
+        }
+        const products = await Product.find({ legacyId: { $in: config.value } })
+            .select('-__v')
+            .lean();
+        const sortedProducts = config.value.map(id => products.find(p => p.legacyId === id)).filter(Boolean);
+        res.json(sortedProducts);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch carousel slides' });
     }
-    const products = await Product.find({ legacyId: { $in: config.value } }).lean();
-    // Sort products to match the order in the config
-    const sortedProducts = config.value.map(id => products.find(p => p.legacyId === id)).filter(Boolean);
-    res.json(sortedProducts);
 });
 
-// PUBLIC: Get the full product data for top picks
 app.get('/api/config/top-picks-products', async (req, res) => {
-    const config = await Config.findOne({ key: 'topPicksProductIds' });
-    if (!config || !config.value || config.value.length === 0) {
-        return res.json([]);
+    try {
+        const config = await Config.findOne({ key: 'topPicksProductIds' }).lean();
+        if (!config || !config.value || config.value.length === 0) {
+            return res.json([]);
+        }
+        const products = await Product.find({ legacyId: { $in: config.value } })
+            .select('-__v')
+            .lean();
+        const sortedProducts = config.value.map(id => products.find(p => p.legacyId === id)).filter(Boolean);
+        res.json(sortedProducts);
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch top picks' });
     }
-    const products = await Product.find({ legacyId: { $in: config.value } }).lean();
-    const sortedProducts = config.value.map(id => products.find(p => p.legacyId === id)).filter(Boolean);
-    res.json(sortedProducts);
 });
 
-// --- Order and Admin Endpoints ---
+// Order Endpoints
 app.get('/api/admin/orders', adminAuth, async (req, res) => {
     try {
         const { search, page = 1, limit = 10 } = req.query;
         let query = {};
 
         if (search) {
-            const searchRegex = { $regex: search, $options: 'i' }; // i for case-insensitive
+            const searchRegex = { $regex: search, $options: 'i' };
             query.$or = [
                 { orderId: searchRegex },
                 { 'user.firstname': searchRegex },
@@ -489,14 +611,20 @@ app.get('/api/admin/orders', adminAuth, async (req, res) => {
             ];
         }
 
-        const pageNum = parseInt(page);
-        const limitNum = parseInt(limit);
+        const pageNum = Math.max(1, parseInt(page));
+        const limitNum = Math.min(50, Math.max(1, parseInt(limit)));
         const skip = (pageNum - 1) * limitNum;
 
         const totalOrders = await Order.countDocuments(query);
         const totalPages = Math.ceil(totalOrders / limitNum);
 
-        const orders = await Order.find(query).sort({ date: -1 }).skip(skip).limit(limitNum).lean();
+        const orders = await Order.find(query)
+            .sort({ date: -1 })
+            .skip(skip)
+            .limit(limitNum)
+            .select('-__v')
+            .lean();
+            
         res.json({
             orders,
             totalPages,
@@ -523,7 +651,10 @@ app.get('/api/admin/orders/export', adminAuth, async (req, res) => {
             ];
         }
 
-        const orders = await Order.find(query).sort({ date: -1 }).lean();
+        const orders = await Order.find(query)
+            .sort({ date: -1 })
+            .limit(1000)
+            .lean();
 
         if (orders.length === 0) {
             return res.status(404).send('No orders to export.');
@@ -531,7 +662,6 @@ app.get('/api/admin/orders/export', adminAuth, async (req, res) => {
 
         const headers = ['OrderID', 'Date', 'CustomerName', 'Email', 'Phone', 'Address', 'Total', 'Items'];
         
-        // Helper to escape CSV cells
         const escapeCsvCell = (cell) => {
             if (cell === null || cell === undefined) return '';
             let str = String(cell);
@@ -541,7 +671,7 @@ app.get('/api/admin/orders/export', adminAuth, async (req, res) => {
             return str;
         };
 
-        const csvRows = [headers.join(',')]; // Header row
+        const csvRows = [headers.join(',')];
 
         orders.forEach(order => {
             const row = [
@@ -564,7 +694,6 @@ app.get('/api/admin/orders/export', adminAuth, async (req, res) => {
 
 app.get('/api/admin/dashboard-stats', adminAuth, async (req, res) => {
     try {
-        // 1. Get total revenue and total orders
         const orderStats = await Order.aggregate([
             {
                 $group: {
@@ -575,10 +704,12 @@ app.get('/api/admin/dashboard-stats', adminAuth, async (req, res) => {
             }
         ]);
 
-        // 2. Get 5 most recent orders
-        const recentOrders = await Order.find().sort({ date: -1 }).limit(5).lean();
+        const recentOrders = await Order.find()
+            .sort({ date: -1 })
+            .limit(5)
+            .select('-__v')
+            .lean();
 
-        // 3. Get top 5 selling products
         const topSellingProducts = await Order.aggregate([
             { $unwind: '$items' },
             {
@@ -600,7 +731,7 @@ app.get('/api/admin/dashboard-stats', adminAuth, async (req, res) => {
         ]);
 
         res.json({
-            ...orderStats[0],
+            ...(orderStats[0] || { totalRevenue: 0, totalOrders: 0 }),
             recentOrders,
             topSellingProducts
         });
@@ -610,18 +741,16 @@ app.get('/api/admin/dashboard-stats', adminAuth, async (req, res) => {
     }
 });
 
-// --- Config Endpoints ---
-app.get('/api/config/maps-key', (req, res) => {
-    // Send the Google Maps API key from environment variables to the client
-    res.json({ apiKey: process.env.GOOGLE_MAPS_API_KEY });
+app.get('/api/health', async (req, res) => {
+    res.json({ 
+        status: 'OK', 
+        timestamp: new Date().toISOString(),
+        dbStatus: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+        environment: 'vercel'
+    });
 });
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'OK', timestamp: new Date().toISOString() });
-});
-
-app.post('/api/razorpay/create-order', async (req, res) => {
+app.post('/api/razorpay/create-order', strictLimiter, async (req, res) => {
     try {
         const { total } = req.body;
         if (!total) {
@@ -629,7 +758,7 @@ app.post('/api/razorpay/create-order', async (req, res) => {
         }
 
         const options = {
-            amount: Math.round(total * 100), // amount in the smallest currency unit (paise)
+            amount: Math.round(total * 100),
             currency: "INR",
             receipt: `receipt_order_${new Date().getTime()}`,
         };
@@ -650,7 +779,6 @@ app.post('/api/razorpay/create-order', async (req, res) => {
     }
 });
 
-// Endpoint 2: Verify Payment & Create Order in DB
 app.post('/api/razorpay/capture', async (req, res) => {
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderDetails } = req.body;
@@ -659,13 +787,11 @@ app.post('/api/razorpay/capture', async (req, res) => {
              return res.status(400).json({ success: false, error: 'Missing required data.' });
         }
 
-        // Step 1: Verify the signature
         const shasum = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
         shasum.update(`${razorpay_order_id}|${razorpay_payment_id}`);
         const digest = shasum.digest('hex');
 
         if (digest === razorpay_signature) {
-            // Step 2: Signature is valid. Create the order in your database.
             const { user, items, total } = orderDetails;
             const newOrder = new Order({
                 orderId: razorpay_order_id,
@@ -698,9 +824,7 @@ app.post('/api/razorpay/capture', async (req, res) => {
 app.post('/api/auth/check-email', async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ error: 'Email is required.' });
-    // In this simple auth, we just check if the email exists in the user's local storage.
-    // A real implementation would check against a user database.
-    res.json({ success: true }); // For now, always succeed if email is provided.
+    res.json({ success: true });
 });
 
 app.get('/api/my-orders', userAuth, async (req, res) => {
@@ -713,11 +837,14 @@ app.get('/api/my-orders', userAuth, async (req, res) => {
             ]
         })
             .sort({ date: -1 })
+            .select('-__v')
             .lean();
 
-        // To enrich items with their current image
         const productIds = [...new Set(orders.flatMap(o => o.items.map(i => i.id)))];
-        const products = await Product.find({ legacyId: { $in: productIds } }).lean();
+        const products = await Product.find({ legacyId: { $in: productIds } })
+            .select('legacyId images')
+            .lean();
+            
         const productImages = products.reduce((acc, p) => {
             acc[p.legacyId] = (p.images && p.images.length > 0) ? p.images[0] : 'https://placehold.co/64x64';
             return acc;
@@ -745,7 +872,6 @@ app.put('/api/admin/orders/:orderId/status', adminAuth, async (req, res) => {
 
         const updatePayload = {};
 
-        // Validate the status against the schema enum
         if (status) {
             if (!Order.schema.path('shippingStatus').enumValues.includes(status)) {
                 return res.status(400).json({ error: 'Invalid status value.' });
@@ -760,7 +886,7 @@ app.put('/api/admin/orders/:orderId/status', adminAuth, async (req, res) => {
             { orderId: orderId },
             { $set: updatePayload },
             { new: true }
-        );
+        ).select('-__v');
 
         if (!updatedOrder) return res.status(404).json({ error: 'Order not found.' });
         res.json(updatedOrder);
@@ -770,94 +896,57 @@ app.put('/api/admin/orders/:orderId/status', adminAuth, async (req, res) => {
     }
 });
 
-// --- Server Startup ---
-async function startServer() {
-    const connectWithRetry = async () => {
+// ============================================
+// ERROR HANDLING
+// ============================================
+
+// Handle 404
+app.use((req, res) => {
+    res.status(404).json({ error: 'Route not found' });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+    console.error('Unhandled error:', err);
+    res.status(500).json({ 
+        error: 'Internal server error',
+        message: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+});
+
+// ============================================
+// VERCEL SERVERLESS EXPORT
+// ============================================
+
+// For Vercel, we export the app directly
+// The connection is established per request via middleware
+module.exports = app;
+
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+    const startLocalServer = async () => {
         try {
-            console.log('Attempting to connect to MongoDB...');
-            await mongoose.connect(MONGO_URI);
-            console.log('Successfully connected to MongoDB.');
-        } catch (err) {
-            console.error('MongoDB connection error:', err.message);
-            console.log('Retrying connection in 5 seconds...');
-            setTimeout(connectWithRetry, 5000); // Retry after 5 seconds
+            await connectToDatabase();
+            
+            app.listen(PORT, () => {
+                console.log('\n╔════════════════════════════════════════════════════════╗');
+                console.log('║  🚀 LOCAL DEVELOPMENT SERVER                          ║');
+                console.log('╚════════════════════════════════════════════════════════╝');
+                console.log(`\n📍 Main site:        http://localhost:${PORT}/index.html`);
+                console.log(`📍 Admin dashboard:  http://localhost:${PORT}/admin.html`);
+                console.log(`📍 Health check:     http://localhost:${PORT}/api/health`);
+                console.log('\n⚡ Optimizations enabled:');
+                console.log('   ✓ Connection caching for serverless');
+                console.log('   ✓ Simple rate limiting');
+                console.log('   ✓ Database indexes');
+                console.log('   ✓ Response compression');
+                console.log('   ✓ Lean queries\n');
+            });
+        } catch (error) {
+            console.error('Failed to start local server:', error);
+            process.exit(1);
         }
     };
 
-    await connectWithRetry();
-
-    mongoose.connection.on('disconnected', () => {
-        console.error('MongoDB disconnected! Attempting to reconnect...');
-        connectWithRetry();
-    });
-
-    // This part of the code will only run after a successful initial connection.
-    try {
-        // The server logic that depends on the DB connection
-        // can now be placed here, confident that the connection is established.
-        
-        // Check if the database is empty. If so, seed it from products.json.
-        const productCount = await Product.countDocuments();
-        if (productCount === 0) {
-            console.log('Database is empty. Seeding from products.json...');
-            try {
-                const productsJsonPath = path.join(__dirname, 'products.json');
-                const productsData = await fs.readFile(productsJsonPath, 'utf-8');
-                const productsFromFile = JSON.parse(productsData);
-
-                const productsToSeed = [];
-                const commentsToSeed = [];
-
-                for (const product of productsFromFile) {
-                    const { reviews, id, ...productDetails } = product;
-                    
-                    // Prepare product for DB
-                    productsToSeed.push({
-                        ...productDetails,
-                        legacyId: id, // Map 'id' from JSON to 'legacyId' in schema
-                        rating: product.rating || 0,
-                        reviewsCount: reviews ? reviews.length : 0
-                    });
-
-                    // Prepare comments for DB
-                    if (reviews && Array.isArray(reviews)) {
-                        reviews.forEach(review => {
-                            commentsToSeed.push({
-                                productId: id,
-                                username: review.user,
-                                comment: review.comment,
-                                rating: review.rating
-                            });
-                        });
-                    }
-                }
-
-                await Product.insertMany(productsToSeed);
-                await Comment.insertMany(commentsToSeed);
-                console.log('Database seeded successfully with products and comments.');
-
-            } catch (seedError) {
-                console.error('Error seeding database:', seedError);
-            }
-        } else {
-            console.log('Database already contains products. Skipping seeding.');
-        }
-
-        if (process.env.VERCEL) {
-            console.log('Vercel environment detected: skipping app.listen().');
-        } else {
-            app.listen(PORT, () => {
-                console.log(`\n🚀 Server running at http://localhost:${PORT}`);
-                console.log(`Access your main site at: http://localhost:${PORT}/index.html`);
-                console.log(`Admin dashboard at: http://localhost:${PORT}/admin.html`);
-            });
-        }
-    } catch (err) {
-        console.error('FATAL: Server startup error:', err);
-        process.exit(1);
-    }
+    startLocalServer();
 }
-
-startServer();
-
-module.exports = app;
