@@ -41,7 +41,7 @@ async function connectToDatabase() {
       socketTimeoutMS: 45000,
       family: 4,
       // Crucial for serverless: reuse connections
-      bufferCommands: false,
+      bufferCommands: true,
     });
 
     cachedDb = connection;
@@ -274,6 +274,7 @@ app.use(async (req, res, next) => {
 
 app.get('/api/products', async (req, res) => {
     try {
+        await connectToDatabase(); // Ensure connection before queries
         const { sort = 'relevance', category: categoryQuery, page = 1, limit = 10, search } = req.query;
 
         let query = {};
